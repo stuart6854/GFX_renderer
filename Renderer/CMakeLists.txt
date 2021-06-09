@@ -1,15 +1,22 @@
-project(GFX)
+add_library(gfx
+        include/GFX/DeviceContext.h
+        src/GFX/GFXAPI.h
+        include/GFX/RenderContext.h
+        src/GFX/Renderers/RendererForward.cpp
+        src/Platform/Vulkan/VulkanGFX.cpp
+        src/Platform/Vulkan/VulkanDeviceContext.cpp
+        src/Platform/Vulkan/VulkanDeviceContext.h
+        src/Platform/Vulkan/VulkanRenderContext.cpp
+        src/Platform/Vulkan/VulkanRenderContext.h
+        src/Platform/Vulkan/VulkanCore.cpp
+        src/Platform/Vulkan/VulkanCore.h
+        src/Platform/Vulkan/VulkanUtils.cpp
+        src/Platform/Vulkan/VulkanUtils.h
+        src/GFX/CommandBuffer.h src/Platform/Vulkan/VulkanCommandBuffer.cpp src/Platform/Vulkan/VulkanCommandBuffer.h include/GFX/Surface.h src/Platform/Vulkan/VulkanSurface.h)
 
-find_package(Vulkan REQUIRED FATAL_ERROR)
+target_include_directories(gfx PUBLIC src include)
 
-add_library(GFX
-        src/GFX/Renderers/ForwardRenderer.cpp
-        src/Platform/Vulkan/gfx_vulkan.cpp
-        src/GFX/GFXAPI.h)
+target_link_libraries(gfx PUBLIC Vulkan::Vulkan d3d12.lib)
 
-target_include_directories(GFX PUBLIC include)
-
-target_link_libraries(GFX PUBLIC Vulkan::Vulkan d3d12.lib)
-
-target_compile_definitions(GFX PUBLIC GFX_API_VULKAN)
+target_compile_definitions(gfx PUBLIC GFX_API_VULKAN)
 

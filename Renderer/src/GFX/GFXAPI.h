@@ -5,6 +5,6 @@
 #ifndef PERSONAL_RENDERER_GFXAPI_H
 #define PERSONAL_RENDERER_GFXAPI_H
 
-
+#include "Platform/Vulkan/VulkanCore.h"
 
 #endif  // PERSONAL_RENDERER_GFXAPI_H

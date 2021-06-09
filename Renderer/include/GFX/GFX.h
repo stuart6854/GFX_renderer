@@ -4,7 +4,6 @@
 namespace gfx
 {
     void Init();
-
     void Shutdown();
 }
 
