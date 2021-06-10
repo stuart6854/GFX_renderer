@@ -7,6 +7,8 @@
 
 #include "VulkanCommandBuffer.h"
 
+#include "GFX/Utility/Color.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace gfx
@@ -22,13 +24,19 @@ namespace gfx
     class RenderContext
     {
     public:
+        void Begin();
+        void End();
+
+        void BeginRenderPass(Color clearColor, Framebuffer framebuffer);
+        void EndRenderPass();
+
         void SetVertexBuffer();
         void SetIndexBuffer();
 
         void Draw();
         void DrawIndexed();
 
-        auto GetCommandBuffer() -> CommandBuffer;
+        auto GetCommandBuffer() -> CommandBuffer&;
 
     private:
         CommandBuffer m_cmdBuffer;

@@ -55,6 +55,27 @@ namespace gfx::Vulkan
         return actualExtent;
     }
 
+    auto FindDepthFormat(vk::PhysicalDevice physicalDevice) -> vk::Format
+    {
+        // Since all depth formats may be optional, we need to find a suitable
+        // depth format to use. Start with the highest precision packed format.
+        std::vector<vk::Format> depthFormats = {
+            vk::Format::eD32SfloatS8Uint, vk::Format::eD32Sfloat, vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm
+        };
+
+        for (auto& format : depthFormats)
+        {
+            vk::FormatProperties formatProps = physicalDevice.getFormatProperties(format);
+
+            // Format must support depth stencil attachment for optimal tiling
+            if (formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+            {
+                return format;
+            }
+        }
+        return vk::Format::eUndefined;
+    }
+
     auto FindGraphicsQueueFamily(vk::PhysicalDevice physicalDevice) -> uint32_t
     {
         auto queueProperties = physicalDevice.getQueueFamilyProperties();

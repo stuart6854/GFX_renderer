@@ -29,6 +29,7 @@ namespace gfx
         Vulkan::CreateInstance(appInfo);
         Vulkan::PickPhysicalDevice();
         Vulkan::CreateDevice();
+        Vulkan::CreateAllocator();
 
         auto gpu = Vulkan::GetPhysicalDevice().getProperties();
         std::cout << "Graphics Card: " << gpu.deviceName << std::endl;

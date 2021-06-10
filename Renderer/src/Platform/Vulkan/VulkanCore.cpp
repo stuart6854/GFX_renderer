@@ -15,10 +15,13 @@ namespace gfx::Vulkan
         vk::Instance s_vkInstance;
         vk::PhysicalDevice s_vkPhysicalDevice;
         vk::Device s_vkDevice;
+        VulkanAllocator s_vkAllocator;
 
         uint32_t s_vkGraphicsQueueFamily;
 
         vk::Queue s_vkGraphicsQueue;
+
+        vk::Format s_vkDepthFormat;
 
         vk::DebugUtilsMessengerEXT s_vkDebugCallback;
     }  // namespace
@@ -70,6 +73,8 @@ namespace gfx::Vulkan
         {
             s_vkPhysicalDevice = possibleGPUs.at(0);
         }
+
+        s_vkDepthFormat = FindDepthFormat(s_vkPhysicalDevice);
     }
 
     void CreateDevice()
@@ -108,12 +113,15 @@ namespace gfx::Vulkan
         //        m_transferQueue = m_device.getQueue(m_transferQueueFamily, 0);
     }
 
+    void CreateAllocator() { s_vkAllocator.Init(s_vkInstance, s_vkPhysicalDevice, s_vkDevice); }
+
     void Shutdown()
     {
+        s_vkAllocator.Destroy();
         s_vkDevice.destroy();
         s_vkInstance.destroy(s_vkDebugCallback, nullptr, vk::DispatchLoaderDynamic(s_vkInstance, vkGetInstanceProcAddr));
         s_vkInstance.destroy();
-
+        
         s_vkDevice = nullptr;
         s_vkPhysicalDevice = nullptr;
         s_vkDebugCallback = nullptr;
@@ -123,10 +131,13 @@ namespace gfx::Vulkan
     auto GetInstance() -> vk::Instance { return s_vkInstance; }
     auto GetPhysicalDevice() -> vk::PhysicalDevice { return s_vkPhysicalDevice; }
     auto GetDevice() -> vk::Device { return s_vkDevice; }
+    auto GetAllocator() -> const VulkanAllocator& { return s_vkAllocator; }
 
     auto GetGraphicsQueueFamily() -> uint32_t { return s_vkGraphicsQueueFamily; }
 
     auto GetGraphicsQueue() -> vk::Queue { return s_vkGraphicsQueue; }
+
+    auto GetDepthFormat() -> vk::Format { return s_vkDepthFormat; }
 
     static VKAPI_ATTR auto VKAPI_CALL VkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                       VkDebugUtilsMessageTypeFlagsEXT messageType,

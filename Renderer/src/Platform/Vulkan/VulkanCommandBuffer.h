@@ -12,10 +12,20 @@ namespace gfx
     class CommandBuffer
     {
     public:
+        CommandBuffer();
+        ~CommandBuffer();
+
+        void Begin();
+        void End();
+
+        void BeginRenderPass(vk::RenderPassBeginInfo& beginInfo);
+        void EndRenderPass();
+
         auto GetAPIResource() -> vk::CommandBuffer;
         void SetAPIResource(vk::CommandBuffer cmdBuffer);
 
     private:
+        vk::CommandPool m_cmdPool;
         vk::CommandBuffer m_cmdBuffer;
     };
 

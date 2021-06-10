@@ -6,6 +6,8 @@
 #define PERSONAL_RENDERER_VULKANDEVICECONTEXT_H
 
 #include "VulkanSurface.h"
+#include "VulkanFramebuffer.h"
+#include "VulkanAllocator.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -23,13 +25,17 @@ namespace gfx
     class DeviceContext
     {
     public:
-        DeviceContext() = default;
+        DeviceContext();
         ~DeviceContext();
 
         void ProcessWindowChanges(ISurface& surface, uint32_t windowWidth, uint32_t windowHeight);
 
+        void NewFrame();
+
         void Submit(RenderContext& context);
         void Present();
+
+        auto GetFramebuffer() -> Framebuffer;
 
     private:
         vk::SurfaceKHR m_surface;
@@ -43,18 +49,35 @@ namespace gfx
         std::vector<vk::ImageView> m_swapchainImageViews;
         std::vector<vk::Framebuffer> m_swapchainFramebuffers;
 
+        struct
+        {
+            vk::Image Image;
+            VmaAllocation Allocation;
+            vk::ImageView View;
+        } m_depthStencil;
+
+        vk::RenderPass m_swapchainRenderPass;
+
         struct Frame
         {
             vk::Semaphore PresentComplete, RenderComplete;
             vk::Fence RenderFence;
-
-            vk::CommandPool CmdPool;
-            vk::CommandBuffer MainCmdBuffer;
         };
         std::array<Frame, FRAME_OVERLAP> m_frames;
         uint32_t m_frameCounter;
 
         auto GetCurrentFrame() -> Frame&;
+
+        void CreateSwapchain(uint32_t width, uint32_t height);
+
+        void CreateDepthStencil();
+
+        void CreateRenderPass();
+        void CreateImageResources();
+        void CreateFramesResources();
+
+        void DestroySwapchainResources();
+        void Destroy();
     };
 }  // namespace gfx
 

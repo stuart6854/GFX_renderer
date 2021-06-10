@@ -15,6 +15,8 @@ namespace gfx::Vulkan
 
     auto ChooseExtent(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface, uint32_t width, uint32_t height) -> vk::Extent2D;
 
+    auto FindDepthFormat(vk::PhysicalDevice physicalDevice) -> vk::Format;
+
     auto FindGraphicsQueueFamily(vk::PhysicalDevice physicalDevice) -> uint32_t;
 
 }  // namespace gfx::Vulkan

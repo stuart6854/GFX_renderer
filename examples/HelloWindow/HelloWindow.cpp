@@ -27,8 +27,16 @@ int main(int argc, char** argv)
         {
             window.PollEvents();
 
-            //        deviceContext.Submit(renderContext);
-            //        deviceContext.Present();
+            deviceContext.NewFrame();
+
+            renderContext.Begin();
+            renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), deviceContext.GetFramebuffer());
+
+            renderContext.EndRenderPass();
+            renderContext.End();
+
+            deviceContext.Submit(renderContext);
+            deviceContext.Present();
         }
     }
     gfx::Shutdown();

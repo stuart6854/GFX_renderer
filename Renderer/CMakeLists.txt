@@ -12,7 +12,7 @@ add_library(gfx
         src/Platform/Vulkan/VulkanCore.h
         src/Platform/Vulkan/VulkanUtils.cpp
         src/Platform/Vulkan/VulkanUtils.h
-        src/GFX/CommandBuffer.h src/Platform/Vulkan/VulkanCommandBuffer.cpp src/Platform/Vulkan/VulkanCommandBuffer.h include/GFX/Surface.h src/Platform/Vulkan/VulkanSurface.h)
+        src/GFX/CommandBuffer.h src/Platform/Vulkan/VulkanCommandBuffer.cpp src/Platform/Vulkan/VulkanCommandBuffer.h include/GFX/Surface.h src/Platform/Vulkan/VulkanSurface.h include/GFX/Utility/Color.h src/GFX/Utility/Color.cpp include/GFX/Resources/Framebuffer.h src/Platform/Vulkan/VulkanFramebuffer.cpp src/Platform/Vulkan/VulkanFramebuffer.h src/Platform/Vulkan/VulkanAllocator.cpp src/Platform/Vulkan/VulkanAllocator.h)
 
 target_include_directories(gfx PUBLIC src include)
 
