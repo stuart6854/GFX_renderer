@@ -35,11 +35,31 @@ namespace gfx
         *image = rawImage;
     }
 
+    void VulkanAllocator::Allocate(vk::BufferCreateInfo imageInfo, VmaMemoryUsage memoryUsage, vk::Buffer* buffer, VmaAllocation* allocation) const
+    {
+        VmaAllocationCreateInfo allocInfo{};
+        allocInfo.usage = memoryUsage;
+
+        VkBufferCreateInfo rawBufferInfo = imageInfo;
+
+        VkBuffer rawBuffer{};
+        vmaCreateBuffer(m_allocator, &rawBufferInfo, &allocInfo, &rawBuffer, allocation, nullptr);
+
+        *buffer = rawBuffer;
+    }
+
     void VulkanAllocator::Free(vk::Image& image, VmaAllocation& allocation) const
     {
         if (!image) return;
 
         vmaDestroyImage(m_allocator, image, allocation);
+    }
+
+    void VulkanAllocator::Free(vk::Buffer& buffer, VmaAllocation& allocation) const
+    {
+        if (!buffer) return;
+
+        vmaDestroyBuffer(m_allocator, buffer, allocation);
     }
 
 }  // namespace gfx

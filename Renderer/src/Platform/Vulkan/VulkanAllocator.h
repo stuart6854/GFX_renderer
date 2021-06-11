@@ -21,8 +21,10 @@ namespace gfx
         void Destroy();
 
         void Allocate(vk::ImageCreateInfo imageInfo, VmaMemoryUsage memoryUsage, vk::Image* image, VmaAllocation* allocation) const;
+        void Allocate(vk::BufferCreateInfo imageInfo, VmaMemoryUsage memoryUsage, vk::Buffer* buffer, VmaAllocation* allocation) const;
 
         void Free(vk::Image& image, VmaAllocation& allocation) const;
+        void Free(vk::Buffer& buffer, VmaAllocation& allocation) const;
 
     private:
         VmaAllocator m_allocator;
