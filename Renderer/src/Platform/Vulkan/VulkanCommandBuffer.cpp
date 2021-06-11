@@ -8,6 +8,8 @@
 
     #include "VulkanCore.h"
 
+    #include <iostream>
+
 namespace gfx
 {
     CommandBuffer::CommandBuffer()
@@ -60,6 +62,32 @@ namespace gfx
     void CommandBuffer::BeginRenderPass(vk::RenderPassBeginInfo& beginInfo) { m_cmdBuffer.beginRenderPass(beginInfo, vk::SubpassContents::eInline); }
 
     void CommandBuffer::EndRenderPass() { m_cmdBuffer.endRenderPass(); }
+
+    void CommandBuffer::BindVertexBuffer(Buffer& buffer)
+    {
+        if (buffer.GetType() != BufferType::eVertex)
+        {
+            std::cout << "Trying to bind a buffer that is not a Vertex buffer!" << std::endl;
+            return;
+        }
+
+        auto apiBuffer = buffer.GetAPIResource();
+
+        m_cmdBuffer.bindVertexBuffers(0, apiBuffer, {});
+    }
+
+    void CommandBuffer::BindIndexBuffer(Buffer& buffer)
+    {
+        if (buffer.GetType() != BufferType::eIndex)
+        {
+            std::cout << "Trying to bind a buffer that is not a Index buffer!" << std::endl;
+            return;
+        }
+
+        auto apiBuffer = buffer.GetAPIResource();
+
+        m_cmdBuffer.bindIndexBuffer(apiBuffer, 0, vk::IndexType::eUint32);
+    }
 
     auto CommandBuffer::GetAPIResource() -> vk::CommandBuffer { return m_cmdBuffer; }
 

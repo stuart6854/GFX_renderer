@@ -37,9 +37,9 @@ namespace gfx
 
     void RenderContext::EndRenderPass() { GetCommandBuffer().EndRenderPass(); }
 
-    void RenderContext::SetVertexBuffer() {}
+    void RenderContext::BindVertexBuffer(Buffer& buffer) { GetCommandBuffer().BindVertexBuffer(buffer); }
 
-    void RenderContext::SetIndexBuffer() {}
+    void RenderContext::BindIndexBuffer(Buffer& buffer) { GetCommandBuffer().BindIndexBuffer(buffer); }
 
     void RenderContext::Draw() {}
 

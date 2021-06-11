@@ -8,6 +8,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanDeviceContext.h"
 
+#include "GFX/Resources/Buffer.h"
 #include "GFX/Utility/Color.h"
 
 #include <vulkan/vulkan.hpp>
@@ -31,8 +32,8 @@ namespace gfx
         void BeginRenderPass(Color clearColor, Framebuffer framebuffer);
         void EndRenderPass();
 
-        void SetVertexBuffer();
-        void SetIndexBuffer();
+        void BindVertexBuffer(Buffer& buffer);
+        void BindIndexBuffer(Buffer& buffer);
 
         void Draw();
         void DrawIndexed();
