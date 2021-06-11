@@ -7,12 +7,11 @@
 
 namespace gfx
 {
-
     struct Vertex
     {
-        float x, y, z;
+        float position[3];
     };
 
-}
+}  // namespace gfx
 
 #endif  // PERSONAL_RENDERER_VERTEX_H
