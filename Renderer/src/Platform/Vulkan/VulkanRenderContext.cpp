@@ -4,14 +4,16 @@
 
 #ifdef GFX_API_VULKAN
 
-    #include <GFX/Resources/Framebuffer.h>
+    #include "GFX/Resources/Framebuffer.h"
+
+    #include "VulkanCore.h"
     #include "VulkanRenderContext.h"
 
 namespace gfx
 {
-    void RenderContext::Begin() { m_cmdBuffer.Begin(); }
+    void RenderContext::Begin() { GetCommandBuffer().Begin(); }
 
-    void RenderContext::End() { m_cmdBuffer.End(); }
+    void RenderContext::End() { GetCommandBuffer().End(); }
 
     void RenderContext::BeginRenderPass(Color clearColor, Framebuffer framebuffer)
     {
@@ -30,10 +32,10 @@ namespace gfx
         beginInfo.renderArea.extent = framebuffer.GetExtent();
         beginInfo.setClearValues(clearValues);
 
-        m_cmdBuffer.BeginRenderPass(beginInfo);
+        GetCommandBuffer().BeginRenderPass(beginInfo);
     }
 
-    void RenderContext::EndRenderPass() { m_cmdBuffer.EndRenderPass(); }
+    void RenderContext::EndRenderPass() { GetCommandBuffer().EndRenderPass(); }
 
     void RenderContext::SetVertexBuffer() {}
 
@@ -43,7 +45,9 @@ namespace gfx
 
     void RenderContext::DrawIndexed() {}
 
-    auto RenderContext::GetCommandBuffer() -> CommandBuffer& { return m_cmdBuffer; }
+    void RenderContext::NextCommandBuffer() { m_activeCmdBufferIndex = (m_activeCmdBufferIndex + 1) % FRAME_OVERLAP; }
+
+    auto RenderContext::GetCommandBuffer() -> CommandBuffer& { return m_cmdBuffers.at(m_activeCmdBufferIndex); }
 
 }  // namespace gfx
 

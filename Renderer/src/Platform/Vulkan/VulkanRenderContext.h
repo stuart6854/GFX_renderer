@@ -6,6 +6,7 @@
 #define PERSONAL_RENDERER_VULKANRENDERCONTEXT_H
 
 #include "VulkanCommandBuffer.h"
+#include "VulkanDeviceContext.h"
 
 #include "GFX/Utility/Color.h"
 
@@ -36,10 +37,13 @@ namespace gfx
         void Draw();
         void DrawIndexed();
 
+        void NextCommandBuffer();
+
         auto GetCommandBuffer() -> CommandBuffer&;
 
     private:
-        CommandBuffer m_cmdBuffer;
+        std::array<CommandBuffer, FRAME_OVERLAP> m_cmdBuffers{};
+        uint32_t m_activeCmdBufferIndex{};
     };
 
 }  // namespace gfx

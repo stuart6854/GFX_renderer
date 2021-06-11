@@ -4,9 +4,9 @@
 
 #ifdef GFX_API_VULKAN
 
-#include "VulkanCommandBuffer.h"
+    #include "VulkanCommandBuffer.h"
 
-#include "VulkanCore.h"
+    #include "VulkanCore.h"
 
 namespace gfx
 {
@@ -28,6 +28,11 @@ namespace gfx
         bufferInfo.commandPool = m_cmdPool;
 
         m_cmdBuffer = device.allocateCommandBuffers(bufferInfo).at(0);
+
+        vk::FenceCreateInfo fenceInfo{};
+        fenceInfo.setFlags(vk::FenceCreateFlagBits::eSignaled);
+
+        m_fence = device.createFence(fenceInfo);
     }
 
     CommandBuffer::~CommandBuffer()
@@ -39,6 +44,12 @@ namespace gfx
 
     void CommandBuffer::Begin()
     {
+        auto device = Vulkan::GetDevice();
+
+        // Wait until GPU has finished rendering the last frame
+        device.waitForFences(m_fence, VK_TRUE, UINT64_MAX);
+        device.resetFences(m_fence);
+
         vk::CommandBufferBeginInfo beginInfo{};
 
         m_cmdBuffer.begin(beginInfo);
@@ -53,6 +64,8 @@ namespace gfx
     auto CommandBuffer::GetAPIResource() -> vk::CommandBuffer { return m_cmdBuffer; }
 
     void CommandBuffer::SetAPIResource(vk::CommandBuffer cmdBuffer) { m_cmdBuffer = cmdBuffer; }
+
+    auto CommandBuffer::GetFence() -> vk::Fence { return m_fence; }
 
 }  // namespace gfx
 

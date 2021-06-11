@@ -23,10 +23,12 @@ namespace gfx
 
         auto GetAPIResource() -> vk::CommandBuffer;
         void SetAPIResource(vk::CommandBuffer cmdBuffer);
+        auto GetFence() -> vk::Fence;
 
     private:
         vk::CommandPool m_cmdPool;
         vk::CommandBuffer m_cmdBuffer;
+        vk::Fence m_fence;
     };
 
 }  // namespace gfx

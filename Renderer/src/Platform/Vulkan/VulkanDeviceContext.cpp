@@ -38,8 +38,8 @@ namespace gfx
         auto& frame = GetCurrentFrame();
 
         // Wait until GPU has finished rendering the last frame
-        device.waitForFences(frame.RenderFence, VK_TRUE, UINT64_MAX);
-        device.resetFences(frame.RenderFence);
+        if (frame.RenderFence) device.waitForFences(frame.RenderFence, VK_TRUE, UINT64_MAX);
+        //        device.resetFences(frame.RenderFence);
 
         // Request image from swapchain
         m_swapchainImageIndex = device.acquireNextImageKHR(m_swapchain, UINT64_MAX, frame.PresentComplete, {}).value;
@@ -63,7 +63,10 @@ namespace gfx
 
         auto graphicsQueue = Vulkan::GetGraphicsQueue();
         // RenderComplete fence will now block until the graphics commands finish execution
+        GetCurrentFrame().RenderFence = context.GetCommandBuffer().GetFence();
         graphicsQueue.submit(submitInfo, GetCurrentFrame().RenderFence);
+
+        context.NextCommandBuffer();
     }
 
     void DeviceContext::Present()
@@ -186,9 +189,6 @@ namespace gfx
         colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
         colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
-        // TODO: This should be ePresentSrcKHR if not using ImGui. Add a way to disable ImGui and change this.
-        colorAttachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
-
         vk::AttachmentDescription depthAttachment{};
         depthAttachment.format = Vulkan::GetDepthFormat();
         depthAttachment.samples = vk::SampleCountFlagBits::e1;
@@ -281,7 +281,7 @@ namespace gfx
         {
             auto& frame = m_frames.at(i);
 
-            frame.RenderFence = device.createFence(fenceInfo);
+            //            frame.RenderFence = device.createFence(fenceInfo);
             frame.PresentComplete = device.createSemaphore(semaphoreInfo);
             frame.RenderComplete = device.createSemaphore(semaphoreInfo);
         }
