@@ -71,9 +71,9 @@ namespace gfx
             return;
         }
 
-        auto apiBuffer = buffer.GetAPIResource();
+        auto apiBuffer = buffer.GetAPIBuffer();
 
-        m_cmdBuffer.bindVertexBuffers(0, apiBuffer, {});
+        m_cmdBuffer.bindVertexBuffers(0, apiBuffer, { 0 });
     }
 
     void CommandBuffer::BindIndexBuffer(Buffer& buffer)
@@ -84,9 +84,16 @@ namespace gfx
             return;
         }
 
-        auto apiBuffer = buffer.GetAPIResource();
+        auto apiBuffer = buffer.GetAPIBuffer();
 
         m_cmdBuffer.bindIndexBuffer(apiBuffer, 0, vk::IndexType::eUint32);
+    }
+
+    void CommandBuffer::CopyBuffer(vk::Buffer src, vk::Buffer dst, uint32_t size)
+    {
+        vk::BufferCopy copyRegion{};
+        copyRegion.setSize(size);
+        m_cmdBuffer.copyBuffer(src, dst, copyRegion);
     }
 
     auto CommandBuffer::GetAPIResource() -> vk::CommandBuffer { return m_cmdBuffer; }
