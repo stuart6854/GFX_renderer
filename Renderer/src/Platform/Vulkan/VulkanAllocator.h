@@ -26,6 +26,9 @@ namespace gfx
         void Free(vk::Image& image, VmaAllocation& allocation) const;
         void Free(vk::Buffer& buffer, VmaAllocation& allocation) const;
 
+        auto Map(VmaAllocation allocation) -> void*;
+        void Unmap(VmaAllocation allocation);
+
     private:
         VmaAllocator m_allocator;
     };

@@ -62,4 +62,13 @@ namespace gfx
         vmaDestroyBuffer(m_allocator, buffer, allocation);
     }
 
+    auto VulkanAllocator::Map(VmaAllocation allocation) -> void*
+    {
+        void* mapped = nullptr;
+        vmaMapMemory(m_allocator, allocation, &mapped);
+        return mapped;
+    }
+
+    void VulkanAllocator::Unmap(VmaAllocation allocation) { vmaUnmapMemory(m_allocator, allocation); }
+
 }  // namespace gfx
