@@ -32,6 +32,53 @@ namespace gfx
         CreateFramesResources();
     }
 
+    auto DeviceContext::CreateBuffer(BufferDesc desc) -> Buffer
+    {
+        auto allocator = Vulkan::GetAllocator();
+
+        auto usage = BufferTypeToVulkan(desc.Type);
+        if (desc.Type != eStaging) usage |= vk::BufferUsageFlagBits::eTransferDst;
+
+        vk::BufferCreateInfo bufferInfo{};
+        bufferInfo.setSize(desc.Size);
+        bufferInfo.setUsage(usage);
+
+        auto memoryType = (desc.Type == eStaging) ? VMA_MEMORY_USAGE_CPU_ONLY : VMA_MEMORY_USAGE_GPU_ONLY;
+
+        vk::Buffer vkBuffer;
+        VmaAllocation allocation;
+        allocator.Allocate(bufferInfo, memoryType, &vkBuffer, &allocation);
+
+        Buffer buffer(desc);
+        buffer.SetAPIResource(vkBuffer, allocation);
+
+        return buffer;
+    }
+
+    void DeviceContext::Upload(Buffer& dst, const void* data)
+    {
+        const auto size = dst.GetSize();
+
+        BufferDesc stagingBufferDesc{ .Type = eStaging, .Size = size };
+        auto stagingBuffer = CreateBuffer(stagingBufferDesc);
+
+        auto allocator = Vulkan::GetAllocator();
+
+        auto* mapped = allocator.Map(stagingBuffer.GetAPIAllocation());
+        std::memcpy(mapped, data, size);
+        allocator.Unmap(stagingBuffer.GetAPIAllocation());
+
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Begin();
+        cmdBuffer.CopyBuffer(stagingBuffer.GetAPIBuffer(), dst.GetAPIBuffer(), size);
+        cmdBuffer.End();
+
+        Submit(cmdBuffer);
+
+        // Wait for fence to signal command buffer has finished execution
+        Vulkan::GetDevice().waitForFences(cmdBuffer.GetFence(), VK_TRUE, UINT64_MAX);
+    }
+
     void DeviceContext::NewFrame()
     {
         auto device = Vulkan::GetDevice();
@@ -67,6 +114,17 @@ namespace gfx
         graphicsQueue.submit(submitInfo, GetCurrentFrame().RenderFence);
 
         context.NextCommandBuffer();
+    }
+
+    void DeviceContext::Submit(CommandBuffer& cmdBuffer)
+    {
+        auto apiBuffer = cmdBuffer.GetAPIResource();
+
+        vk::SubmitInfo submitInfo{};
+        submitInfo.setCommandBuffers(apiBuffer);
+
+        auto graphicsQueue = Vulkan::GetGraphicsQueue();
+        graphicsQueue.submit(submitInfo, cmdBuffer.GetFence());
     }
 
     void DeviceContext::Present()

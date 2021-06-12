@@ -8,6 +8,10 @@
 #include "VulkanSurface.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanAllocator.h"
+#include "VulkanBuffer.h"
+#include "VulkanCommandBuffer.h"
+
+#include "GFX/Resources/ResourceDescriptions.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -30,9 +34,14 @@ namespace gfx
 
         void ProcessWindowChanges(ISurface& surface, uint32_t windowWidth, uint32_t windowHeight);
 
+        auto CreateBuffer(BufferDesc desc) -> Buffer;
+
+        void Upload(Buffer& dst, const void* data);
+
         void NewFrame();
 
         void Submit(RenderContext& context);
+        void Submit(CommandBuffer& cmdBuffer);
         void Present();
 
         auto GetFramebuffer() -> Framebuffer;
