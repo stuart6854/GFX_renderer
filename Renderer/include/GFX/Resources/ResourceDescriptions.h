@@ -13,7 +13,7 @@ namespace gfx
     {
         eVertex,
         eIndex,
-        eTransfer
+        eStaging
     };
 
     struct BufferDesc
