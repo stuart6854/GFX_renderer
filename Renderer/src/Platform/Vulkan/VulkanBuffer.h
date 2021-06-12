@@ -26,7 +26,8 @@ namespace gfx
         auto GetNumElements() const -> uint32_t;
 
         void SetAPIResource(vk::Buffer buffer, VmaAllocation allocation);
-        auto GetAPIResource() const -> vk::Buffer;
+        auto GetAPIBuffer() const -> vk::Buffer;
+        auto GetAPIAllocation() const -> VmaAllocation;
 
     private:
         BufferDesc m_desc;

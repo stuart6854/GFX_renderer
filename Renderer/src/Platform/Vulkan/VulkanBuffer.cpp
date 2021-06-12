@@ -16,8 +16,8 @@ namespace gfx
                 return vk::BufferUsageFlagBits::eVertexBuffer;
             case eIndex:
                 return vk::BufferUsageFlagBits::eIndexBuffer;
-            case eTransfer:
-                vk::BufferUsageFlagBits::eTransferSrc;
+            case eStaging:
+                return vk::BufferUsageFlagBits::eTransferSrc;
         }
         return {};
     }
@@ -38,7 +38,9 @@ namespace gfx
         m_allocation = allocation;
     }
 
-    auto Buffer::GetAPIResource() const -> vk::Buffer { return m_buffer; }
+    auto Buffer::GetAPIBuffer() const -> vk::Buffer { return m_buffer; }
+
+    auto Buffer::GetAPIAllocation() const -> VmaAllocation { return m_allocation; }
 
 }  // namespace gfx
 
