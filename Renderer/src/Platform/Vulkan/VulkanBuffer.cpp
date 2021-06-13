@@ -12,11 +12,11 @@ namespace gfx
     {
         switch (type)
         {
-            case eVertex:
+            case BufferType::eVertex:
                 return vk::BufferUsageFlagBits::eVertexBuffer;
-            case eIndex:
+            case BufferType::eIndex:
                 return vk::BufferUsageFlagBits::eIndexBuffer;
-            case eStaging:
+            case BufferType::eStaging:
                 return vk::BufferUsageFlagBits::eTransferSrc;
         }
         return {};

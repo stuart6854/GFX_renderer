@@ -9,8 +9,9 @@
 
 namespace gfx
 {
-    enum BufferType
+    enum class BufferType
     {
+        eNone = 0,
         eVertex,
         eIndex,
         eStaging

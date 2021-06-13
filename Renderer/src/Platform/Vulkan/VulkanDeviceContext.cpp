@@ -37,13 +37,13 @@ namespace gfx
         auto allocator = Vulkan::GetAllocator();
 
         auto usage = BufferTypeToVulkan(desc.Type);
-        if (desc.Type != eStaging) usage |= vk::BufferUsageFlagBits::eTransferDst;
+        if (desc.Type != BufferType::eStaging) usage |= vk::BufferUsageFlagBits::eTransferDst;
 
         vk::BufferCreateInfo bufferInfo{};
         bufferInfo.setSize(desc.Size);
         bufferInfo.setUsage(usage);
 
-        auto memoryType = (desc.Type == eStaging) ? VMA_MEMORY_USAGE_CPU_ONLY : VMA_MEMORY_USAGE_GPU_ONLY;
+        auto memoryType = (desc.Type == BufferType::eStaging) ? VMA_MEMORY_USAGE_CPU_ONLY : VMA_MEMORY_USAGE_GPU_ONLY;
 
         vk::Buffer vkBuffer;
         VmaAllocation allocation;
@@ -55,11 +55,13 @@ namespace gfx
         return buffer;
     }
 
+    auto DeviceContext::CreateShader() -> Shader { return Shader(""); }
+
     void DeviceContext::Upload(Buffer& dst, const void* data)
     {
         const auto size = dst.GetSize();
 
-        BufferDesc stagingBufferDesc{ .Type = eStaging, .Size = size };
+        BufferDesc stagingBufferDesc{ .Type = BufferType::eStaging, .Size = size };
         auto stagingBuffer = CreateBuffer(stagingBufferDesc);
 
         auto allocator = Vulkan::GetAllocator();

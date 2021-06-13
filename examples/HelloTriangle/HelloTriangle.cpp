@@ -28,11 +28,11 @@ int main(int argc, char** argv)
         deviceContext.ProcessWindowChanges(window, window.GetWidth(), window.GetHeight());
 
         const uint32_t vertexBufferSize = sizeof(gfx::Vertex) * triVerts.size();
-        gfx::BufferDesc vertexBufferDesc = { .Type = gfx::eVertex, .Size = vertexBufferSize };
+        gfx::BufferDesc vertexBufferDesc = { .Type = gfx::BufferType::eVertex, .Size = vertexBufferSize };
         auto vertexBuffer = deviceContext.CreateBuffer(vertexBufferDesc);
 
         const uint32_t indexBufferSize = sizeof(uint32_t) * triIndices.size();
-        gfx::BufferDesc indexBufferDesc = { .Type = gfx::eIndex, .Size = indexBufferSize };
+        gfx::BufferDesc indexBufferDesc = { .Type = gfx::BufferType::eIndex, .Size = indexBufferSize };
         gfx::Buffer indexBuffer = deviceContext.CreateBuffer(indexBufferDesc);
 
         deviceContext.Upload(vertexBuffer, &triVerts[0]);
