@@ -4,3 +4,12 @@
 [submodule "dependencies\\glm"]
 	path = dependencies\\glm
 	url = https://github.com/g-truc/glm.git
+[submodule "dependencies\\shaderc"]
+	path = dependencies\\shaderc
+	url = https://github.com/google/shaderc.git
+[submodule "dependencies\\SPIRV-Tools"]
+	path = dependencies\\SPIRV-Tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools.git
+[submodule "dependencies\\glslang"]
+	path = dependencies\\glslang
+	url = https://github.com/KhronosGroup/glslang.git

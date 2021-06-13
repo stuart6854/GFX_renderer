@@ -2,7 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dependencies/SPIRV-Tools" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dependencies/SPIRV-Tools/external/spirv-headers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dependencies/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dependencies/shaderc" vcs="Git" />
   </component>
 </project>
