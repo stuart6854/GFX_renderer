@@ -43,9 +43,9 @@ namespace gfx
 
     void RenderContext::BindIndexBuffer(Buffer& buffer) { GetCommandBuffer().BindIndexBuffer(buffer); }
 
-    void RenderContext::Draw() {}
+    void RenderContext::Draw(uint32_t vertexCount) { GetCommandBuffer().Draw(vertexCount); }
 
-    void RenderContext::DrawIndexed() {}
+    void RenderContext::DrawIndexed(uint32_t indexCount) { GetCommandBuffer().DrawIndexed(indexCount); }
 
     void RenderContext::NextCommandBuffer() { m_activeCmdBufferIndex = (m_activeCmdBufferIndex + 1) % FRAME_OVERLAP; }
 

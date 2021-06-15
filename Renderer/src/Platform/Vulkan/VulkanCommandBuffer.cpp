@@ -59,7 +59,20 @@ namespace gfx
 
     void CommandBuffer::End() { m_cmdBuffer.end(); }
 
-    void CommandBuffer::BeginRenderPass(vk::RenderPassBeginInfo& beginInfo) { m_cmdBuffer.beginRenderPass(beginInfo, vk::SubpassContents::eInline); }
+    void CommandBuffer::BeginRenderPass(vk::RenderPassBeginInfo& beginInfo)
+    {
+        m_cmdBuffer.beginRenderPass(beginInfo, vk::SubpassContents::eInline);
+        vk::Viewport viewport;
+        viewport.width = 720;
+        viewport.height = 480;
+
+        vk::Rect2D scissor;
+        scissor.extent.width = 720;
+        scissor.extent.height = 480;
+
+        m_cmdBuffer.setViewport(0, viewport);
+        m_cmdBuffer.setScissor(0, scissor);
+    }
 
     void CommandBuffer::EndRenderPass() { m_cmdBuffer.endRenderPass(); }
 
@@ -90,6 +103,10 @@ namespace gfx
 
         m_cmdBuffer.bindIndexBuffer(apiBuffer, 0, vk::IndexType::eUint32);
     }
+
+    void CommandBuffer::Draw(uint32_t vertexCount) { m_cmdBuffer.draw(vertexCount, 1, 0, 0); }
+
+    void CommandBuffer::DrawIndexed(uint32_t indexCount) { m_cmdBuffer.drawIndexed(indexCount, 1, 0, 0, 0); }
 
     void CommandBuffer::CopyBuffer(vk::Buffer src, vk::Buffer dst, uint32_t size)
     {

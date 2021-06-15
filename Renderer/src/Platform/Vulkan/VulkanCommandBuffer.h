@@ -28,6 +28,9 @@ namespace gfx
         void BindVertexBuffer(Buffer& buffer);
         void BindIndexBuffer(Buffer& buffer);
 
+        void Draw(uint32_t vertexCount);
+        void DrawIndexed(uint32_t indexCount);
+
         void CopyBuffer(vk::Buffer src, vk::Buffer dst, uint32_t size);
 
         auto GetAPIResource() -> vk::CommandBuffer;

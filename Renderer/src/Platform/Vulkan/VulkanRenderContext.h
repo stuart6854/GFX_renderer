@@ -37,8 +37,8 @@ namespace gfx
         void BindVertexBuffer(Buffer& buffer);
         void BindIndexBuffer(Buffer& buffer);
 
-        void Draw();
-        void DrawIndexed();
+        void Draw(uint32_t vertexCount);
+        void DrawIndexed(uint32_t indexCount);
 
         void NextCommandBuffer();
 
