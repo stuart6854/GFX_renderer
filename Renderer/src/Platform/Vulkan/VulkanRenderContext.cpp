@@ -15,7 +15,7 @@ namespace gfx
 
     void RenderContext::End() { GetCommandBuffer().End(); }
 
-    void RenderContext::BeginRenderPass(Color clearColor, Framebuffer framebuffer)
+    void RenderContext::BeginRenderPass(const Color& clearColor, Framebuffer* framebuffer)
     {
         vk::ClearValue colorClear;
         colorClear.setColor({ clearColor.ToArray() });
@@ -26,10 +26,10 @@ namespace gfx
         auto clearValues = { colorClear, depthClear };
 
         vk::RenderPassBeginInfo beginInfo{};
-        beginInfo.renderPass = framebuffer.GetRenderPass();
-        beginInfo.framebuffer = framebuffer.GetFramebuffer();
+        beginInfo.renderPass = framebuffer->GetRenderPass();
+        beginInfo.framebuffer = framebuffer->GetFramebuffer();
         beginInfo.renderArea.setOffset({ 0, 0 });
-        beginInfo.renderArea.extent = framebuffer.GetExtent();
+        beginInfo.renderArea.extent = framebuffer->GetExtent();
         beginInfo.setClearValues(clearValues);
 
         GetCommandBuffer().BeginRenderPass(beginInfo);
@@ -37,11 +37,11 @@ namespace gfx
 
     void RenderContext::EndRenderPass() { GetCommandBuffer().EndRenderPass(); }
 
-    void RenderContext::BindPipeline(Pipeline& pipeline) { GetCommandBuffer().BindPipeline(pipeline); }
+    void RenderContext::BindPipeline(Pipeline* pipeline) { GetCommandBuffer().BindPipeline(pipeline); }
 
-    void RenderContext::BindVertexBuffer(Buffer& buffer) { GetCommandBuffer().BindVertexBuffer(buffer); }
+    void RenderContext::BindVertexBuffer(Buffer* buffer) { GetCommandBuffer().BindVertexBuffer(buffer); }
 
-    void RenderContext::BindIndexBuffer(Buffer& buffer) { GetCommandBuffer().BindIndexBuffer(buffer); }
+    void RenderContext::BindIndexBuffer(Buffer* buffer) { GetCommandBuffer().BindIndexBuffer(buffer); }
 
     void RenderContext::Draw(uint32_t vertexCount) { GetCommandBuffer().Draw(vertexCount); }
 

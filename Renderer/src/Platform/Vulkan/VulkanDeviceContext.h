@@ -16,6 +16,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <memory>
+
 namespace gfx
 {
     class RenderContext;
@@ -35,9 +37,11 @@ namespace gfx
 
         void ProcessWindowChanges(ISurface& surface, uint32_t windowWidth, uint32_t windowHeight);
 
-        auto CreateBuffer(BufferDesc desc) -> Buffer;
+        auto CreateBuffer(BufferDesc desc) -> std::shared_ptr<Buffer>;
+        auto CreateShader(const std::string& path) -> std::shared_ptr<Shader>;
+        auto CreatePipeline(const PipelineDesc& desc) -> std::shared_ptr<Pipeline>;
 
-        void Upload(Buffer& dst, const void* data);
+        void Upload(Buffer* dst, const void* data);
 
         void NewFrame();
 
@@ -45,7 +49,27 @@ namespace gfx
         void Submit(CommandBuffer& cmdBuffer);
         void Present();
 
-        auto GetFramebuffer() -> Framebuffer;
+        auto GetFramebuffer() -> std::shared_ptr<Framebuffer>;
+
+    private:
+        struct Frame
+        {
+            vk::Semaphore PresentComplete, RenderComplete;
+            vk::Fence RenderFence;
+        };
+
+        auto GetCurrentFrame() -> Frame&;
+
+        void CreateSwapchain(uint32_t width, uint32_t height);
+
+        void CreateDepthStencil();
+
+        void CreateRenderPass();
+        void CreateImageResources();
+        void CreateFramesResources();
+
+        void DestroySwapchainResources();
+        void Destroy();
 
     private:
         vk::SurfaceKHR m_surface;
@@ -68,26 +92,13 @@ namespace gfx
 
         vk::RenderPass m_swapchainRenderPass;
 
-        struct Frame
-        {
-            vk::Semaphore PresentComplete, RenderComplete;
-            vk::Fence RenderFence;
-        };
         std::array<Frame, FRAME_OVERLAP> m_frames;
         uint32_t m_frameCounter;
 
-        auto GetCurrentFrame() -> Frame&;
-
-        void CreateSwapchain(uint32_t width, uint32_t height);
-
-        void CreateDepthStencil();
-
-        void CreateRenderPass();
-        void CreateImageResources();
-        void CreateFramesResources();
-
-        void DestroySwapchainResources();
-        void Destroy();
+        /* Resources */
+        std::vector<std::shared_ptr<Buffer>> m_buffers;
+        std::vector<std::shared_ptr<Shader>> m_shaders;
+        std::vector<std::shared_ptr<Pipeline>> m_pipelines;
     };
 }  // namespace gfx
 

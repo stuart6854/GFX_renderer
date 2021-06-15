@@ -76,30 +76,30 @@ namespace gfx
 
     void CommandBuffer::EndRenderPass() { m_cmdBuffer.endRenderPass(); }
 
-    void CommandBuffer::BindPipeline(Pipeline& pipeline) { m_cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetAPIPipeline()); }
+    void CommandBuffer::BindPipeline(Pipeline* pipeline) { m_cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetAPIPipeline()); }
 
-    void CommandBuffer::BindVertexBuffer(Buffer& buffer)
+    void CommandBuffer::BindVertexBuffer(Buffer* buffer)
     {
-        if (buffer.GetType() != BufferType::eVertex)
+        if (buffer->GetType() != BufferType::eVertex)
         {
             std::cout << "Trying to bind a buffer that is not a Vertex buffer!" << std::endl;
             return;
         }
 
-        auto apiBuffer = buffer.GetAPIBuffer();
+        auto apiBuffer = buffer->GetAPIBuffer();
 
         m_cmdBuffer.bindVertexBuffers(0, apiBuffer, { 0 });
     }
 
-    void CommandBuffer::BindIndexBuffer(Buffer& buffer)
+    void CommandBuffer::BindIndexBuffer(Buffer* buffer)
     {
-        if (buffer.GetType() != BufferType::eIndex)
+        if (buffer->GetType() != BufferType::eIndex)
         {
             std::cout << "Trying to bind a buffer that is not a Index buffer!" << std::endl;
             return;
         }
 
-        auto apiBuffer = buffer.GetAPIBuffer();
+        auto apiBuffer = buffer->GetAPIBuffer();
 
         m_cmdBuffer.bindIndexBuffer(apiBuffer, 0, vk::IndexType::eUint32);
     }

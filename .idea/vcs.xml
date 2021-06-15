@@ -6,6 +6,7 @@
     <mapping directory="$PROJECT_DIR$/dependencies/SPIRV-Tools/external/spirv-headers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dependencies/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dependencies/glm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/dependencies/glslang" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/dependencies/shaderc" vcs="Git" />
   </component>
 </project>

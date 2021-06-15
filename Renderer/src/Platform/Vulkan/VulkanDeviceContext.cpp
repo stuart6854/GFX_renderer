@@ -32,7 +32,7 @@ namespace gfx
         CreateFramesResources();
     }
 
-    auto DeviceContext::CreateBuffer(BufferDesc desc) -> Buffer
+    auto DeviceContext::CreateBuffer(BufferDesc desc) -> std::shared_ptr<Buffer>
     {
         auto allocator = Vulkan::GetAllocator();
 
@@ -49,30 +49,43 @@ namespace gfx
         VmaAllocation allocation;
         allocator.Allocate(bufferInfo, memoryType, &vkBuffer, &allocation);
 
-        Buffer buffer(desc);
-        buffer.SetAPIResource(vkBuffer, allocation);
+        auto buffer = std::make_shared<Buffer>(desc);
+        buffer->SetAPIResource(vkBuffer, allocation);
 
+        m_buffers.push_back(buffer);
         return buffer;
     }
 
-    auto DeviceContext::CreateShader() -> Shader { return Shader(""); }
-
-    void DeviceContext::Upload(Buffer& dst, const void* data)
+    auto DeviceContext::CreateShader(const std::string& path) -> std::shared_ptr<Shader>
     {
-        const auto size = dst.GetSize();
+        auto shader = std::make_shared<Shader>(path);
+        m_shaders.push_back(shader);
+        return shader;
+    }
+
+    auto DeviceContext::CreatePipeline(const PipelineDesc& desc) -> std::shared_ptr<Pipeline>
+    {
+        auto pipeline = std::make_shared<Pipeline>(desc);
+        m_pipelines.push_back(pipeline);
+        return pipeline;
+    }
+
+    void DeviceContext::Upload(Buffer* dst, const void* data)
+    {
+        const auto size = dst->GetSize();
 
         BufferDesc stagingBufferDesc{ .Type = BufferType::eStaging, .Size = size };
         auto stagingBuffer = CreateBuffer(stagingBufferDesc);
 
         auto allocator = Vulkan::GetAllocator();
 
-        auto* mapped = allocator.Map(stagingBuffer.GetAPIAllocation());
+        auto* mapped = allocator.Map(stagingBuffer->GetAPIAllocation());
         std::memcpy(mapped, data, size);
-        allocator.Unmap(stagingBuffer.GetAPIAllocation());
+        allocator.Unmap(stagingBuffer->GetAPIAllocation());
 
         CommandBuffer cmdBuffer;
         cmdBuffer.Begin();
-        cmdBuffer.CopyBuffer(stagingBuffer.GetAPIBuffer(), dst.GetAPIBuffer(), size);
+        cmdBuffer.CopyBuffer(stagingBuffer->GetAPIBuffer(), dst->GetAPIBuffer(), size);
         cmdBuffer.End();
 
         Submit(cmdBuffer);
@@ -143,11 +156,11 @@ namespace gfx
         m_frameCounter++;
     }
 
-    auto DeviceContext::GetFramebuffer() -> Framebuffer
+    auto DeviceContext::GetFramebuffer() -> std::shared_ptr<Framebuffer>
     {
         auto framebuffer = m_swapchainFramebuffers.at(m_swapchainImageIndex);
         vk::Extent2D extent = { m_swapchainWidth, m_swapchainHeight };
-        return Framebuffer(framebuffer, m_swapchainRenderPass, extent);
+        return std::make_shared<Framebuffer>(framebuffer, m_swapchainRenderPass, extent);
     }
 
     auto DeviceContext::GetCurrentFrame() -> DeviceContext::Frame& { return m_frames.at(m_frameCounter % FRAME_OVERLAP); }

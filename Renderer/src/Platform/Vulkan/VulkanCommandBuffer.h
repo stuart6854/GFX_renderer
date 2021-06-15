@@ -24,9 +24,9 @@ namespace gfx
         void BeginRenderPass(vk::RenderPassBeginInfo& beginInfo);
         void EndRenderPass();
 
-        void BindPipeline(Pipeline& pipeline);
-        void BindVertexBuffer(Buffer& buffer);
-        void BindIndexBuffer(Buffer& buffer);
+        void BindPipeline(Pipeline* pipeline);
+        void BindVertexBuffer(Buffer* buffer);
+        void BindIndexBuffer(Buffer* buffer);
 
         void Draw(uint32_t vertexCount);
         void DrawIndexed(uint32_t indexCount);

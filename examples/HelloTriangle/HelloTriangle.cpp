@@ -17,7 +17,7 @@
 
 const std::vector<gfx::Vertex> triVerts = {
     { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
-    { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },o
+    { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },
     { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
 };
 const std::vector<uint32_t> triIndices = { 0, 1, 2 };
@@ -39,10 +39,10 @@ int main(int argc, char** argv)
 
         const uint32_t indexBufferSize = sizeof(uint32_t) * triIndices.size();
         gfx::BufferDesc indexBufferDesc = { .Type = gfx::BufferType::eIndex, .Size = indexBufferSize };
-        gfx::Buffer indexBuffer = deviceContext.CreateBuffer(indexBufferDesc);
+        auto indexBuffer = deviceContext.CreateBuffer(indexBufferDesc);
 
-        deviceContext.Upload(vertexBuffer, &triVerts[0]);
-        deviceContext.Upload(indexBuffer, &triIndices[0]);
+        deviceContext.Upload(vertexBuffer.get(), &triVerts[0]);
+        deviceContext.Upload(indexBuffer.get(), &triIndices[0]);
 
         auto shader = std::make_shared<gfx::Shader>("resources/shaders/shader.glsl");
 
@@ -52,9 +52,9 @@ int main(int argc, char** argv)
             { gfx::ShaderDataType::Float3, "a_Position" },
             { gfx::ShaderDataType::Float3, "a_Color" },
         };
-        pipelineDesc.Framebuffer = std::make_shared<gfx::Framebuffer>(deviceContext.GetFramebuffer());
+        pipelineDesc.Framebuffer = deviceContext.GetFramebuffer();
 
-        gfx::Pipeline pipeline(pipelineDesc);
+        auto pipeline = deviceContext.CreatePipeline(pipelineDesc);
 
         gfx::RenderContext renderContext;
 
@@ -65,12 +65,14 @@ int main(int argc, char** argv)
             deviceContext.NewFrame();
 
             renderContext.Begin();
-            renderContext.BeginRenderPass(gfx::Color(0.156f, 0.176f, 0.196f), deviceContext.GetFramebuffer());
 
-            renderContext.BindPipeline(pipeline);
+            auto framebuffer = deviceContext.GetFramebuffer();
+            renderContext.BeginRenderPass(gfx::Color(0.156f, 0.176f, 0.196f), framebuffer.get());
 
-            renderContext.BindVertexBuffer(vertexBuffer);
-            renderContext.BindIndexBuffer(indexBuffer);
+            renderContext.BindPipeline(pipeline.get());
+
+            renderContext.BindVertexBuffer(vertexBuffer.get());
+            renderContext.BindIndexBuffer(indexBuffer.get());
 
             renderContext.DrawIndexed(3);
 
