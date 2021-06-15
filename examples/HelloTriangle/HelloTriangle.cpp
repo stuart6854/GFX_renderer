@@ -65,6 +65,8 @@ int main(int argc, char** argv)
             renderContext.BindVertexBuffer(vertexBuffer);
             renderContext.BindIndexBuffer(indexBuffer);
 
+            renderContext.DrawIndexed(3);
+
             renderContext.EndRenderPass();
             renderContext.End();
 
