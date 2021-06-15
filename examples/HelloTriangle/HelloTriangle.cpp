@@ -9,6 +9,8 @@
 #include <GFX/RenderContext.h>
 #include <GFX/Resources/Vertex.h>
 #include <GFX/Resources/Buffer.h>
+#include <GFX/Resources/Shader.h>
+#include <GFX/Resources/Pipeline.h>
 
 #include <iostream>
 #include <vector>
@@ -37,6 +39,15 @@ int main(int argc, char** argv)
 
         deviceContext.Upload(vertexBuffer, &triVerts[0]);
         deviceContext.Upload(indexBuffer, &triIndices[0]);
+
+        auto shader = std::make_shared<gfx::Shader>("resources/shaders/shader.glsl");
+
+        gfx::PipelineDesc pipelineDesc;
+        pipelineDesc.Shader = shader;
+        pipelineDesc.Layout = { { gfx::ShaderDataType::Float3, "a_Position" } };
+        pipelineDesc.Framebuffer = std::make_shared<gfx::Framebuffer>(deviceContext.GetFramebuffer());
+
+        gfx::Pipeline pipeline(pipelineDesc);
 
         gfx::RenderContext renderContext;
 
