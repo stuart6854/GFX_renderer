@@ -12,7 +12,7 @@
 
 namespace gfx
 {
-    DeviceContext::DeviceContext() { CreateFramesResources(); }
+    DeviceContext::DeviceContext() : m_swapchainImageIndex(0), m_frameCounter(0) { CreateFramesResources(); }
 
     DeviceContext::~DeviceContext() { Destroy(); }
 

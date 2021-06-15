@@ -6,10 +6,11 @@
 #define PERSONAL_RENDERER_VULKANDEVICECONTEXT_H
 
 #include "VulkanSurface.h"
-#include "VulkanFramebuffer.h"
 #include "VulkanAllocator.h"
-#include "VulkanBuffer.h"
+#include "VulkanFramebuffer.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanBuffer.h"
+#include "VulkanShader.h"
 
 #include "GFX/Resources/ResourceDescriptions.h"
 
