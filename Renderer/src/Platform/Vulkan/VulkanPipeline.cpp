@@ -71,7 +71,7 @@ namespace gfx
         vk::PipelineRasterizationStateCreateInfo rasterizationState{};
         rasterizationState.setPolygonMode(m_desc.Wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill);
         rasterizationState.setCullMode(m_desc.BackFaceCulling ? vk::CullModeFlagBits::eBack : vk::CullModeFlagBits::eNone);
-        rasterizationState.setFrontFace(vk::FrontFace::eClockwise);
+        rasterizationState.setFrontFace(vk::FrontFace::eCounterClockwise);
         rasterizationState.setDepthClampEnable(false);
         rasterizationState.setRasterizerDiscardEnable(false);
         rasterizationState.setDepthBiasClamp(false);
