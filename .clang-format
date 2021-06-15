@@ -12,6 +12,7 @@ AlignOperands: Align
 AllowShortFunctionsOnASingleLine: InlineOnly
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
 BinPackArguments: false
 BinPackParameters: false
 BreakBeforeBraces: Allman
