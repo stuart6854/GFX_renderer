@@ -30,7 +30,9 @@ int main(int argc, char** argv)
             deviceContext.NewFrame();
 
             renderContext.Begin();
-            renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), deviceContext.GetFramebuffer());
+
+            auto framebuffer = deviceContext.GetFramebuffer();
+            renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), framebuffer.get());
 
             renderContext.EndRenderPass();
             renderContext.End();
