@@ -15,7 +15,11 @@
 #include <iostream>
 #include <vector>
 
-const std::vector<gfx::Vertex> triVerts = { { { 0.0f, 1.0f, 0.0f } }, { { 1.0f, -1.0f, 0.0f } }, { { -1.0f, -1.0f, 0.0f } } };
+const std::vector<gfx::Vertex> triVerts = {
+    { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
+    { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },o
+    { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
+};
 const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 
 int main(int argc, char** argv)
@@ -44,7 +48,10 @@ int main(int argc, char** argv)
 
         gfx::PipelineDesc pipelineDesc;
         pipelineDesc.Shader = shader;
-        pipelineDesc.Layout = { { gfx::ShaderDataType::Float3, "a_Position" } };
+        pipelineDesc.Layout = {
+            { gfx::ShaderDataType::Float3, "a_Position" },
+            { gfx::ShaderDataType::Float3, "a_Color" },
+        };
         pipelineDesc.Framebuffer = std::make_shared<gfx::Framebuffer>(deviceContext.GetFramebuffer());
 
         gfx::Pipeline pipeline(pipelineDesc);
