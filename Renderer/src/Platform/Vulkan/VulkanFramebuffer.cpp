@@ -11,7 +11,7 @@
 namespace gfx
 {
     Framebuffer::Framebuffer(vk::Framebuffer framebuffer, vk::RenderPass renderpass, vk::Extent2D extent)
-        : m_framebuffer(framebuffer), m_renderpass(renderpass), m_extent(extent)
+        : m_framebuffer(framebuffer), m_renderpass(renderpass), m_extent(extent), m_swapchainTarget(true)
     {
     }
 

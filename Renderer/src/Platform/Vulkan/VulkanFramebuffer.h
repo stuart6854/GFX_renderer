@@ -18,11 +18,13 @@ namespace gfx
         auto GetFramebuffer() const -> vk::Framebuffer;
         auto GetRenderPass() const -> vk::RenderPass;
         auto GetExtent() const -> vk::Extent2D;
+        auto IsSwapchainTarget() const -> bool { return m_swapchainTarget; }
 
     private:
         vk::Framebuffer m_framebuffer;
         vk::RenderPass m_renderpass;
         vk::Extent2D m_extent;
+        bool m_swapchainTarget = false;
     };
 }  // namespace gfx
 
