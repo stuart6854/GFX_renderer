@@ -60,6 +60,8 @@ int main(int argc, char** argv)
             renderContext.Begin();
             renderContext.BeginRenderPass(gfx::Color(0.156f, 0.176f, 0.196f), deviceContext.GetFramebuffer());
 
+            renderContext.BindPipeline(pipeline);
+
             renderContext.BindVertexBuffer(vertexBuffer);
             renderContext.BindIndexBuffer(indexBuffer);
 
