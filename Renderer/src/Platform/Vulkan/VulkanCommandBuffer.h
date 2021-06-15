@@ -6,6 +6,7 @@
 #define PERSONAL_RENDERER_VULKANCOMMANDBUFFER_H
 
 #include "GFX/Resources/Buffer.h"
+#include "GFX/Resources/Pipeline.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -23,6 +24,7 @@ namespace gfx
         void BeginRenderPass(vk::RenderPassBeginInfo& beginInfo);
         void EndRenderPass();
 
+        void BindPipeline(Pipeline& pipeline);
         void BindVertexBuffer(Buffer& buffer);
         void BindIndexBuffer(Buffer& buffer);
 

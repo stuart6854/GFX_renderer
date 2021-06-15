@@ -63,6 +63,8 @@ namespace gfx
 
     void CommandBuffer::EndRenderPass() { m_cmdBuffer.endRenderPass(); }
 
+    void CommandBuffer::BindPipeline(Pipeline& pipeline) { m_cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetAPIPipeline()); }
+
     void CommandBuffer::BindVertexBuffer(Buffer& buffer)
     {
         if (buffer.GetType() != BufferType::eVertex)
