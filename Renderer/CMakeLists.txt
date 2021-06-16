@@ -39,7 +39,7 @@ add_library(gfx
 
 target_include_directories(gfx PUBLIC src include)
 
-target_link_libraries(gfx PUBLIC Vulkan::Vulkan d3d12.lib shaderc spirv-cross-cpp )
+target_link_libraries(gfx PUBLIC Vulkan::Vulkan d3d12.lib shaderc spirv-cross-cpp glm)
 
 target_compile_definitions(gfx PUBLIC GFX_API_VULKAN)
 
