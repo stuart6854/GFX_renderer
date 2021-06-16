@@ -55,9 +55,22 @@ namespace gfx
         auto shader = m_desc.Shader;
         auto framebuffer = m_desc.Framebuffer;
 
+        const auto& pushConstantRanges = shader->GetPushConstantRanges();
+
+        std::vector<vk::PushConstantRange> vkPushConstantRanges(pushConstantRanges.size());
+        for (int i = 0; i < pushConstantRanges.size(); i++)
+        {
+            const auto& pushConstantRange = pushConstantRanges[i];
+            auto& vkPushConstantRange = vkPushConstantRanges[i];
+
+            vkPushConstantRange.stageFlags = pushConstantRange.ShaderStage;
+            vkPushConstantRange.offset = pushConstantRange.Offset;
+            vkPushConstantRange.size = pushConstantRange.Size;
+        }
+
         vk::PipelineLayoutCreateInfo layoutInfo{};
         // TODO: Get DescriptorSetLayouts from shader
-        // TODO: Get PushConstantRanges from shader
+        layoutInfo.setPushConstantRanges(vkPushConstantRanges);
 
         m_layout = device.createPipelineLayout(layoutInfo);
 
