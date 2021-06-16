@@ -24,7 +24,7 @@ const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 
 int main(int argc, char** argv)
 {
-    std::cout << "Running example \"HelloTriangle\"" << std::endl;
+    std::cout << "Running example \"HelloUniforms\"" << std::endl;
 
     gfx::Init();
     {
@@ -73,6 +73,9 @@ int main(int argc, char** argv)
 
             renderContext.BindVertexBuffer(vertexBuffer.get());
             renderContext.BindIndexBuffer(indexBuffer.get());
+
+            float pos = 0.5f;
+            renderContext.PushConstants(gfx::ShaderStage::eVertex, 0, sizeof(float), &pos);
 
             renderContext.DrawIndexed(3);
 
