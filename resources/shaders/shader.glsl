@@ -11,10 +11,10 @@ layout(location = 1) in vec3 a_Color;
 //    mat4 u_ViewProjection;
 //};
 
-//layout(push_constant) uniform Transform
-//{
-//    mat4 u_Model;
-//} u_Transform;
+layout(push_constant) uniform Transform
+{
+    mat4 u_Model;
+} u_Transform;
 
 struct VertexOutput
 {

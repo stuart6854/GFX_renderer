@@ -6,7 +6,11 @@
 
     #include "VulkanShader.h"
 
+    #include "GFX/Resources/ShaderUniform.h"
+
     #include "VulkanCore.h"
+
+    #include <spirv_cross/spirv_glsl.hpp>
 
     #include <iostream>
     #include <fstream>
@@ -14,6 +18,26 @@
 
 namespace gfx
 {
+    static auto SPIRTypeToShaderUniformType(const spirv_cross::SPIRType& type)
+    {
+        switch (type.basetype)
+        {
+            case spirv_cross::SPIRType::Boolean: return ShaderUniformType::eBool;
+            case spirv_cross::SPIRType::Int: return ShaderUniformType::eInt;
+            case spirv_cross::SPIRType::UInt: return ShaderUniformType::eUInt;
+            case spirv_cross::SPIRType::Float:
+                if (type.vecsize == 1) return ShaderUniformType::eFloat;
+                if (type.vecsize == 2) return ShaderUniformType::eVec2;
+                if (type.vecsize == 3) return ShaderUniformType::eVec3;
+                if (type.vecsize == 4) return ShaderUniformType::eVec4;
+
+                if (type.columns == 3) return ShaderUniformType::eMat3;
+                if (type.columns == 4) return ShaderUniformType::eMat4;
+                break;
+        }
+        return ShaderUniformType::eNone;
+    }
+
     Shader::Shader(const std::string& path) : m_path(path)
     {
         // Get name of shader from filename without ext
@@ -32,6 +56,7 @@ namespace gfx
         m_shaderSource = PreProcess(source);
         auto shaderData = CompileOrGetVulkanBinary();
         LoadAndCreateShaders(shaderData);
+        ReflectAllStages(shaderData);
     }
 
     auto Shader::ReadShaderFromFile(const std::string& filepath) -> std::string
@@ -65,12 +90,9 @@ namespace gfx
     {
         switch (stage)
         {
-            case vk::ShaderStageFlagBits::eVertex:
-                return shaderc_vertex_shader;
-            case vk::ShaderStageFlagBits::eFragment:
-                return shaderc_fragment_shader;
-            case vk::ShaderStageFlagBits::eCompute:
-                return shaderc_compute_shader;
+            case vk::ShaderStageFlagBits::eVertex: return shaderc_vertex_shader;
+            case vk::ShaderStageFlagBits::eFragment: return shaderc_fragment_shader;
+            case vk::ShaderStageFlagBits::eCompute: return shaderc_compute_shader;
         }
         return (shaderc_shader_kind)0;
     }
@@ -148,6 +170,71 @@ namespace gfx
             shaderStage.setStage(stage);
             shaderStage.setModule(shaderModule);
             shaderStage.setPName("main");
+        }
+    }
+
+    void Shader::Reflect(vk::ShaderStageFlagBits shaderStage, const std::vector<uint32_t>& shaderData)
+    {
+        std::cout << "===========================" << std::endl;
+        std::cout << " Vulkan Shader Reflection" << std::endl;
+        std::cout << " " << m_path << std::endl;
+        std::cout << "===========================" << std::endl;
+
+        spirv_cross::Compiler compiler(shaderData);
+        auto resources = compiler.get_shader_resources();
+
+        std::cout << "Push Constant Buffers: " << std::endl;
+        for (const auto& resource : resources.push_constant_buffers)
+        {
+            const auto& bufferName = resource.name;
+            auto& bufferType = compiler.get_type(resource.base_type_id);
+            auto bufferSize = compiler.get_declared_struct_size(bufferType);
+            auto memberCount = bufferType.member_types.size();
+            uint32_t bufferOffset = 0;
+            if (!m_pushConstantRanges.empty())
+            {
+                bufferOffset = m_pushConstantRanges.back().Offset + m_pushConstantRanges.back().Size;
+            }
+
+            auto& pushConstantRange = m_pushConstantRanges.emplace_back();
+            pushConstantRange.ShaderStage = shaderStage;
+            pushConstantRange.Offset = bufferOffset;
+            pushConstantRange.Size = bufferSize;
+
+            // TODO: ??
+            //  Skip empty push constant buffers - these are for the renderer only
+            if (bufferName.empty() || bufferName == "u_Renderer") continue;
+
+            ShaderBuffer& buffer = m_buffers[bufferName];
+            buffer.Name = bufferName;
+            buffer.Size = bufferSize;
+
+            std::cout << "  Name: " << bufferName << std::endl;
+            std::cout << "  Member Count: " << memberCount << std::endl;
+            std::cout << "  Size: " << bufferSize << std::endl;
+
+            for (int i = 0; i < memberCount; i++)
+            {
+                auto& type = compiler.get_type(bufferType.member_types[i]);
+                const auto& memberName = compiler.get_member_name(bufferType.self, i);
+                auto size = compiler.get_declared_struct_member_size(bufferType, i);
+                auto offset = compiler.type_struct_member_offset(bufferType, i) - bufferOffset;
+
+                std::string uniformName = bufferName + "." + memberName;
+                buffer.Uniforms[uniformName] = ShaderUniform(uniformName, SPIRTypeToShaderUniformType(type), size, offset);
+            }
+        }
+
+        std::cout << "===========================" << std::endl;
+    }
+
+    void Shader::ReflectAllStages(const std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData)
+    {
+        m_resources.clear();
+
+        for (auto [stage, data] : shaderData)
+        {
+            Reflect(stage, data);
         }
     }
 

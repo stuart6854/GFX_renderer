@@ -31,7 +31,11 @@ add_library(gfx
         src/Platform/Vulkan/VulkanShader.h
         include/GFX/Resources/Shader.h
         src/Platform/Vulkan/VulkanPipeline.cpp
-        src/Platform/Vulkan/VulkanPipeline.h include/GFX/Resources/VertexLayout.h include/GFX/Resources/Pipeline.h)
+        src/Platform/Vulkan/VulkanPipeline.h
+        include/GFX/Resources/VertexLayout.h
+        include/GFX/Resources/Pipeline.h
+        include/GFX/Resources/ShaderUniform.h
+        src/GFX/Resources/ShaderUniform.cpp)
 
 target_include_directories(gfx PUBLIC src include)
 
