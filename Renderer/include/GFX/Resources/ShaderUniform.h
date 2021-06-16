@@ -57,11 +57,11 @@ namespace gfx
         std::unordered_map<std::string, ShaderUniform> Uniforms;
     };
 
-    enum class ShaderDomain
+    enum class ShaderStage
     {
-        None = 0,
-        Vertex = 0,
-        Pixel = 1
+        eNone = 0,
+        eVertex,
+        ePixel
     };
 
     class ShaderResourceDeclaration
