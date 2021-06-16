@@ -47,6 +47,11 @@ namespace gfx
 
     void RenderContext::BindIndexBuffer(Buffer* buffer) { GetCommandBuffer().BindIndexBuffer(buffer); }
 
+    void RenderContext::PushConstants(ShaderStage stage, uint32_t offset, uint32_t size, const void* data)
+    {
+        GetCommandBuffer().PushConstants(m_boundPipeline->GetAPIPipelineLayout(), stage, offset, size, data);
+    }
+
     void RenderContext::Draw(uint32_t vertexCount) { GetCommandBuffer().Draw(vertexCount); }
 
     void RenderContext::DrawIndexed(uint32_t indexCount) { GetCommandBuffer().DrawIndexed(indexCount); }

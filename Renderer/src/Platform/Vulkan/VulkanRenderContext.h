@@ -14,6 +14,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <cstdint>
+
 namespace gfx
 {
     /**
@@ -36,6 +38,8 @@ namespace gfx
         void BindPipeline(Pipeline* pipeline);
         void BindVertexBuffer(Buffer* buffer);
         void BindIndexBuffer(Buffer* buffer);
+
+        void PushConstants(ShaderStage stage, uint32_t offset, uint32_t size, const void* data);
 
         void Draw(uint32_t vertexCount);
         void DrawIndexed(uint32_t indexCount);

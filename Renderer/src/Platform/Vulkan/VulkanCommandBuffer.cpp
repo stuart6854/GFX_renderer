@@ -12,6 +12,17 @@
 
 namespace gfx
 {
+    static auto ShaderStageToVulkan(ShaderStage stage) -> vk::ShaderStageFlagBits
+    {
+        switch (stage)
+        {
+            case ShaderStage::eNone: break;
+            case ShaderStage::eVertex: return vk::ShaderStageFlagBits::eVertex;
+            case ShaderStage::ePixel: return vk::ShaderStageFlagBits::eFragment;
+        }
+        return {};
+    }
+
     CommandBuffer::CommandBuffer()
     {
         auto device = Vulkan::GetDevice();
@@ -102,6 +113,11 @@ namespace gfx
         auto apiBuffer = buffer->GetAPIBuffer();
 
         m_cmdBuffer.bindIndexBuffer(apiBuffer, 0, vk::IndexType::eUint32);
+    }
+
+    void CommandBuffer::PushConstants(vk::PipelineLayout layout, ShaderStage stage, uint32_t offset, uint32_t size, const void* data)
+    {
+        m_cmdBuffer.pushConstants(layout, ShaderStageToVulkan(stage), offset, size, data);
     }
 
     void CommandBuffer::Draw(uint32_t vertexCount) { m_cmdBuffer.draw(vertexCount, 1, 0, 0); }
