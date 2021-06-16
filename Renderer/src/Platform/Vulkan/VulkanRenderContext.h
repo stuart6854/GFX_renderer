@@ -47,6 +47,8 @@ namespace gfx
     private:
         std::array<CommandBuffer, FRAME_OVERLAP> m_cmdBuffers{};
         uint32_t m_activeCmdBufferIndex{};
+
+        Pipeline* m_boundPipeline;
     };
 
 }  // namespace gfx

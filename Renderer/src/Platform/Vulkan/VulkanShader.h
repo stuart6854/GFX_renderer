@@ -33,6 +33,8 @@ namespace gfx
 
         auto GetPipelineShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
+        auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
+
     private:
         static auto ReadShaderFromFile(const std::string& filepath) -> std::string;
         static auto ShaderTypeFromString(const std::string& type) -> vk::ShaderStageFlagBits;
@@ -52,7 +54,7 @@ namespace gfx
         std::vector<vk::PipelineShaderStageCreateInfo> m_pipelineShaderStageCreateInfos;
 
         std::unordered_map<std::string, ShaderResourceDeclaration> m_resources;
-        
+
         std::vector<PushConstantRange> m_pushConstantRanges;
         std::unordered_map<std::string, ShaderBuffer> m_buffers;
     };
