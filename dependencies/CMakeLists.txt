@@ -6,8 +6,11 @@ add_subdirectory(glfw)
 
 add_subdirectory(glm)
 
+option(SPIRV_SKIP_EXECUTABLES "Skip building the executable and tests along with the library" ON)
 add_subdirectory(SPIRV-Tools)
 
+option(SKIP_GLSLANG_INSTALL "Skip installation" ON)
+option(ENABLE_CTEST "Enables testing" OFF)
 add_subdirectory(glslang)
 
 set(SHADERC_SKIP_INSTALL ON)
@@ -19,7 +22,5 @@ set(SKIP_GOOGLETEST_INSTALL ON)
 add_subdirectory(shaderc)
 
 option(SPIRV_CROSS_ENABLE_TESTS "Enable SPIRV-Cross tests." OFF)
-option(SPIRV_CROSS_ENABLE_HLSL "Enable HLSL target support." OFF)
 option(SPIRV_CROSS_SKIP_INSTALL "Skips installation targets." ON)
-option(SPIRV_CROSS_ENABLE_REFLECT "Enable JSON reflection target support." OFF)
 add_subdirectory(spirv-cross)
