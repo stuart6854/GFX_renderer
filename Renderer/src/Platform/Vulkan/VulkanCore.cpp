@@ -3,6 +3,8 @@
 //
 #ifdef GFX_API_VULKAN
 
+    #include "GFX/Debug.h"
+
     #include "VulkanCore.h"
     #include "VulkanUtils.h"
 
@@ -121,7 +123,7 @@ namespace gfx::Vulkan
         s_vkDevice.destroy();
         s_vkInstance.destroy(s_vkDebugCallback, nullptr, vk::DispatchLoaderDynamic(s_vkInstance, vkGetInstanceProcAddr));
         s_vkInstance.destroy();
-        
+
         s_vkDevice = nullptr;
         s_vkPhysicalDevice = nullptr;
         s_vkDebugCallback = nullptr;
@@ -146,7 +148,7 @@ namespace gfx::Vulkan
     {
         if (messageType >= (int)vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation)
         {
-            std::cout << "*** VULKAN VALIDATION ***\n" << pCallbackData->pMessage << std::endl;
+            GFX_ERROR("*** VULKAN VALIDATION ***\n{}", pCallbackData->pMessage);
         }
         return VK_FALSE;
     }

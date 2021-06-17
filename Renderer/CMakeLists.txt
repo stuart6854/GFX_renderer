@@ -35,7 +35,8 @@ add_library(gfx
         include/GFX/Resources/VertexLayout.h
         include/GFX/Resources/Pipeline.h
         include/GFX/Resources/ShaderUniform.h
-        src/GFX/Resources/ShaderUniform.cpp)
+        src/GFX/Resources/ShaderUniform.cpp
+        include/GFX/Debug.h)
 
 target_include_directories(gfx PUBLIC src include)
 

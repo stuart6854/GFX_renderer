@@ -5,23 +5,22 @@
 #ifdef GFX_API_VULKAN
 
     #include "GFX/GFX.h"
+    #include "GFX/Debug.h"
     #include "GFX/GFXAPI.h"
 
     #include <vulkan/vulkan.hpp>
-
-    #include <iostream>
 
 namespace gfx
 {
     void Init()
     {
-        std::cout << "Initialising Vulkan Renderer!" << std::endl;
+        GFX_INFO("Initialising Vulkan Renderer!");
 
         auto instanceVersion = vk::enumerateInstanceVersion();
         uint32_t major = VK_VERSION_MAJOR(instanceVersion);
         uint32_t minor = VK_VERSION_MINOR(instanceVersion);
         uint32_t patch = VK_VERSION_PATCH(instanceVersion);
-        std::cout << "Vulkan version: " << major << "." << minor << "." << patch << std::endl;
+        GFX_INFO("Vulkan version: {}.{}.{}", major, minor, patch);
 
         vk::ApplicationInfo appInfo{};
         appInfo.apiVersion = VK_API_VERSION_1_2;
@@ -32,12 +31,12 @@ namespace gfx
         Vulkan::CreateAllocator();
 
         auto gpu = Vulkan::GetPhysicalDevice().getProperties();
-        std::cout << "Graphics Card: " << gpu.deviceName << std::endl;
+        GFX_INFO("Graphics Card: {}", gpu.deviceName);
     }
 
     void Shutdown()
     {
-        std::cout << "Shutting down Vulkan Renderer!" << std::endl;
+        GFX_INFO("Shutting down Vulkan Renderer!");
 
         Vulkan::Shutdown();
     }

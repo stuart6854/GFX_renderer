@@ -4,9 +4,10 @@
 
 #ifdef GFX_API_VULKAN
 
-    #include "VulkanCommandBuffer.h"
+    #include "GFX/Debug.h"
 
     #include "VulkanCore.h"
+    #include "VulkanCommandBuffer.h"
 
     #include <iostream>
 
@@ -93,7 +94,7 @@ namespace gfx
     {
         if (buffer->GetType() != BufferType::eVertex)
         {
-            std::cout << "Trying to bind a buffer that is not a Vertex buffer!" << std::endl;
+            GFX_ERROR("Trying to bind a buffer that is not a Vertex buffer!");
             return;
         }
 
@@ -106,7 +107,7 @@ namespace gfx
     {
         if (buffer->GetType() != BufferType::eIndex)
         {
-            std::cout << "Trying to bind a buffer that is not a Index buffer!" << std::endl;
+            GFX_ERROR("Trying to bind a buffer that is not a Index buffer!");
             return;
         }
 

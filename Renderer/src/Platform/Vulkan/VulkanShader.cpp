@@ -6,6 +6,7 @@
 
     #include "VulkanShader.h"
 
+    #include "GFX/Debug.h"
     #include "GFX/Resources/ShaderUniform.h"
 
     #include "VulkanCore.h"
@@ -72,7 +73,7 @@ namespace gfx
         }
         else
         {
-            std::cerr << "Could not load shader!" << std::endl;
+            GFX_ERROR("Could not load shader!");
         }
         in.close();
         return result;
@@ -141,7 +142,7 @@ namespace gfx
 
                 if (module.GetCompilationStatus() != shaderc_compilation_status_success)
                 {
-                    std::cerr << module.GetErrorMessage() << std::endl;
+                    GFX_ERROR("{}", module.GetErrorMessage());
                 }
 
                 const auto* begin = (const uint8_t*)module.cbegin();
@@ -175,15 +176,15 @@ namespace gfx
 
     void Shader::Reflect(vk::ShaderStageFlagBits shaderStage, const std::vector<uint32_t>& shaderData)
     {
-        std::cout << "===========================" << std::endl;
-        std::cout << " Vulkan Shader Reflection" << std::endl;
-        std::cout << " " << m_path << std::endl;
-        std::cout << "===========================" << std::endl;
+        GFX_INFO("===========================");
+        GFX_INFO(" Vulkan Shader Reflection");
+        GFX_INFO(" {}", m_path);
+        GFX_INFO("===========================");
 
         spirv_cross::Compiler compiler(shaderData);
         auto resources = compiler.get_shader_resources();
 
-        std::cout << "Push Constant Buffers: " << std::endl;
+        GFX_INFO("Push Constant Buffers: ");
         for (const auto& resource : resources.push_constant_buffers)
         {
             const auto& bufferName = resource.name;
@@ -209,9 +210,9 @@ namespace gfx
             buffer.Name = bufferName;
             buffer.Size = bufferSize;
 
-            std::cout << "  Name: " << bufferName << std::endl;
-            std::cout << "  Member Count: " << memberCount << std::endl;
-            std::cout << "  Size: " << bufferSize << std::endl;
+            GFX_INFO("  Name: {}", bufferName);
+            GFX_INFO("  Member Count: {}", memberCount);
+            GFX_INFO("  Size: {}", bufferSize);
 
             for (int i = 0; i < memberCount; i++)
             {
@@ -225,7 +226,7 @@ namespace gfx
             }
         }
 
-        std::cout << "===========================" << std::endl;
+        GFX_INFO("===========================");
     }
 
     void Shader::ReflectAllStages(const std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData)

@@ -5,6 +5,7 @@
 #include <ExampleBase/Window.h>
 
 #include <GFX/GFX.h>
+#include <GFX/Debug.h>
 #include <GFX/DeviceContext.h>
 #include <GFX/RenderContext.h>
 #include <GFX/Resources/Vertex.h>
@@ -24,7 +25,7 @@ const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 
 int main(int argc, char** argv)
 {
-    std::cout << "Running example \"HelloUniforms\"" << std::endl;
+    GFX_INFO("Running example \"HelloUniforms\"");
 
     gfx::Init();
     {
