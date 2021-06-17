@@ -38,9 +38,15 @@ add_library(gfx
         src/GFX/Resources/ShaderUniform.cpp
         include/GFX/Debug.h)
 
-target_include_directories(gfx PUBLIC src include)
+target_include_directories(gfx PUBLIC src include $ENV{VULKAN_SDK}/Include)
 
-target_link_libraries(gfx PUBLIC fmt::fmt Vulkan::Vulkan d3d12.lib shaderc spirv-cross-cpp glm)
+target_link_directories(gfx PUBLIC $ENV{VULKAN_SDK}/Lib ${CMAKE_SOURCE_DIR}/dependencies/VulkanSDK/Lib)
+
+set(VulkanLibs
+        optimized spirv-cross-core spirv-cross-cpp shaderc_shared
+        debug spirv-cross-cored spirv-cross-cppd shaderc_sharedd)
+
+target_link_libraries(gfx PUBLIC fmt::fmt glm vulkan-1 ${VulkanLibs} d3d12 )
 
 target_compile_definitions(gfx PUBLIC GFX_API_VULKAN)
 

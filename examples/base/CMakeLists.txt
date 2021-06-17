@@ -2,4 +2,4 @@ add_library(example_base src/ExampleBase/Window.cpp src/ExampleBase/Window.h ../
 
 target_include_directories(example_base PUBLIC src)
 
-target_link_libraries(example_base PUBLIC Vulkan::Vulkan gfx glfw glm)
+target_link_libraries(example_base PUBLIC gfx glfw glm)
