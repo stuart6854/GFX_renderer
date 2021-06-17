@@ -16,3 +16,6 @@
 [submodule "dependencies\\spirv-cross"]
 	path = dependencies\\spirv-cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross.git
+[submodule "dependencies\\fmt"]
+	path = dependencies\\fmt
+	url = https://github.com/fmtlib/fmt.git
