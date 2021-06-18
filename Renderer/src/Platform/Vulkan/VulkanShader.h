@@ -19,11 +19,29 @@ namespace gfx
     class Shader
     {
     public:
+        struct UniformBuffer
+        {
+            vk::DescriptorBufferInfo Descriptor = {};
+            uint32_t Size = 0;
+            uint32_t BindingPoint = 0;
+            std::string Name;
+            vk::ShaderStageFlagBits ShaderStage = {};
+        };
+
         struct PushConstantRange
         {
             vk::ShaderStageFlagBits ShaderStage = {};
             uint32_t Offset = 0;
             uint32_t Size = 0;
+        };
+
+        struct ShaderDescriptorSet
+        {
+            std::unordered_map<uint32_t, UniformBuffer*> UniformBuffers;
+
+            std::unordered_map<std::string, vk::WriteDescriptorSet> WriteDescriptorSets;
+
+            operator bool() const { return !(UniformBuffers.empty()); }
         };
 
     public:
@@ -33,6 +51,7 @@ namespace gfx
 
         auto GetPipelineShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
+        auto GetShaderDescriptorSets() const -> const std::vector<ShaderDescriptorSet>& { return m_shaderDescriptorSets; }
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
 
     private:
@@ -53,6 +72,7 @@ namespace gfx
         std::unordered_map<vk::ShaderStageFlagBits, std::string> m_shaderSource;
         std::vector<vk::PipelineShaderStageCreateInfo> m_pipelineShaderStageCreateInfos;
 
+        std::vector<ShaderDescriptorSet> m_shaderDescriptorSets;
         std::unordered_map<std::string, ShaderResourceDeclaration> m_resources;
 
         std::vector<PushConstantRange> m_pushConstantRanges;

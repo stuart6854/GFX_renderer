@@ -39,6 +39,9 @@ namespace gfx
         return ShaderUniformType::eNone;
     }
 
+        static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
+    //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
+
     Shader::Shader(const std::string& path) : m_path(path)
     {
         // Get name of shader from filename without ext
@@ -183,6 +186,42 @@ namespace gfx
 
         spirv_cross::Compiler compiler(shaderData);
         auto resources = compiler.get_shader_resources();
+
+        GFX_INFO("Uniform Buffers");
+        for (const auto& resource : resources.uniform_buffers)
+        {
+            const auto& bufferName = resource.name;
+            auto& bufferType = compiler.get_type(resource.base_type_id);
+            auto bufferSize = compiler.get_declared_struct_size(bufferType);
+            auto memberCount = bufferType.member_types.size();
+            uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32_t descriptorSet = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+
+            if (descriptorSet >= m_shaderDescriptorSets.size()) m_shaderDescriptorSets.resize(descriptorSet + 1);
+
+            ShaderDescriptorSet& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
+            if (s_UniformBuffers[descriptorSet].find(binding) == s_UniformBuffers[descriptorSet].end())
+            {
+                auto* uniformBuffer = new UniformBuffer;
+                uniformBuffer->BindingPoint = binding;
+                uniformBuffer->Size = bufferSize;
+                uniformBuffer->Name = bufferName;
+                uniformBuffer->ShaderStage = shaderStage;
+                s_UniformBuffers.at(descriptorSet)[binding] = uniformBuffer;
+            }
+            else
+            {
+                auto* uniformBuffer = s_UniformBuffers.at(descriptorSet).at(binding);
+                if (bufferSize > uniformBuffer->Size) uniformBuffer->Size = bufferSize;
+            }
+
+            shaderDescriptorSet.UniformBuffers[binding] = s_UniformBuffers.at(descriptorSet).at(binding);
+
+            GFX_INFO("  {} ({}, {})", bufferName, descriptorSet, binding);
+            GFX_INFO("  Member Count: {}", memberCount);
+            GFX_INFO("  Size: {}", bufferSize);
+            GFX_INFO("-------------------");
+        }
 
         GFX_INFO("Push Constant Buffers: ");
         for (const auto& resource : resources.push_constant_buffers)

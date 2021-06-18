@@ -6,10 +6,10 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Color;
 
-//layout(std140, binding = 0) uniform Camera
-//{
-//    mat4 u_ViewProjection;
-//};
+layout(std140, binding = 0) uniform Camera
+{
+    mat4 u_ViewProjection;
+};
 
 layout(push_constant) uniform Transform
 {
@@ -31,10 +31,10 @@ void main()
     gl_Position = /*u_ViewProjection * u_Transform.u_Model * */ vec4(a_Position + vec3(u_Transform.pos, 0, 0), 1.0f);
 }
 
-    #type pixel
+#type pixel
 
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
 layout (location = 0) out vec4 color;
 
