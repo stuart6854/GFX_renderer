@@ -39,7 +39,7 @@ namespace gfx
         return ShaderUniformType::eNone;
     }
 
-        static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
+    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
     //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
 
     Shader::Shader(const std::string& path) : m_path(path)
@@ -61,6 +61,20 @@ namespace gfx
         auto shaderData = CompileOrGetVulkanBinary();
         LoadAndCreateShaders(shaderData);
         ReflectAllStages(shaderData);
+        CreateDescriptors();
+    }
+
+    auto Shader::GetAllDescriptorSetLayouts() -> std::vector<vk::DescriptorSetLayout>
+    {
+        std::vector<vk::DescriptorSetLayout> result;
+
+        result.reserve(m_descriptorSetLayouts.size());
+        for (auto& layout : m_descriptorSetLayouts)
+        {
+            result.emplace_back(layout);
+        }
+
+        return result;
     }
 
     auto Shader::ReadShaderFromFile(const std::string& filepath) -> std::string
@@ -275,6 +289,55 @@ namespace gfx
         for (auto [stage, data] : shaderData)
         {
             Reflect(stage, data);
+        }
+    }
+
+    void Shader::CreateDescriptors()
+    {
+        auto device = Vulkan::GetDevice();
+
+        /*
+         * Descriptor Pool
+         */
+        m_typeCounts.clear();
+        for (uint32_t set = 0; set < m_shaderDescriptorSets.size(); set++)
+        {
+            auto& shaderDescriptorSet = m_shaderDescriptorSets[set];
+
+            if (!shaderDescriptorSet.UniformBuffers.empty())
+            {
+                vk::DescriptorPoolSize& typeCount = m_typeCounts[set].emplace_back();
+                typeCount.setType(vk::DescriptorType::eUniformBuffer);
+                typeCount.setDescriptorCount(shaderDescriptorSet.UniformBuffers.size());
+            }
+
+            /*
+             * Descriptor Set Layout
+             */
+
+            std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
+            for (auto& [binding, uniformBuffer] : shaderDescriptorSet.UniformBuffers)
+            {
+                vk::DescriptorSetLayoutBinding layoutBinding = layoutBindings.emplace_back();
+                layoutBinding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                layoutBinding.setDescriptorCount(1);
+                layoutBinding.setStageFlags(uniformBuffer->ShaderStage);
+                layoutBinding.binding = binding;
+
+                vk::WriteDescriptorSet& writeSet = shaderDescriptorSet.WriteDescriptorSets[uniformBuffer->Name];
+                writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                writeSet.setDescriptorCount(1);
+                writeSet.setDstBinding(layoutBinding.binding);
+            }
+
+            vk::DescriptorSetLayoutCreateInfo descriptorLayout{};
+            descriptorLayout.setBindings(layoutBindings);
+
+            GFX_INFO(
+                "Creating descriptor set {} with {} ubo's" /*, {} ssbo's, {} samplers and {} storage images"*/, set, shaderDescriptorSet.UniformBuffers.size());
+
+            if (set >= m_descriptorSetLayouts.size()) m_descriptorSetLayouts.resize(set + 1);
+            m_descriptorSetLayouts[set] = device.createDescriptorSetLayout(descriptorLayout);
         }
     }
 

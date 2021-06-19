@@ -51,6 +51,10 @@ namespace gfx
 
         auto GetPipelineShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
+        auto GetDescriptorSet() -> vk::DescriptorSet { return m_descriptorSet; }
+        auto GetDescriptorSetLayout(uint32_t set) -> vk::DescriptorSetLayout { return m_descriptorSetLayouts.at(set); }
+        auto GetAllDescriptorSetLayouts() -> std::vector<vk::DescriptorSetLayout>;
+
         auto GetShaderDescriptorSets() const -> const std::vector<ShaderDescriptorSet>& { return m_shaderDescriptorSets; }
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
 
@@ -64,6 +68,7 @@ namespace gfx
         void LoadAndCreateShaders(std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData);
         void Reflect(vk::ShaderStageFlagBits shaderStage, const std::vector<uint32_t>& shaderData);
         void ReflectAllStages(const std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData);
+        void CreateDescriptors();
 
     private:
         std::string m_name;
@@ -77,6 +82,11 @@ namespace gfx
 
         std::vector<PushConstantRange> m_pushConstantRanges;
         std::unordered_map<std::string, ShaderBuffer> m_buffers;
+
+        /* Descriptors */
+        std::unordered_map<uint32_t, std::vector<vk::DescriptorPoolSize>> m_typeCounts;
+        std::vector<vk::DescriptorSetLayout> m_descriptorSetLayouts;
+        vk::DescriptorSet m_descriptorSet;
     };
 }  // namespace gfx
 
