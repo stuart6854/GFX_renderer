@@ -306,7 +306,7 @@ namespace gfx
 
             if (!shaderDescriptorSet.UniformBuffers.empty())
             {
-                vk::DescriptorPoolSize& typeCount = m_typeCounts[set].emplace_back();
+                auto& typeCount = m_typeCounts[set].emplace_back();
                 typeCount.setType(vk::DescriptorType::eUniformBuffer);
                 typeCount.setDescriptorCount(shaderDescriptorSet.UniformBuffers.size());
             }
@@ -318,13 +318,13 @@ namespace gfx
             std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
             for (auto& [binding, uniformBuffer] : shaderDescriptorSet.UniformBuffers)
             {
-                vk::DescriptorSetLayoutBinding layoutBinding = layoutBindings.emplace_back();
+                auto& layoutBinding = layoutBindings.emplace_back();
                 layoutBinding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
                 layoutBinding.setDescriptorCount(1);
                 layoutBinding.setStageFlags(uniformBuffer->ShaderStage);
                 layoutBinding.binding = binding;
 
-                vk::WriteDescriptorSet& writeSet = shaderDescriptorSet.WriteDescriptorSets[uniformBuffer->Name];
+                auto& writeSet = shaderDescriptorSet.WriteDescriptorSets[uniformBuffer->Name];
                 writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
                 writeSet.setDescriptorCount(1);
                 writeSet.setDstBinding(layoutBinding.binding);
