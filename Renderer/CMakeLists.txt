@@ -42,20 +42,18 @@ target_include_directories(gfx
     PUBLIC
         src
         include
-        $ENV{VULKAN_SDK}/Include
-        ${CMAKE_SOURCE_DIR}/dependencies/assimp/Include)
+        $ENV{VULKAN_SDK}/Include)
 
 target_link_directories(gfx
     PUBLIC
         $ENV{VULKAN_SDK}/Lib
-        ${CMAKE_SOURCE_DIR}/dependencies/VulkanSDK/Lib
-        ${CMAKE_SOURCE_DIR}/dependencies/assimp/Lib)
+        ${CMAKE_SOURCE_DIR}/dependencies/VulkanSDK/Lib)
 
 set(VulkanLibs
         optimized spirv-cross-core spirv-cross-cpp shaderc_shared
         debug spirv-cross-cored spirv-cross-cppd shaderc_sharedd)
 
-target_link_libraries(gfx PUBLIC fmt::fmt glm vulkan-1 ${VulkanLibs} d3d12 assimp-vc142-mtd zlibstaticd)
+target_link_libraries(gfx PUBLIC fmt::fmt glm vulkan-1 ${VulkanLibs} d3d12 assimp::assimp)
 
 target_compile_definitions(gfx PUBLIC GFX_API_VULKAN)
 
