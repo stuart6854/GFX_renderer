@@ -18,6 +18,7 @@ namespace gfx
         eNone = 0,
         eVertex,
         eIndex,
+        eUniformBuffer,
         eStaging
     };
 

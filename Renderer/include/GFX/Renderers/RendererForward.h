@@ -5,9 +5,10 @@
 #ifndef PERSONAL_RENDERER_RENDERERFORWARD_H
 #define PERSONAL_RENDERER_RENDERERFORWARD_H
 
-#include "DrawCall.h"
+#include "RendererStructures.h"
 #include "GFX/DeviceContext.h"
 #include "GFX/RenderContext.h"
+#include "GFX/Resources/UniformBufferSet.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -27,7 +28,7 @@ namespace gfx
 
         auto LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>;
 
-        void BeginScene();
+        void BeginScene(const Camera& camera);
         void EndScene();
 
         void DrawMesh(const DrawCall& drawCall);
@@ -44,6 +45,13 @@ namespace gfx
 
         std::vector<DrawCall> m_geometryDrawCalls;
         std::vector<DrawCall> m_shadowDrawCalls;
+
+        std::shared_ptr<UniformBufferSet> m_uniformBufferSet;
+
+        struct UBCamera
+        {
+            glm::mat4 ViewProjection;
+        } CameraData;
     };
 }  // namespace gfx
 

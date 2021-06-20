@@ -16,7 +16,20 @@ namespace gfx
         {
             case BufferType::eVertex: return vk::BufferUsageFlagBits::eVertexBuffer;
             case BufferType::eIndex: return vk::BufferUsageFlagBits::eIndexBuffer;
+            case BufferType::eUniformBuffer: return vk::BufferUsageFlagBits::eUniformBuffer;
             case BufferType::eStaging: return vk::BufferUsageFlagBits::eTransferSrc;
+        }
+        return {};
+    }
+
+    auto BufferTypeToMemType(BufferType type) -> VmaMemoryUsage
+    {
+        switch (type)
+        {
+            case BufferType::eVertex:
+            case BufferType::eIndex: return VMA_MEMORY_USAGE_GPU_ONLY;
+            case BufferType::eUniformBuffer:
+            case BufferType::eStaging: return VMA_MEMORY_USAGE_CPU_ONLY;
         }
         return {};
     }
@@ -32,7 +45,7 @@ namespace gfx
         bufferInfo.setSize(desc.Size);
         bufferInfo.setUsage(usage);
 
-        auto memoryType = (desc.Type == BufferType::eStaging) ? VMA_MEMORY_USAGE_CPU_ONLY : VMA_MEMORY_USAGE_GPU_ONLY;
+        auto memoryType = BufferTypeToMemType(desc.Type);
 
         allocator.Allocate(bufferInfo, memoryType, &m_buffer, &m_allocation);
     }

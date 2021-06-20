@@ -12,9 +12,12 @@ namespace gfx
     {
         m_deviceContext.ProcessWindowChanges(surface, 720, 480);
 
-        m_geometryShader = m_deviceContext.CreateShader("resources/forwardrenderer/scene_shader.glsl");
+        m_uniformBufferSet = std::make_shared<UniformBufferSet>(FRAME_OVERLAP);
+        m_uniformBufferSet->Create(sizeof(UBCamera), 0);
 
         {
+            m_geometryShader = m_deviceContext.CreateShader("resources/forwardrenderer/scene_shader.glsl");
+
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;
             pipelineDesc.Layout = {
@@ -38,8 +41,21 @@ namespace gfx
         return mesh;
     }
 
-    void RendererForward::BeginScene()
+    void RendererForward::BeginScene(const Camera& camera)
     {
+        auto currentFrameIndex = m_deviceContext.GetCurrentFrameIndex();
+
+        /*
+         * Update uniform Buffers
+         * */
+        auto& cameraData = CameraData;
+
+        auto viewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
+
+        cameraData.ViewProjection = viewProjection;
+
+        m_uniformBufferSet->Get(0, 0, currentFrameIndex)->SetData(&cameraData, sizeof(cameraData));
+
         m_deviceContext.NewFrame();
         m_renderContext.Begin();
     }

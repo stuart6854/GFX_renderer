@@ -37,7 +37,7 @@ int main(int argc, char** argv)
         {
             window.PollEvents();
 
-            renderer.BeginScene();
+            renderer.BeginScene({ proj, view });
 
             renderer.DrawMesh({ mesh.get(), model });
 

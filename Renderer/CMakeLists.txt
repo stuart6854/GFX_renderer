@@ -2,7 +2,6 @@ add_library(gfx
         include/GFX/Debug.h
         include/GFX/DeviceContext.h
         include/GFX/RenderContext.h
-        include/GFX/Renderers/DrawCall.h
         include/GFX/Resources/Buffer.h
         include/GFX/Resources/Framebuffer.h
         include/GFX/Resources/Pipeline.h
@@ -39,7 +38,7 @@ add_library(gfx
         src/Platform/Vulkan/VulkanShader.h
         src/Platform/Vulkan/VulkanUtils.cpp
         src/Platform/Vulkan/VulkanUtils.h
-        )
+        include/GFX/Resources/UniformBuffer.h src/Platform/Vulkan/VulkanUniformBuffer.cpp src/Platform/Vulkan/VulkanUniformBuffer.h include/GFX/Resources/UniformBufferSet.h src/GFX/Resources/UniformBufferSet.cpp include/GFX/Renderers/RendererStructures.h)
 
 target_include_directories(gfx
     PUBLIC

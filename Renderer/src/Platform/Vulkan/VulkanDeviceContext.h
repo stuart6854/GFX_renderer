@@ -49,6 +49,7 @@ namespace gfx
         void Submit(CommandBuffer& cmdBuffer);
         void Present();
 
+        auto GetCurrentFrameIndex() const -> uint32_t { return m_frameCounter % FRAME_OVERLAP; }
         auto GetFramebuffer() -> std::shared_ptr<Framebuffer>;
 
     private:
