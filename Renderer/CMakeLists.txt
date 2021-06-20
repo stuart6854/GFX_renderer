@@ -38,7 +38,7 @@ add_library(gfx
         src/Platform/Vulkan/VulkanShader.h
         src/Platform/Vulkan/VulkanUtils.cpp
         src/Platform/Vulkan/VulkanUtils.h
-        include/GFX/Resources/UniformBuffer.h src/Platform/Vulkan/VulkanUniformBuffer.cpp src/Platform/Vulkan/VulkanUniformBuffer.h include/GFX/Resources/UniformBufferSet.h src/GFX/Resources/UniformBufferSet.cpp include/GFX/Renderers/RendererStructures.h)
+        include/GFX/Resources/UniformBuffer.h src/Platform/Vulkan/VulkanUniformBuffer.cpp src/Platform/Vulkan/VulkanUniformBuffer.h include/GFX/Resources/UniformBufferSet.h src/GFX/Resources/UniformBufferSet.cpp include/GFX/Renderers/RendererStructures.h include/GFX/Config.h)
 
 target_include_directories(gfx
     PUBLIC

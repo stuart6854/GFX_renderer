@@ -8,6 +8,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanDeviceContext.h"
 
+#include "GFX/Config.h"
 #include "GFX/Resources/Buffer.h"
 #include "GFX/Resources/Pipeline.h"
 #include "GFX/Utility/Color.h"
@@ -49,7 +50,7 @@ namespace gfx
         auto GetCommandBuffer() -> CommandBuffer&;
 
     private:
-        std::array<CommandBuffer, FRAME_OVERLAP> m_cmdBuffers{};
+        std::array<CommandBuffer, Config::FramesInFlight> m_cmdBuffers{};
         uint32_t m_activeCmdBufferIndex{};
 
         Pipeline* m_boundPipeline;

@@ -4,6 +4,7 @@
 
 #include "GFX/Renderers/RendererForward.h"
 
+#include "GFX/Config.h"
 #include "GFX/Resources/Mesh.h"
 
 namespace gfx
@@ -12,7 +13,7 @@ namespace gfx
     {
         m_deviceContext.ProcessWindowChanges(surface, 720, 480);
 
-        m_uniformBufferSet = std::make_shared<UniformBufferSet>(FRAME_OVERLAP);
+        m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
 
         {

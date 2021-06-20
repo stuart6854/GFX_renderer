@@ -12,6 +12,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanShader.h"
 
+#include "GFX/Config.h"
 #include "GFX/Resources/ResourceDescriptions.h"
 
 #include <vulkan/vulkan.hpp>
@@ -21,8 +22,6 @@
 namespace gfx
 {
     class RenderContext;
-
-    constexpr int FRAME_OVERLAP = 2;
 
     /**
      * Device Context is basically equal to a window.
@@ -49,7 +48,7 @@ namespace gfx
         void Submit(CommandBuffer& cmdBuffer);
         void Present();
 
-        auto GetCurrentFrameIndex() const -> uint32_t { return m_frameCounter % FRAME_OVERLAP; }
+        auto GetCurrentFrameIndex() const -> uint32_t { return m_frameCounter % Config::FramesInFlight; }
         auto GetFramebuffer() -> std::shared_ptr<Framebuffer>;
 
     private:
@@ -93,7 +92,7 @@ namespace gfx
 
         vk::RenderPass m_swapchainRenderPass;
 
-        std::array<Frame, FRAME_OVERLAP> m_frames;
+        std::array<Frame, Config::FramesInFlight> m_frames;
         uint32_t m_frameCounter;
 
         /* Resources */

@@ -6,6 +6,8 @@
 
     #include "VulkanDeviceContext.h"
 
+    #include "GFX/Config.h"
+
     #include "VulkanCore.h"
     #include "VulkanRenderContext.h"
     #include "VulkanUtils.h"
@@ -163,7 +165,11 @@ namespace gfx
         return std::make_shared<Framebuffer>(framebuffer, m_swapchainRenderPass, extent);
     }
 
-    auto DeviceContext::GetCurrentFrame() -> DeviceContext::Frame& { return m_frames.at(m_frameCounter % FRAME_OVERLAP); }
+    auto DeviceContext::GetCurrentFrame() -> DeviceContext::Frame&
+    {
+        const auto& framesInFlight = Config::FramesInFlight;
+        return m_frames.at(m_frameCounter % framesInFlight);
+    }
 
     void DeviceContext::CreateSwapchain(uint32_t width, uint32_t height)
     {
@@ -350,7 +356,7 @@ namespace gfx
         vk::FenceCreateInfo fenceInfo{ vk::FenceCreateFlagBits::eSignaled };
         vk::SemaphoreCreateInfo semaphoreInfo{};
 
-        for (int i = 0; i < FRAME_OVERLAP; ++i)
+        for (int i = 0; i < Config::FramesInFlight; ++i)
         {
             auto& frame = m_frames.at(i);
 
@@ -388,7 +394,7 @@ namespace gfx
         auto device = Vulkan::GetDevice();
 
         device.destroy(m_swapchain);
-        for (int i = 0; i < FRAME_OVERLAP; ++i)
+        for (int i = 0; i < Config::FramesInFlight; ++i)
         {
             auto& frame = m_frames.at(i);
 

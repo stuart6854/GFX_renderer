@@ -4,10 +4,12 @@
 
 #ifdef GFX_API_VULKAN
 
-    #include "GFX/Resources/Framebuffer.h"
+    #include "VulkanRenderContext.h"
 
     #include "VulkanCore.h"
-    #include "VulkanRenderContext.h"
+
+    #include "GFX/Config.h"
+    #include "GFX/Resources/Framebuffer.h"
 
 namespace gfx
 {
@@ -56,7 +58,11 @@ namespace gfx
 
     void RenderContext::DrawIndexed(uint32_t indexCount) { GetCommandBuffer().DrawIndexed(indexCount); }
 
-    void RenderContext::NextCommandBuffer() { m_activeCmdBufferIndex = (m_activeCmdBufferIndex + 1) % FRAME_OVERLAP; }
+    void RenderContext::NextCommandBuffer()
+    {
+        const auto& framesInFlight = Config::FramesInFlight;
+        m_activeCmdBufferIndex = (m_activeCmdBufferIndex + 1) % framesInFlight;
+    }
 
     auto RenderContext::GetCommandBuffer() -> CommandBuffer& { return m_cmdBuffers.at(m_activeCmdBufferIndex); }
 
