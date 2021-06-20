@@ -19,11 +19,14 @@ namespace gfx
     {
     public:
         Buffer(BufferDesc desc);
+        ~Buffer();
 
         auto GetType() const -> BufferType;
         auto GetSize() const -> uint32_t;
         auto GetStride() const -> uint32_t;
         auto GetNumElements() const -> uint32_t;
+
+        auto GetDesc() const -> const BufferDesc& { return m_desc; }
 
         void SetAPIResource(vk::Buffer buffer, VmaAllocation allocation);
         auto GetAPIBuffer() const -> vk::Buffer;

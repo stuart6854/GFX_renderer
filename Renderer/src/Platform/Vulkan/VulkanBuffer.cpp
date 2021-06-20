@@ -6,23 +6,43 @@
 
     #include "VulkanBuffer.h"
 
+    #include "VulkanCore.h"
+
 namespace gfx
 {
     auto BufferTypeToVulkan(BufferType type) -> vk::BufferUsageFlags
     {
         switch (type)
         {
-            case BufferType::eVertex:
-                return vk::BufferUsageFlagBits::eVertexBuffer;
-            case BufferType::eIndex:
-                return vk::BufferUsageFlagBits::eIndexBuffer;
-            case BufferType::eStaging:
-                return vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::eVertex: return vk::BufferUsageFlagBits::eVertexBuffer;
+            case BufferType::eIndex: return vk::BufferUsageFlagBits::eIndexBuffer;
+            case BufferType::eStaging: return vk::BufferUsageFlagBits::eTransferSrc;
         }
         return {};
     }
 
-    Buffer::Buffer(BufferDesc desc) : m_desc(desc) {}
+    Buffer::Buffer(BufferDesc desc) : m_desc(desc)
+    {
+        auto allocator = Vulkan::GetAllocator();
+
+        auto usage = BufferTypeToVulkan(desc.Type);
+        if (desc.Type != BufferType::eStaging) usage |= vk::BufferUsageFlagBits::eTransferDst;
+
+        vk::BufferCreateInfo bufferInfo{};
+        bufferInfo.setSize(desc.Size);
+        bufferInfo.setUsage(usage);
+
+        auto memoryType = (desc.Type == BufferType::eStaging) ? VMA_MEMORY_USAGE_CPU_ONLY : VMA_MEMORY_USAGE_GPU_ONLY;
+
+        allocator.Allocate(bufferInfo, memoryType, &m_buffer, &m_allocation);
+    }
+
+    Buffer::~Buffer()
+    {
+        auto allocator = Vulkan::GetAllocator();
+
+        allocator.Free(m_buffer, m_allocation);
+    }
 
     auto Buffer::GetType() const -> BufferType { return m_desc.Type; }
 
