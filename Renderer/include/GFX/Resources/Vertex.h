@@ -5,12 +5,16 @@
 #ifndef PERSONAL_RENDERER_VERTEX_H
 #define PERSONAL_RENDERER_VERTEX_H
 
+#include <glm/glm.hpp>
+
 namespace gfx
 {
     struct Vertex
     {
-        float position[3];
-        float color[3];
+        glm::vec3 Position;
+        glm::vec3 Normal;
+        glm::vec2 TexCoord;
+//        glm::vec3 Color;
     };
 
 }  // namespace gfx
