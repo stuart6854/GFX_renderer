@@ -64,6 +64,8 @@ namespace gfx
         CreateDescriptors();
     }
 
+    auto Shader::GetHash() const -> size_t { return std::hash<std::string>{}(m_path); }
+
     auto Shader::GetAllDescriptorSetLayouts() -> std::vector<vk::DescriptorSetLayout>
     {
         std::vector<vk::DescriptorSetLayout> result;
@@ -73,6 +75,19 @@ namespace gfx
         {
             result.emplace_back(layout);
         }
+
+        return result;
+    }
+
+    auto Shader::AllocateDescriptorSet(uint32_t set, uint32_t frameIndex) -> Shader::ShaderMaterialDescriptorSet
+    {
+        assert(set < m_descriptorSetLayouts.size());
+
+        ShaderMaterialDescriptorSet result;
+        if (m_shaderDescriptorSets.empty()) return result;
+
+        vk::DescriptorSet descriptorSet = Vulkan::AllocateDescriptorSet(frameIndex, m_descriptorSetLayouts);
+        result.DescriptorSets.push_back(descriptorSet);
 
         return result;
     }
@@ -255,13 +270,12 @@ namespace gfx
             pushConstantRange.Offset = bufferOffset;
             pushConstantRange.Size = bufferSize;
 
-            // TODO: ??
             //  Skip empty push constant buffers - these are for the renderer only
             if (bufferName.empty() || bufferName == "u_Renderer") continue;
 
             ShaderBuffer& buffer = m_buffers[bufferName];
             buffer.Name = bufferName;
-            buffer.Size = bufferSize;
+            buffer.Size = bufferSize - bufferOffset;
 
             GFX_INFO("  Name: {}", bufferName);
             GFX_INFO("  Member Count: {}", memberCount);

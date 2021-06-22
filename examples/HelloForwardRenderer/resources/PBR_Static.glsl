@@ -15,7 +15,7 @@ layout(std140, binding = 0) uniform Camera
 layout(push_constant) uniform Transform
 {
     mat4 u_Model;
-} u_Transform;
+} u_Renderer;
 
 struct VertexOutput
 {
@@ -30,7 +30,7 @@ void main()
     Output.Normal = a_Normal;
     Output.TexCoord = a_TexCoord;
 
-    gl_Position = /*u_ViewProjection * */ u_Transform.u_Model *  vec4(a_Position, 1.0f);
+    gl_Position = u_ViewProjection * u_Renderer.u_Model *  vec4(a_Position, 1.0f);
 }
 
 #type pixel
@@ -39,6 +39,19 @@ void main()
 #extension GL_ARB_separate_shader_objects : enable
 
 layout (location = 0) out vec4 out_Color;
+
+//layout(set = 0, binding = 5) uniform sampler2D u_AlbedoTexture;
+
+layout(push_constant) uniform Material
+{
+    layout(offset = 64) vec3 AlbedoColor;
+    float Metalness;
+//    float Roughness;
+//
+//    float EnvMapRotation;
+//
+//    bool UseNormalMap;
+} u_MaterialUniforms;
 
 struct VertexOutput
 {
@@ -50,5 +63,6 @@ layout(location = 0) in VertexOutput Input;
 
 void main()
 {
-    out_Color = vec4(1, 1, 1, 1);
+    out_Color = vec4(u_MaterialUniforms.AlbedoColor, 1.0);
+//    out_Color = vec4(1, 1, 1, 1);
 }

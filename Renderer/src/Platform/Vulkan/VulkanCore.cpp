@@ -4,11 +4,13 @@
 #ifdef GFX_API_VULKAN
 
     #include "GFX/Debug.h"
+    #include "GFX/Config.h"
 
     #include "VulkanCore.h"
     #include "VulkanUtils.h"
 
     #include <iostream>
+    #include <array>
 
 namespace gfx::Vulkan
 {
@@ -24,6 +26,9 @@ namespace gfx::Vulkan
         vk::Queue s_vkGraphicsQueue;
 
         vk::Format s_vkDepthFormat;
+
+        std::array<vk::DescriptorPool, Config::FramesInFlight> m_vkDescriptorPools;
+        std::array<uint32_t, Config::FramesInFlight> m_vkDescriptorPoolAllocationCounts;
 
         vk::DebugUtilsMessengerEXT s_vkDebugCallback;
     }  // namespace
@@ -117,8 +122,41 @@ namespace gfx::Vulkan
 
     void CreateAllocator() { s_vkAllocator.Init(s_vkInstance, s_vkPhysicalDevice, s_vkDevice); }
 
+    void CreateDescriptorPool()
+    {
+        std::vector<vk::DescriptorPoolSize> poolSizes = {
+            { vk::DescriptorType::eSampler, 1000 },
+            { vk::DescriptorType::eCombinedImageSampler, 1000 },
+            { vk::DescriptorType::eSampledImage, 1000 },
+            { vk::DescriptorType::eStorageImage, 1000 },
+            { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+            { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+            { vk::DescriptorType::eUniformBuffer, 1000 },
+            { vk::DescriptorType::eStorageBuffer, 1000 },
+            { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+            { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+            { vk::DescriptorType::eInputAttachment, 1000 },
+        };
+
+        vk::DescriptorPoolCreateInfo poolInfo{};
+        poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+        poolInfo.setMaxSets(1000);
+        poolInfo.setPoolSizes(poolSizes);
+
+        auto device = GetDevice();
+        for (uint32_t i = 0; i < Config::FramesInFlight; i++)
+        {
+            m_vkDescriptorPools[i] = device.createDescriptorPool(poolInfo);
+            m_vkDescriptorPoolAllocationCounts[i] = 0;
+        }
+    }
+
     void Shutdown()
     {
+        for (auto& pool : m_vkDescriptorPools)
+        {
+            s_vkDevice.destroy(pool);
+        }
         s_vkAllocator.Destroy();
         s_vkDevice.destroy();
         s_vkInstance.destroy(s_vkDebugCallback, nullptr, vk::DispatchLoaderDynamic(s_vkInstance, vkGetInstanceProcAddr));
@@ -140,6 +178,26 @@ namespace gfx::Vulkan
     auto GetGraphicsQueue() -> vk::Queue { return s_vkGraphicsQueue; }
 
     auto GetDepthFormat() -> vk::Format { return s_vkDepthFormat; }
+
+    void ResetDescriptorPool(uint32_t frameIndex)
+    {
+        GetDevice().resetDescriptorPool(m_vkDescriptorPools[frameIndex]);
+        m_vkDescriptorPoolAllocationCounts[frameIndex] = 0;
+    }
+
+    auto AllocateDescriptorSet(uint32_t frameIndex, const std::vector<vk::DescriptorSetLayout>& layouts) -> vk::DescriptorSet
+    {
+        vk::DescriptorSetAllocateInfo allocInfo{};
+        allocInfo.setDescriptorSetCount(1);
+        allocInfo.setSetLayouts(layouts);
+        allocInfo.setDescriptorPool(m_vkDescriptorPools[frameIndex]);
+
+        auto device = GetDevice();
+        auto descriptorSet = device.allocateDescriptorSets(allocInfo).at(0);
+
+        m_vkDescriptorPoolAllocationCounts[frameIndex] += allocInfo.descriptorSetCount;
+        return descriptorSet;
+    }
 
     static VKAPI_ATTR auto VKAPI_CALL VkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                       VkDebugUtilsMessageTypeFlagsEXT messageType,

@@ -17,7 +17,7 @@ namespace gfx
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
 
         {
-            m_geometryShader = m_deviceContext.CreateShader("resources/forwardrenderer/scene_shader.glsl");
+            m_geometryShader = m_deviceContext.CreateShader("resources/PBR_Static.glsl");
 
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;
@@ -89,14 +89,97 @@ namespace gfx
             m_renderContext.BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
             m_renderContext.BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
 
-            m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &drawCall.transform);
+            auto& materials = drawCall.mesh->GetMaterials();
+            for (auto& material : materials)
+            {
+                // TODO: Update material for rendering?
+                UpdateMaterialForRendering(material, m_uniformBufferSet);
+            }
 
-            m_renderContext.DrawIndexed(drawCall.mesh->GetIndexCount());
+            auto& submeshes = drawCall.mesh->GetSubmeshes();
+            for (const auto& submesh : submeshes)
+            {
+                auto& material = drawCall.mesh->GetMaterials()[submesh.MaterialIndex];
+                auto layout = m_geometryPipeline->GetAPIPipelineLayout();
+                auto descriptorSet = material->GetDescriptorSet(m_deviceContext.GetCurrentFrameIndex());
+
+                std::vector<vk::DescriptorSet> descriptorSets = {
+                    descriptorSet,
+                    // m_rendererDescriptorSet
+                };
+
+                m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
+
+                auto& buffer = material->GetUniformStorageBuffer();
+                m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &drawCall.transform);
+                m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
+
+                m_renderContext.DrawIndexed(drawCall.mesh->GetIndexCount(), 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+            }
         }
 
         m_renderContext.EndRenderPass();
 
         m_geometryDrawCalls.clear();
+    }
+
+    auto RendererForward::CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material,
+                                                                        const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
+        -> const std::vector<std::vector<vk::WriteDescriptorSet>>&
+    {
+        // Check for existing writeDescriptors
+        auto shaderHash = material->GetShader()->GetHash();
+        if (m_uniformBufferWriteDescriptorCache.find(uniformBufferSet.get()) != m_uniformBufferWriteDescriptorCache.end())
+        {
+            const auto& shaderMap = m_uniformBufferWriteDescriptorCache.at(uniformBufferSet.get());
+            if (shaderMap.find(shaderHash) != shaderMap.end())
+            {
+                const auto& writeDescriptors = shaderMap.at(shaderHash);
+                return writeDescriptors;
+            }
+        }
+
+        // Create & Cache writeDescriptors
+        auto shader = material->GetShader();
+        if (shader->HasDescriptorSet(0))
+        {
+            const auto& shaderDescriptorsSets = shader->GetShaderDescriptorSets();
+            if (!shaderDescriptorsSets.empty())
+            {
+                auto& writeDescriptors = m_uniformBufferWriteDescriptorCache[uniformBufferSet.get()][shaderHash];
+                writeDescriptors.resize(Config::FramesInFlight);
+                for (auto&& [binding, shaderUB] : shaderDescriptorsSets[0].UniformBuffers)
+                {
+                    for (uint32_t frame = 0; frame < Config::FramesInFlight; frame++)
+                    {
+                        auto uniformBuffer = uniformBufferSet->Get(binding, 0, frame);
+
+                        vk::WriteDescriptorSet writeDesc{};
+                        writeDesc.setDescriptorCount(1);
+                        writeDesc.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                        writeDesc.setBufferInfo(uniformBuffer->GetDescriptorBufferInfo());
+                        writeDesc.setDstBinding(uniformBuffer->GetBinding());
+                        writeDescriptors[frame].push_back(writeDesc);
+                    }
+                }
+            }
+        }
+
+        return m_uniformBufferWriteDescriptorCache[uniformBufferSet.get()][shaderHash];
+    }
+
+    void RendererForward::UpdateMaterialForRendering(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
+    {
+        if (uniformBufferSet != nullptr)
+        {
+            auto writeDescriptors = CreateOrRetrieveUniformBufferWriteDescriptors(material, uniformBufferSet);
+
+            material->UpdateForRendering(m_deviceContext.GetCurrentFrameIndex(), writeDescriptors);
+        }
+        else
+        {
+            material->UpdateForRendering(m_deviceContext.GetCurrentFrameIndex());
+        }
     }
 
 }  // namespace gfx

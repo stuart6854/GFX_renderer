@@ -15,6 +15,10 @@ namespace gfx
     {
         BufferDesc bufferDesc = { .Type = BufferType::eUniformBuffer, .Size = size };
         m_buffer = std::make_shared<Buffer>(bufferDesc);
+
+        m_descriptorInfo.setBuffer(m_buffer->GetAPIBuffer());
+        m_descriptorInfo.setOffset(0);
+        m_descriptorInfo.setRange(size);
     }
 
     void UniformBuffer::SetData(const void* data, uint32_t size, uint32_t offset)

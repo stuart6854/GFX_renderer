@@ -9,6 +9,7 @@
 #include "GFX/DeviceContext.h"
 #include "GFX/RenderContext.h"
 #include "GFX/Resources/UniformBufferSet.h"
+#include "GFX/Resources/Material.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -36,6 +37,10 @@ namespace gfx
     private:
         void Flush();
 
+        auto CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
+            -> const std::vector<std::vector<vk::WriteDescriptorSet>>&;
+        void UpdateMaterialForRendering(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet);
+
     private:
         DeviceContext m_deviceContext;
         RenderContext m_renderContext;
@@ -52,6 +57,10 @@ namespace gfx
         {
             glm::mat4 ViewProjection;
         } CameraData;
+
+        // UniformBufferSet* -> Shader Hash -> Frame -> WriteDescriptor
+        std::unordered_map<UniformBufferSet*, std::unordered_map<uint64_t, std::vector<std::vector<vk::WriteDescriptorSet>>>>
+            m_uniformBufferWriteDescriptorCache;
     };
 }  // namespace gfx
 

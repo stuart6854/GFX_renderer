@@ -54,9 +54,21 @@ namespace gfx
         GetCommandBuffer().PushConstants(m_boundPipeline->GetAPIPipelineLayout(), stage, offset, size, data);
     }
 
+    void RenderContext::BindDescriptorSets(vk::PipelineBindPoint bindPoint,
+                                           vk::PipelineLayout layout,
+                                           uint32_t firstSet,
+                                           const std::vector<vk::DescriptorSet>& sets,
+                                           const std::vector<uint32_t>& dynamicOffsets)
+    {
+        GetCommandBuffer().BindDescriptorSets(bindPoint, layout, firstSet, sets, dynamicOffsets);
+    }
+
     void RenderContext::Draw(uint32_t vertexCount) { GetCommandBuffer().Draw(vertexCount); }
 
-    void RenderContext::DrawIndexed(uint32_t indexCount) { GetCommandBuffer().DrawIndexed(indexCount); }
+    void RenderContext::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance)
+    {
+        GetCommandBuffer().DrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    }
 
     void RenderContext::NextCommandBuffer()
     {

@@ -5,7 +5,9 @@
 #include "GFX/Resources/Mesh.h"
 
 #include "GFX/Debug.h"
+#include "GFX/Resources/Shader.h"
 #include "GFX/Resources/ResourceDescriptions.h"
+#include "GFX/Utility/Color.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -40,6 +42,7 @@ namespace gfx
             auto& submesh = m_submeshes.emplace_back();
             submesh.BaseVertex = vertexCount;
             submesh.BaseIndex = indexCount;
+            submesh.MaterialIndex = mesh->mMaterialIndex;
             submesh.VertexCount = mesh->mNumVertices;
             submesh.IndexCount = mesh->mNumFaces * 3;
 
@@ -74,8 +77,6 @@ namespace gfx
             }
         }
 
-        // TODO: Load textures/materials
-
         BufferDesc vertexBufferDesc{};
         vertexBufferDesc.Type = BufferType::eVertex;
         vertexBufferDesc.Size = sizeof(Vertex) * vertexCount;
@@ -85,6 +86,44 @@ namespace gfx
         indexBufferDesc.Type = BufferType::eIndex;
         indexBufferDesc.Size = sizeof(uint32_t) * indexCount;
         m_indexBuffer = std::make_shared<Buffer>(indexBufferDesc);
+
+        // TODO: Load textures/materials
+
+        // TODO: Some sort of shader library
+        //         auto meshShader = GetMeshShader();
+        auto meshShader = std::make_shared<Shader>("resources/PBR_Static.glsl");
+
+        if (scene->HasMaterials())
+        {
+            GFX_INFO("  Materials: {}", scene->mNumMaterials);
+
+            m_materials.resize(scene->mNumMaterials);
+
+            for (uint32_t matIndex = 0; matIndex < scene->mNumMaterials; matIndex++)
+            {
+                auto aiMaterial = scene->mMaterials[matIndex];
+                auto aiMaterialName = aiMaterial->GetName();
+                GFX_INFO("  Material {}: {}", matIndex, aiMaterialName.data);
+
+                auto mat = std::make_shared<Material>(meshShader);
+                m_materials[matIndex] = mat;
+
+                glm::vec3 albedoColor = { 0.8f, 0.8f, 0.8f };
+                aiColor3D aiColor;
+                if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor) == AI_SUCCESS) albedoColor = { aiColor.r, aiColor.g, aiColor.b };
+
+                mat->Set("u_MaterialUniforms.AlbedoColor", albedoColor);
+
+                GFX_INFO("    Albedo = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
+            }
+        }
+        else
+        {
+            GFX_INFO("  No materials. Creating a default one...");
+
+            auto mat = std::make_shared<Material>(meshShader);
+            mat->Set("u_MaterialUniforms.AlbedoColor", Color(0.8f, 0.1f, 0.3f));
+        }
 
         GFX_INFO("  Mesh loaded: {} vertices, {} indices", vertexCount, indexCount);
     }

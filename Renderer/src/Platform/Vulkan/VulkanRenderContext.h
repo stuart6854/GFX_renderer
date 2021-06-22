@@ -41,9 +41,14 @@ namespace gfx
         void BindIndexBuffer(Buffer* buffer);
 
         void PushConstants(ShaderStage stage, uint32_t offset, uint32_t size, const void* data);
+        void BindDescriptorSets(vk::PipelineBindPoint bindPoint,
+                                vk::PipelineLayout layout,
+                                uint32_t firstSet,
+                                const std::vector<vk::DescriptorSet>& sets,
+                                const std::vector<uint32_t>& dynamicOffsets);
 
         void Draw(uint32_t vertexCount);
-        void DrawIndexed(uint32_t indexCount);
+        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount = 1, uint32_t firstIndex = 0, uint32_t vertexOffset = 0, uint32_t firstInstance = 0);
 
         void NextCommandBuffer();
 

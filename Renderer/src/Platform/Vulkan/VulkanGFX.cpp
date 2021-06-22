@@ -29,6 +29,7 @@ namespace gfx
         Vulkan::PickPhysicalDevice();
         Vulkan::CreateDevice();
         Vulkan::CreateAllocator();
+        Vulkan::CreateDescriptorPool();
 
         auto gpu = Vulkan::GetPhysicalDevice().getProperties();
         GFX_INFO("Graphics Card: {}", gpu.deviceName);

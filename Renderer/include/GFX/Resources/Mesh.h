@@ -7,6 +7,7 @@
 
 #include "Vertex.h"
 #include "Buffer.h"
+#include "Material.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@ namespace gfx
     public:
         uint32_t BaseVertex;
         uint32_t BaseIndex;
+        uint32_t MaterialIndex;
         uint32_t VertexCount;
         uint32_t IndexCount;
     };
@@ -35,6 +37,9 @@ namespace gfx
         auto GetVertices() const -> const std::vector<Vertex>& { return m_vertices; }
         auto GetIndices() const -> const std::vector<uint32_t>& { return m_indices; }
 
+        auto GetSubmeshes() const -> const std::vector<Submesh>& { return m_submeshes; }
+        auto GetMaterials() const -> const std::vector<std::shared_ptr<Material>>& { return m_materials; }
+
         auto GetVertexBuffer() -> std::shared_ptr<Buffer> { return m_vertexBuffer; }
         auto GetIndexBuffer() -> std::shared_ptr<Buffer> { return m_indexBuffer; }
 
@@ -46,6 +51,7 @@ namespace gfx
         std::vector<uint32_t> m_indices;
 
         std::vector<Submesh> m_submeshes;
+        std::vector<std::shared_ptr<Material>> m_materials;
 
         std::shared_ptr<Buffer> m_vertexBuffer;
         std::shared_ptr<Buffer> m_indexBuffer;

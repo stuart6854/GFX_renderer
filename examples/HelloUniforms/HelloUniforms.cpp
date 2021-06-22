@@ -78,7 +78,7 @@ int main(int argc, char** argv)
             float pos = 0.5f;
             renderContext.PushConstants(gfx::ShaderStage::eVertex, 0, sizeof(float), &pos);
 
-            renderContext.DrawIndexed(3);
+            renderContext.DrawIndexed(3, 0, 0, 0, 0);
 
             renderContext.EndRenderPass();
             renderContext.End();

@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
         auto view = glm::lookAt(glm::vec3{ -3, 2, -3 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
 
-        auto model = proj * view * glm::scale(glm::mat4(1.0f), glm::vec3{ 10, 10, 10 });
+        auto model = glm::scale(glm::mat4(1.0f), glm::vec3{ 10, 10, 10 });
 
         while (!window.ShouldClose())
         {

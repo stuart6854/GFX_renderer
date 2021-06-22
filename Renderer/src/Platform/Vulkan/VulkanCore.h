@@ -15,6 +15,7 @@ namespace gfx::Vulkan
     void PickPhysicalDevice();
     void CreateDevice();
     void CreateAllocator();
+    void CreateDescriptorPool();
 
     void Shutdown();
 
@@ -28,6 +29,10 @@ namespace gfx::Vulkan
     auto GetGraphicsQueue() -> vk::Queue;
 
     auto GetDepthFormat() -> vk::Format;
+
+    void ResetDescriptorPool(uint32_t frameIndex);
+
+    auto AllocateDescriptorSet(uint32_t frameIndex, const std::vector<vk::DescriptorSetLayout>& layouts) -> vk::DescriptorSet;
 
     static VKAPI_ATTR auto VKAPI_CALL VkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                       VkDebugUtilsMessageTypeFlagsEXT messageType,

@@ -105,6 +105,8 @@ namespace gfx
         if (frame.RenderFence) device.waitForFences(frame.RenderFence, VK_TRUE, UINT64_MAX);
         //        device.resetFences(frame.RenderFence);
 
+        Vulkan::ResetDescriptorPool(GetCurrentFrameIndex());
+
         // Request image from swapchain
         m_swapchainImageIndex = device.acquireNextImageKHR(m_swapchain, UINT64_MAX, frame.PresentComplete, {}).value;
     }

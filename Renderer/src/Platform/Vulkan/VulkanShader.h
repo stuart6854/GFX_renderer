@@ -44,10 +44,20 @@ namespace gfx
             operator bool() const { return !(UniformBuffers.empty()); }
         };
 
+        struct ShaderMaterialDescriptorSet
+        {
+            vk::DescriptorPool Pool = {};
+            std::vector<vk::DescriptorSet> DescriptorSets;
+        };
+
     public:
         Shader(const std::string& path);
 
         void Reload();
+
+        auto GetHash() const -> size_t;
+
+        auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& { return m_buffers; }
 
         auto GetPipelineShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
@@ -56,7 +66,11 @@ namespace gfx
         auto GetAllDescriptorSetLayouts() -> std::vector<vk::DescriptorSetLayout>;
 
         auto GetShaderDescriptorSets() const -> const std::vector<ShaderDescriptorSet>& { return m_shaderDescriptorSets; }
+        auto HasDescriptorSet(uint32_t set) const -> bool { return m_typeCounts.find(set) != m_typeCounts.end(); }
+
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
+
+        auto AllocateDescriptorSet(uint32_t set = 0, uint32_t frameIndex = 0) -> ShaderMaterialDescriptorSet;
 
     private:
         static auto ReadShaderFromFile(const std::string& filepath) -> std::string;
