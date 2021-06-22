@@ -8,6 +8,8 @@
 
     #include "VulkanCore.h"
 
+    #include "GFX/Debug.h"
+
     #include <utility>
 
 namespace gfx
@@ -85,8 +87,7 @@ namespace gfx
     auto Material::FindUniformDeclaration(const std::string& name) -> const ShaderUniform*
     {
         const auto& shaderBuffers = m_shader->GetShaderBuffers();
-        // TODO: Assert shaderBuffers.size() <= 1, "We only support ONE material buffer!"
-        assert(shaderBuffers.size() <= 1);
+        GFX_ASSERT(shaderBuffers.size() <= 1, "Only ONE material buffer supported!");
 
         if (!shaderBuffers.empty())
         {

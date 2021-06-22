@@ -81,7 +81,7 @@ namespace gfx
 
     auto Shader::AllocateDescriptorSet(uint32_t set, uint32_t frameIndex) -> Shader::ShaderMaterialDescriptorSet
     {
-        assert(set < m_descriptorSetLayouts.size());
+        GFX_ASSERT(set < m_descriptorSetLayouts.size(), "Cannot allocate unused set!");
 
         ShaderMaterialDescriptorSet result;
         if (m_shaderDescriptorSets.empty()) return result;

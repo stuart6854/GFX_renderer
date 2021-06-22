@@ -24,4 +24,33 @@
         std::cerr << msg << std::endl;          \
     } while (0)
 
+#ifdef NDEBUG
+    #define GFX_ASSERT(...)
+#else
+    #define GFX_EXPAND_VARGS(x) x
+
+    #define GFX_ASSERT_NO_MESSAGE(condition)   \
+        do                                     \
+        {                                      \
+            if (!(condition))                  \
+            {                                  \
+                GFX_ERROR("Assertion Failed"); \
+                __debugbreak();                \
+            }                                  \
+        } while (0)
+    #define GFX_ASSERT_MESSAGE(condition, ...)                   \
+        do                                                       \
+        {                                                        \
+            if (!(condition))                                    \
+            {                                                    \
+                GFX_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
+                __debugbreak();                                  \
+            }                                                    \
+        } while (0)
+
+    #define GFX_ASSERT_RESOLVE(arg1, arg2, macro, ...) macro
+    #define GFX_GET_ASSERT_MACRO(...) GFX_EXPAND_VARGS(GFX_ASSERT_RESOLVE(__VA_ARGS__, GFX_ASSERT_MESSAGE, GFX_ASSERT_NO_MESSAGE))
+
+    #define GFX_ASSERT(...) GFX_EXPAND_VARGS(GFX_GET_ASSERT_MACRO(__VA_ARGS__)(__VA_ARGS__))
+#endif
 #endif  // PERSONAL_RENDERER_DEBUG_H

@@ -3,6 +3,8 @@
 //
 #include "GFX/Resources/UniformBufferSet.h"
 
+#include "GFX/Debug.h"
+
 namespace gfx
 {
     UniformBufferSet::UniformBufferSet(uint32_t frames) : m_frames(frames) {}
@@ -18,9 +20,9 @@ namespace gfx
 
     auto UniformBufferSet::Get(uint32_t binding, uint32_t set, uint32_t frame) -> std::shared_ptr<UniformBuffer>
     {
-        // TODO: Check (assert?) frame valid
-        // TODO: Check (assert?) set valid
-        // TODO: Check (assert?) binding valid
+        GFX_ASSERT(m_uniformBuffers.find(frame) != m_uniformBuffers.end());
+        GFX_ASSERT(m_uniformBuffers.at(frame).find(set) != m_uniformBuffers.at(frame).end());
+        GFX_ASSERT(m_uniformBuffers.at(frame).at(set).find(binding) != m_uniformBuffers.at(frame).at(set).end());
 
         return m_uniformBuffers.at(frame).at(set).at(binding);
     }

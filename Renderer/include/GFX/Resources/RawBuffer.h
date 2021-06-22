@@ -5,6 +5,8 @@
 #ifndef PERSONAL_RENDERER_RAWBUFFER_H
 #define PERSONAL_RENDERER_RAWBUFFER_H
 
+#include "GFX/Debug.h"
+
 #include <cstdint>
 
 namespace gfx
@@ -51,7 +53,7 @@ namespace gfx
 
         void Write(void* data, uint32_t size, uint32_t offset = 0)
         {
-            // TODO: Check (Assert?) for overflow
+            GFX_ASSERT(offset + size < Size, "Buffer write overflow!");
             memcpy((uint8_t*)Data + offset, data, size);
         }
 

@@ -51,8 +51,8 @@ namespace gfx
             vertexCount += mesh->mNumVertices;
             indexCount += submesh.IndexCount;
 
-            // TODO: Assert(mesh->HasPositions())
-            // TODO: Assert(mesh->HasNormals())
+            GFX_ASSERT(mesh->HasPositions(), "Mesh must have positions!");
+            GFX_ASSERT(mesh->HasNormals(), "Mesh must have normals!");
 
             // Vertices
             for (uint32_t vertIndex = 0; vertIndex < mesh->mNumVertices; vertIndex++)
@@ -70,7 +70,7 @@ namespace gfx
             // Indices
             for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
             {
-                // TODO: Assert(mesh->mFaces[i].mNumIndices == 3)
+                GFX_ASSERT(mesh->mFaces[faceIndex].mNumIndices == 3, "Mesh faces must be triangles!");
                 m_indices.push_back(mesh->mFaces[faceIndex].mIndices[0]);
                 m_indices.push_back(mesh->mFaces[faceIndex].mIndices[1]);
                 m_indices.push_back(mesh->mFaces[faceIndex].mIndices[2]);

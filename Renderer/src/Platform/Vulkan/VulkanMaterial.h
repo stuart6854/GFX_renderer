@@ -5,6 +5,7 @@
 #ifndef PERSONAL_RENDERER_VULKANMATERIAL_H
 #define PERSONAL_RENDERER_VULKANMATERIAL_H
 
+#include "GFX/Debug.h"
 #include "GFX/Config.h"
 
 #include "VulkanShader.h"
@@ -88,7 +89,7 @@ namespace gfx
     auto Material::Get(const std::string& name) -> T&
     {
         auto* decl = FindUniformDeclaration(name);
-        // TODO: Assert decl
+        GFX_ASSERT(decl, "Uniform declaration not found!");
         auto& buffer = m_uniformStorageBuffer;
         return buffer.Read<T>(decl->GetOffset());
     }
