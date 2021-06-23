@@ -5,7 +5,9 @@
 #ifndef PERSONAL_RENDERER_RENDERERSTRUCTURES_H
 #define PERSONAL_RENDERER_RENDERERSTRUCTURES_H
 
-#include <glm/mat4x4.hpp>
+#include <glm/glm.hpp>
+
+#include <vector>
 
 namespace gfx
 {
@@ -23,6 +25,33 @@ namespace gfx
     {
         glm::mat4 ProjectionMatrix;
         glm::mat4 ViewMatrix;
+    };
+
+    struct DirectionalLight
+    {
+        glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
+        glm::vec3 Radiance = { 0.0f, 0.0f, 0.0f };
+        float Multiplier = 0.0f;
+        bool CastShadows = true;
+    };
+
+    struct PointLight
+    {
+        glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+        float Multiplier = 0.0f;
+        glm::vec3 Radiance = { 0.0f, 0.0f, 0.0f };
+        float MinRadius = 0.001f;
+        float Radius = 25.0f;
+        float Falloff = 1.f;
+        float SourceSize = 0.1f;
+        bool CastsShadows = true;
+        char Padding[3]{ 0, 0, 0 };
+    };
+
+    struct LightEnvironment
+    {
+        DirectionalLight DirectionalLights[1];
+        std::vector<PointLight> PointLights;
     };
 
 }  // namespace gfx

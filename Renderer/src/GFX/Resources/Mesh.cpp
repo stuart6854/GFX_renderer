@@ -15,7 +15,7 @@
 
 namespace gfx
 {
-    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals;
+    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_MakeLeftHanded;
 
     Mesh::Mesh(const std::string& path) { LoadMesh(path); }
 
@@ -108,13 +108,33 @@ namespace gfx
                 auto mat = std::make_shared<Material>(meshShader);
                 m_materials[matIndex] = mat;
 
-                glm::vec3 albedoColor = { 0.8f, 0.8f, 0.8f };
+                glm::vec3 ambientColor = { 0.8f, 0.8f, 0.8f };
                 aiColor3D aiColor;
-                if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor) == AI_SUCCESS) albedoColor = { aiColor.r, aiColor.g, aiColor.b };
+                if (aiMaterial->Get(AI_MATKEY_COLOR_AMBIENT, aiColor) == AI_SUCCESS) ambientColor = { aiColor.r, aiColor.g, aiColor.b };
+                mat->Set("u_MaterialUniforms.Ambient", ambientColor);
+                GFX_INFO("    Ambient = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
 
-                mat->Set("u_MaterialUniforms.AlbedoColor", albedoColor);
+                glm::vec3 diffuseColor = { 0.8f, 0.8f, 0.8f };
+                if (aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor) == AI_SUCCESS) diffuseColor = { aiColor.r, aiColor.g, aiColor.b };
+                mat->Set("u_MaterialUniforms.Diffuse", diffuseColor);
+                GFX_INFO("    Diffuse = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
 
-                GFX_INFO("    Albedo = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
+                glm::vec3 specular = { 0.8f, 0.8f, 0.8f };
+                if (aiMaterial->Get(AI_MATKEY_COLOR_SPECULAR, aiColor) == AI_SUCCESS) specular = { aiColor.r, aiColor.g, aiColor.b };
+                mat->Set("u_MaterialUniforms.Specular", specular);
+                GFX_INFO("    Specular = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
+
+                /*float shininess;
+                float metalness;
+                if (aiMaterial->Get(AI_MATKEY_SHININESS, shininess) != AI_SUCCESS) shininess = 80.0f;    // Default value
+                if (aiMaterial->Get(AI_MATKEY_REFLECTIVITY, metalness) != AI_SUCCESS) metalness = 0.0f;  // Default value
+
+                float roughness = 1.0f - glm::sqrt(shininess / 100.0f);
+                GFX_INFO("    Metalness = {}", metalness);
+                GFX_INFO("    Roughness = {}", roughness);
+
+                mat->Set("u_MaterialUniforms.Metalness", metalness);
+                mat->Set("u_MaterialUniforms.Roughness", roughness);*/
             }
         }
         else

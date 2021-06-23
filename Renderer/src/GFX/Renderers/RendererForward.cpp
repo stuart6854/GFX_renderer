@@ -15,6 +15,8 @@ namespace gfx
 
         m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
+        m_uniformBufferSet->Create(sizeof(UBScene), 2);
+        m_uniformBufferSet->Create(sizeof(UBPointLights), 4);
 
         {
             m_geometryShader = m_deviceContext.CreateShader("resources/PBR_Static.glsl");
@@ -42,7 +44,7 @@ namespace gfx
         return mesh;
     }
 
-    void RendererForward::BeginScene(const Camera& camera)
+    void RendererForward::BeginScene(const Camera& camera, const LightEnvironment& lightEnvironment)
     {
         auto currentFrameIndex = m_deviceContext.GetCurrentFrameIndex();
 
@@ -50,12 +52,26 @@ namespace gfx
          * Update uniform Buffers
          * */
         auto& cameraData = CameraData;
+        auto& pointLightsData = PointLightsData;
+        auto& sceneData = SceneData;
+
+        auto cameraPosition = glm::inverse(camera.ViewMatrix)[3];
 
         auto viewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
-
         cameraData.ViewProjection = viewProjection;
-
         m_uniformBufferSet->Get(0, 0, currentFrameIndex)->SetData(&cameraData, sizeof(cameraData));
+
+        auto& pointLights = lightEnvironment.PointLights;
+        pointLightsData.Count = pointLights.size();
+        std::memcpy(pointLightsData.PointLights, pointLights.data(), sizeof(PointLight) * pointLightsData.Count);
+        m_uniformBufferSet->Get(4, 0, currentFrameIndex)->SetData(&pointLightsData, 16ull + sizeof(PointLight) * pointLightsData.Count);
+
+        const auto& directionalLight = lightEnvironment.DirectionalLights[0];
+        sceneData.Light.Direction = directionalLight.Direction;
+        sceneData.Light.Radiance = directionalLight.Radiance;
+        sceneData.Light.Multiplier = directionalLight.Multiplier;
+        sceneData.CameraPosition = cameraPosition;
+        m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
         m_deviceContext.NewFrame();
         m_renderContext.Begin();
@@ -92,7 +108,6 @@ namespace gfx
             auto& materials = drawCall.mesh->GetMaterials();
             for (auto& material : materials)
             {
-                // TODO: Update material for rendering?
                 UpdateMaterialForRendering(material, m_uniformBufferSet);
             }
 

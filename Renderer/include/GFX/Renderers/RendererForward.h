@@ -29,7 +29,7 @@ namespace gfx
 
         auto LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>;
 
-        void BeginScene(const Camera& camera);
+        void BeginScene(const Camera& camera, const LightEnvironment& lightEnvironment);
         void EndScene();
 
         void DrawMesh(const DrawCall& drawCall);
@@ -57,6 +57,27 @@ namespace gfx
         {
             glm::mat4 ViewProjection;
         } CameraData;
+
+        struct DirLight
+        {
+            glm::vec3 Direction;
+            float Padding = 0.0f;
+            glm::vec3 Radiance;
+            float Multiplier;
+        };
+
+        struct UBPointLights
+        {
+            uint32_t Count = 0;
+            glm::vec3 Padding = {};
+            PointLight PointLights[16] = {};
+        } PointLightsData;
+
+        struct UBScene
+        {
+            DirLight Light;
+            glm::vec3 CameraPosition;
+        } SceneData;
 
         // UniformBufferSet* -> Shader Hash -> Frame -> WriteDescriptor
         std::unordered_map<UniformBufferSet*, std::unordered_map<uint64_t, std::vector<std::vector<vk::WriteDescriptorSet>>>>
