@@ -53,7 +53,7 @@ namespace gfx
 
         void Write(void* data, uint32_t size, uint32_t offset = 0)
         {
-            GFX_ASSERT(offset + size < Size, "Buffer write overflow!");
+            GFX_ASSERT(offset + size <= Size, "Buffer write overflow!");
             memcpy((uint8_t*)Data + offset, data, size);
         }
 
