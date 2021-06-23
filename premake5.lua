@@ -127,6 +127,7 @@ function AddExample(example_name, src)
 
             "dependencies/fmt/include",
 
+            "%{IncludeDir.Assimp}",
             "%{IncludeDir.GLFW}",
             "%{IncludeDir.glm}",
             "%{IncludeDir.VulkanSDK}",
