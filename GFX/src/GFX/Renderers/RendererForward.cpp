@@ -129,7 +129,7 @@ namespace gfx
                 m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &drawCall.transform);
                 m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
 
-                m_renderContext.DrawIndexed(drawCall.mesh->GetIndexCount(), 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+                m_renderContext.DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
             }
         }
 
