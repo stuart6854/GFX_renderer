@@ -9,6 +9,10 @@
 #include "Buffer.h"
 #include "Material.h"
 
+#include <glm/mat4x4.hpp>
+
+#include <assimp/scene.h>
+
 #include <string>
 #include <vector>
 
@@ -22,6 +26,7 @@ namespace gfx
         uint32_t MaterialIndex;
         uint32_t VertexCount;
         uint32_t IndexCount;
+        glm::mat4 Transform = glm::mat4(1.0f);
     };
 
     class Mesh
@@ -45,6 +50,8 @@ namespace gfx
 
     private:
         void LoadMesh(const std::string& path);
+
+        void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
 
     private:
         std::vector<Vertex> m_vertices;
