@@ -41,6 +41,29 @@ namespace gfx
 
     Mesh::Mesh(const std::string& path) { LoadMesh(path); }
 
+    Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : m_vertices(vertices), m_indices(indices)
+    {
+        auto& submesh = m_submeshes.emplace_back();
+        submesh.BaseVertex = 0;
+        submesh.BaseIndex = 0;
+        submesh.VertexCount = vertices.size();
+        submesh.IndexCount = indices.size();
+
+        BufferDesc vertexBufferDesc{};
+        vertexBufferDesc.Type = BufferType::eVertex;
+        vertexBufferDesc.Size = sizeof(Vertex) * submesh.VertexCount;
+        m_vertexBuffer = std::make_shared<Buffer>(vertexBufferDesc);
+
+        BufferDesc indexBufferDesc{};
+        indexBufferDesc.Type = BufferType::eIndex;
+        indexBufferDesc.Size = sizeof(uint32_t) * submesh.IndexCount;
+        m_indexBuffer = std::make_shared<Buffer>(indexBufferDesc);
+
+        const auto meshShader = ShaderLibrary::Get("PBR_Static");
+        const auto material = std::make_shared<Material>(meshShader);
+        m_materials.push_back(material);
+    }
+
     void Mesh::LoadMesh(const std::string& path)
     {
         Assimp::Importer importer;
@@ -112,7 +135,7 @@ namespace gfx
         m_indexBuffer = std::make_shared<Buffer>(indexBufferDesc);
 
         // TODO: Load textures/materials
-        
+
         const auto meshShader = ShaderLibrary::Get("PBR_Static");
 
         if (scene->HasMaterials())
@@ -185,5 +208,4 @@ namespace gfx
             TraverseNodes(node->mChildren[i], transform, level + 1);
         }
     }
-
-} // namespace gfx
+}  // namespace gfx
