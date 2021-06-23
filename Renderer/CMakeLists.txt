@@ -67,5 +67,6 @@ set(VulkanLibs
 
 target_link_libraries(gfx PUBLIC fmt::fmt glm vulkan-1 ${VulkanLibs} d3d12 assimp::assimp)
 
-target_compile_definitions(gfx PUBLIC GFX_API_VULKAN)
+target_compile_definitions(gfx PUBLIC GFX_API_VULKAN GLM_FORCE_DEPTH_ZERO_TO_ONE
+        GLM_FORCE_LEFT_HANDED)
 
