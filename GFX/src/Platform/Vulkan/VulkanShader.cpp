@@ -19,25 +19,49 @@
 
 namespace gfx
 {
-    static auto SPIRTypeToShaderUniformType(const spirv_cross::SPIRType& type)
+    namespace Utils
     {
-        switch (type.basetype)
+        static auto GetCacheDirectory() -> const std::string
         {
-            case spirv_cross::SPIRType::Boolean: return ShaderUniformType::eBool;
-            case spirv_cross::SPIRType::Int: return ShaderUniformType::eInt;
-            case spirv_cross::SPIRType::UInt: return ShaderUniformType::eUInt;
-            case spirv_cross::SPIRType::Float:
-                if (type.vecsize == 1) return ShaderUniformType::eFloat;
-                if (type.vecsize == 2) return ShaderUniformType::eVec2;
-                if (type.vecsize == 3) return ShaderUniformType::eVec3;
-                if (type.vecsize == 4) return ShaderUniformType::eVec4;
-
-                if (type.columns == 3) return ShaderUniformType::eMat3;
-                if (type.columns == 4) return ShaderUniformType::eMat4;
-                break;
+            std::string cacheDirectory = "resources/.Cache/Shader/Vulkan";
+            std::filesystem::create_directories(cacheDirectory);
+            return cacheDirectory;
         }
-        return ShaderUniformType::eNone;
-    }
+
+        static auto VkShaderStageCachedFileExt(vk::ShaderStageFlagBits stage) -> std::string
+        {
+            switch (stage)
+            {
+                case vk::ShaderStageFlagBits::eVertex: return ".cached_vulkan.vert";
+                case vk::ShaderStageFlagBits::eFragment: return ".cached_vulkan.frag";
+                case vk::ShaderStageFlagBits::eCompute: return ".cached_vulkan.comp";
+                default: break;
+            }
+            GFX_ASSERT(false);
+            return "";
+        }
+
+        static auto SPIRTypeToShaderUniformType(const spirv_cross::SPIRType& type)
+        {
+            switch (type.basetype)
+            {
+                case spirv_cross::SPIRType::Boolean: return ShaderUniformType::eBool;
+                case spirv_cross::SPIRType::Int: return ShaderUniformType::eInt;
+                case spirv_cross::SPIRType::UInt: return ShaderUniformType::eUInt;
+                case spirv_cross::SPIRType::Float:
+                    if (type.vecsize == 1) return ShaderUniformType::eFloat;
+                    if (type.vecsize == 2) return ShaderUniformType::eVec2;
+                    if (type.vecsize == 3) return ShaderUniformType::eVec3;
+                    if (type.vecsize == 4) return ShaderUniformType::eVec4;
+
+                    if (type.columns == 3) return ShaderUniformType::eMat3;
+                    if (type.columns == 4) return ShaderUniformType::eMat4;
+                    break;
+            }
+            return ShaderUniformType::eNone;
+        }
+
+    }  // namespace Utils
 
     static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
     //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
@@ -156,32 +180,69 @@ namespace gfx
     {
         std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>> shaderData;
 
+        std::filesystem::path cacheDirectory = Utils::GetCacheDirectory();
         for (auto [stage, source] : m_shaderSource)
         {
-            shaderc::Compiler compiler;
-            shaderc::CompileOptions options;
-            options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
-            options.SetWarningsAsErrors();
-            options.SetGenerateDebugInfo();
+            auto extension = Utils::VkShaderStageCachedFileExt(stage);
+            std::filesystem::path p = m_path;
+            const auto path = cacheDirectory / (p.filename().string() + extension);
+            const auto cachedFilePath = path.string();
 
-            const bool optimise = false;
-            if (optimise) options.SetOptimizationLevel(shaderc_optimization_level_performance);
-
-            // Compile shader
+            FILE* f;
+            if (auto err = fopen_s(&f, cachedFilePath.c_str(), "rb"); !err)
             {
-                auto& shaderSource = m_shaderSource.at(stage);
-                shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(shaderSource, VkShaderStageToShaderC(stage), m_path.c_str(), options);
+                GFX_INFO("Found cached shader stage. Reading...");
+                fseek(f, 0, SEEK_END);
+                uint64_t size = ftell(f);
+                fseek(f, 0, SEEK_SET);
+                shaderData[stage] = std::vector<uint32_t>(size / sizeof(uint32_t));
+                fread(shaderData[stage].data(), sizeof(uint32_t), shaderData[stage].size(), f);
+                fclose(f);
+            }
 
-                if (module.GetCompilationStatus() != shaderc_compilation_status_success)
+            if (shaderData[stage].size() == 0)
+            {
+                GFX_INFO("No cached shader found for stage. Compiling...");
+
+                shaderc::Compiler compiler;
+                shaderc::CompileOptions options;
+                options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
+                options.SetWarningsAsErrors();
+                options.SetGenerateDebugInfo();
+
+                const bool optimise = false;
+                if (optimise) options.SetOptimizationLevel(shaderc_optimization_level_performance);
+
+                // Compile shader
                 {
-                    GFX_ERROR("{}", module.GetErrorMessage());
+                    auto& shaderSource = m_shaderSource.at(stage);
+                    shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(shaderSource, VkShaderStageToShaderC(stage), m_path.c_str(), options);
+
+                    if (module.GetCompilationStatus() != shaderc_compilation_status_success)
+                    {
+                        GFX_ERROR("{}", module.GetErrorMessage());
+                    }
+
+                    const auto* begin = (const uint8_t*)module.cbegin();
+                    const auto* end = (const uint8_t*)module.cend();
+                    const auto size = end - begin;
+
+                    shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
                 }
 
-                const auto* begin = (const uint8_t*)module.cbegin();
-                const auto* end = (const uint8_t*)module.cend();
-                const auto size = end - begin;
+                // Cache compiled shader
+                {
+                    std::filesystem::path p = m_path;
+                    const auto path = cacheDirectory / (p.filename().string() + extension);
+                    const auto cachedFilePath = path.string();
 
-                shaderData[stage] = std::vector<uint32_t>(module.cbegin(), module.cend());
+                    FILE* f;
+                    fopen_s(&f, cachedFilePath.c_str(), "wb");
+                    fwrite(shaderData[stage].data(), sizeof(uint32_t), shaderData[stage].size(), f);
+                    fclose(f);
+
+                    GFX_INFO("Shader stage cached.");
+                }
             }
         }
 
@@ -289,7 +350,7 @@ namespace gfx
                 auto offset = compiler.type_struct_member_offset(bufferType, i) - bufferOffset;
 
                 std::string uniformName = bufferName + "." + memberName;
-                buffer.Uniforms[uniformName] = ShaderUniform(uniformName, SPIRTypeToShaderUniformType(type), size, offset);
+                buffer.Uniforms[uniformName] = ShaderUniform(uniformName, Utils::SPIRTypeToShaderUniformType(type), size, offset);
             }
         }
 
