@@ -7,7 +7,6 @@
 #include <GFX/GFX.h>
 #include <GFX/Debug.h>
 #include <GFX/Renderers/RendererForward.h>
-#include <GFX/Resources/Mesh.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -32,10 +31,14 @@ int main(int argc, char** argv)
         auto proj = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 1000.0f);
         proj[1][1] *= -1.0f;
 
-        auto view = glm::lookAt(glm::vec3{ 0, 2, -2 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
+        auto view = glm::lookAt(glm::vec3{ 0, 1, -5 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
 
-        auto rot = glm::eulerAngleXYZ(glm::radians(90.0f), glm::radians(0.0f), glm::radians(90.0f));
-        auto model = glm::translate(glm::mat4(1.0f), glm::vec3{ -1, 0, 0 }) * rot * glm::scale(glm::mat4(1.0f), glm::vec3{ 0.025f, 0.025f, 0.025f });
+        const glm::vec3 position = { 0.0f, 0.0f, 0.0f };
+        const glm::vec3 rotation = { 0.0f, 20.0f, 0.0f };
+        const glm::vec3 scale = glm::vec3(1, 1, 1) * 0.01f;
+
+        const auto rot = glm::eulerAngleXYZ(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
+        const auto model = glm::translate(glm::mat4(1.0f), position) * rot * glm::scale(glm::mat4(1.0f), scale);
 
         gfx::LightEnvironment lightEnvironment{};
         lightEnvironment.DirectionalLights[0].Direction = glm::normalize(glm::vec3{ -0.8f, -1, 0.9f });
