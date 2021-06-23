@@ -34,6 +34,8 @@ namespace gfx
 
         void DrawMesh(const DrawCall& drawCall);
 
+        auto GetDeviceContext() -> DeviceContext& { return m_deviceContext; }
+
     private:
         void Flush();
 
