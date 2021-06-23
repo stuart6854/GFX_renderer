@@ -12,6 +12,8 @@ namespace gfx
     class ISurface
     {
     public:
+        virtual auto GetSurfaceWidth() -> uint32_t = 0;
+        virtual auto GetSurfaceHeight() -> uint32_t = 0;
         virtual auto CreateSurface(vk::Instance instance) -> vk::SurfaceKHR = 0;
     };
 

@@ -28,6 +28,9 @@ namespace example
 
         void PollEvents();
 
+        auto GetSurfaceWidth() -> uint32_t override { return m_width; }
+        auto GetSurfaceHeight() -> uint32_t override { return m_height; }
+
         auto CreateSurface(vk::Instance instance) -> vk::SurfaceKHR override;
 
     private:

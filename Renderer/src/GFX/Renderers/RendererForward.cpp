@@ -11,7 +11,7 @@ namespace gfx
 {
     void RendererForward::Init(ISurface& surface)
     {
-        m_deviceContext.ProcessWindowChanges(surface, 720, 480);
+        m_deviceContext.ProcessWindowChanges(surface, surface.GetSurfaceWidth(), surface.GetSurfaceHeight());
 
         m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
