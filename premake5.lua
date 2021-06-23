@@ -165,7 +165,7 @@ function AddExample(example_name, src)
 
             postbuildcommands
             {
-                '{COPY} "%{wks.location}/dependencies/assimp/bin/Release/assimp-vc141-mtd.dll" "%{cfg.targetdir}"',
+                '{COPY} "%{wks.location}/dependencies/assimp/bin/Release/assimp-vc141-mt.dll" "%{cfg.targetdir}"',
             }
 end
 
