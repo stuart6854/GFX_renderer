@@ -65,6 +65,8 @@ project "GFX"
     defines
     {
         "FMT_HEADER_ONLY",
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+        "GLM_FORCE_LEFT_HANDED",
         "GFX_API_VULKAN",
     }
 

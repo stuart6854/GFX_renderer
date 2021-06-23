@@ -46,7 +46,7 @@ namespace gfx
         PrimitiveTopology Topology = PrimitiveTopology::eTriangles;
         bool BackFaceCulling = true;
         bool DepthTest = true;
-        bool DepthWrite = false;
+        bool DepthWrite = true;
         bool Wireframe = false;
         float LineWidth = 1.0f;
     };

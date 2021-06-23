@@ -78,6 +78,8 @@ namespace gfx
         vk::Viewport viewport;
         viewport.width = 1080;
         viewport.height = 720;
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
 
         // TODO: Scissor size
         vk::Rect2D scissor;

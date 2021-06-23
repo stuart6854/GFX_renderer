@@ -14,7 +14,7 @@
 
 namespace gfx
 {
-    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_MakeLeftHanded;
+    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals;
 
     auto Mat4FromAssimpMat4(const aiMatrix4x4& matrix) -> glm::mat4
     {
