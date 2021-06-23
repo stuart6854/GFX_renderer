@@ -6,6 +6,7 @@
 
 #include "GFX/Config.h"
 #include "GFX/Resources/Mesh.h"
+#include "GFX/Resources/Shader.h"
 
 namespace gfx
 {
@@ -19,7 +20,8 @@ namespace gfx
         m_uniformBufferSet->Create(sizeof(UBPointLights), 4);
 
         {
-            m_geometryShader = m_deviceContext.CreateShader("resources/shaders/PBR_Static.glsl");
+            ShaderLibrary::Load("resources/shaders/PBR_Static.glsl", true);
+            m_geometryShader = ShaderLibrary::Get("PBR_Static");//m_deviceContext.CreateShader("resources/shaders/PBR_Static.glsl");
 
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;

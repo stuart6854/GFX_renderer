@@ -112,10 +112,8 @@ namespace gfx
         m_indexBuffer = std::make_shared<Buffer>(indexBufferDesc);
 
         // TODO: Load textures/materials
-
-        // TODO: Some sort of shader library
-        //         auto meshShader = GetMeshShader();
-        auto meshShader = std::make_shared<Shader>("resources/shaders/PBR_Static.glsl");
+        
+        const auto meshShader = ShaderLibrary::Get("PBR_Static");
 
         if (scene->HasMaterials())
         {

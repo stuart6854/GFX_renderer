@@ -51,10 +51,11 @@ namespace gfx
         };
 
     public:
-        Shader(const std::string& path);
+        Shader(const std::string& path, bool forceCompile = false);
 
-        void Reload();
+        void Reload(bool forceCompile = false);
 
+        auto GetName() const -> const std::string& { return m_name; }
         auto GetHash() const -> size_t;
 
         auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& { return m_buffers; }
@@ -78,7 +79,7 @@ namespace gfx
         static auto VkShaderStageToShaderC(vk::ShaderStageFlagBits stage) -> shaderc_shader_kind;
 
         auto PreProcess(const std::string& source) -> std::unordered_map<vk::ShaderStageFlagBits, std::string>;
-        auto CompileOrGetVulkanBinary() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>;
+        auto CompileOrGetVulkanBinary(bool forceCompile) -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>;
         void LoadAndCreateShaders(std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData);
         void Reflect(vk::ShaderStageFlagBits shaderStage, const std::vector<uint32_t>& shaderData);
         void ReflectAllStages(const std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData);

@@ -65,24 +65,22 @@ namespace gfx
 
     static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
     //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
-
-    Shader::Shader(const std::string& path) : m_path(path)
+   
+    Shader::Shader(const std::string& path, bool forceCompile) : m_path(path)
     {
         // Get name of shader from filename without ext
-        auto found = path.find_last_of("/\\");
-        m_name = (found != std::string::npos) ? path.substr(found + 1) : path;
-        found = m_name.find_last_of('.');
-        m_name = (found != std::string::npos) ? path.substr(0, found) : m_name;
+        const std::filesystem::path filepath = path;
+        m_name = filepath.stem().string();
 
-        Reload();
+        Reload(forceCompile);
     }
 
-    void Shader::Reload()
+    void Shader::Reload(bool forceCompile)
     {
         auto source = ReadShaderFromFile(m_path);
 
         m_shaderSource = PreProcess(source);
-        auto shaderData = CompileOrGetVulkanBinary();
+        auto shaderData = CompileOrGetVulkanBinary(forceCompile);
         LoadAndCreateShaders(shaderData);
         ReflectAllStages(shaderData);
         CreateDescriptors();
@@ -176,7 +174,7 @@ namespace gfx
         return shaderSources;
     }
 
-    auto Shader::CompileOrGetVulkanBinary() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>
+    auto Shader::CompileOrGetVulkanBinary(bool forceCompile) -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>
     {
         std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>> shaderData;
 
@@ -184,23 +182,26 @@ namespace gfx
         for (auto [stage, source] : m_shaderSource)
         {
             auto extension = Utils::VkShaderStageCachedFileExt(stage);
-            std::filesystem::path p = m_path;
-            const auto path = cacheDirectory / (p.filename().string() + extension);
-            const auto cachedFilePath = path.string();
-
-            FILE* f;
-            if (auto err = fopen_s(&f, cachedFilePath.c_str(), "rb"); !err)
+            if (!forceCompile)
             {
-                GFX_INFO("Found cached shader stage. Reading...");
-                fseek(f, 0, SEEK_END);
-                uint64_t size = ftell(f);
-                fseek(f, 0, SEEK_SET);
-                shaderData[stage] = std::vector<uint32_t>(size / sizeof(uint32_t));
-                fread(shaderData[stage].data(), sizeof(uint32_t), shaderData[stage].size(), f);
-                fclose(f);
+                std::filesystem::path p = m_path;
+                const auto path = cacheDirectory / (p.filename().string() + extension);
+                const auto cachedFilePath = path.string();
+
+                FILE* f;
+                if (auto err = fopen_s(&f, cachedFilePath.c_str(), "rb"); !err)
+                {
+                    GFX_INFO("Found cached shader stage. Reading...");
+                    fseek(f, 0, SEEK_END);
+                    uint64_t size = ftell(f);
+                    fseek(f, 0, SEEK_SET);
+                    shaderData[stage] = std::vector<uint32_t>(size / sizeof(uint32_t));
+                    fread(shaderData[stage].data(), sizeof(uint32_t), shaderData[stage].size(), f);
+                    fclose(f);
+                }
             }
 
-            if (shaderData[stage].size() == 0)
+            if (shaderData[stage].empty())
             {
                 GFX_INFO("No cached shader found for stage. Compiling...");
 
