@@ -5,6 +5,7 @@
 #include <ExampleBase/Window.h>
 
 #include <GFX/GFX.h>
+#include "GFX/Debug.h"
 #include <GFX/DeviceContext.h>
 #include <GFX/RenderContext.h>
 #include <GFX/Resources/Vertex.h>
@@ -14,6 +15,7 @@
 
 #include <iostream>
 #include <vector>
+#include <filesystem>
 
 const std::vector<gfx::Vertex> triVerts = {
     { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
@@ -25,6 +27,8 @@ const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 int main(int argc, char** argv)
 {
     std::cout << "Running example \"HelloTriangle\"" << std::endl;
+
+    GFX_INFO("Working Directory: {}", std::filesystem::current_path().string());
 
     gfx::Init();
     {

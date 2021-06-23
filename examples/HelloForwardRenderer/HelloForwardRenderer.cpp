@@ -23,10 +23,11 @@ int main(int argc, char** argv)
         gfx::RendererForward renderer;
         renderer.Init(window);
 
-        //        auto mesh = renderer.LoadMesh("resources/forwardrenderer/triangle/Triangle.gltf");
-        //        auto mesh = renderer.LoadMesh("resources/forwardrenderer/cube.obj");
-        //        auto mesh = renderer.LoadMesh("resources/forwardrenderer/stanford-bunny.obj");
-        auto mesh = renderer.LoadMesh("resources/forwardrenderer/gun/scene.gltf");
+        //        auto mesh = renderer.LoadMesh("resources/models/triangle/Triangle.gltf");
+        //        auto mesh = renderer.LoadMesh("resources/models/cube.obj");
+        //        auto mesh = renderer.LoadMesh("resources/models/stanford-bunny.obj");
+        // auto mesh = renderer.LoadMesh("resources/models/gun/scene.gltf");
+        auto mesh = renderer.LoadMesh("resources/models/backpack/scene.gltf");
 
         auto proj = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 1000.0f);
         proj[1][1] *= -1.0f;
