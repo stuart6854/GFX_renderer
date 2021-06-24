@@ -96,6 +96,61 @@ namespace gfx
         Vulkan::GetDevice().waitForFences(cmdBuffer.GetFence(), VK_TRUE, UINT64_MAX);
     }
 
+    void DeviceContext::Upload(Texture* texture)
+    {
+        auto allocator = Vulkan::GetAllocator();
+
+        auto imageData = texture->GetImageData();
+        BufferDesc stagingBufferDesc{ .Type = BufferType::eStaging, .Size = imageData.Size };
+        auto stagingBuffer = CreateBuffer(stagingBufferDesc);
+
+        auto* mapped = allocator.Map(stagingBuffer->GetAPIAllocation());
+        std::memcpy(mapped, imageData.Data, imageData.Size);
+        allocator.Unmap(stagingBuffer->GetAPIAllocation());
+
+        auto& textureDesc = texture->GetDesc();
+        vk::BufferImageCopy copyRegion{};
+        copyRegion.imageExtent.setWidth(textureDesc.Width);
+        copyRegion.imageExtent.setHeight(textureDesc.Height);
+        copyRegion.imageExtent.setDepth(textureDesc.Depth);
+        copyRegion.imageSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
+        copyRegion.imageSubresource.setMipLevel(0);
+        copyRegion.imageSubresource.setBaseArrayLayer(0);
+        copyRegion.imageSubresource.setLayerCount(textureDesc.Layers);
+        copyRegion.setBufferOffset(0);
+
+        vk::ImageSubresourceRange imageRange{};
+        imageRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
+        imageRange.setBaseMipLevel(0);
+        imageRange.setLevelCount(1);
+        imageRange.setLayerCount(1);
+
+        CommandBuffer cmdBuffer;
+        cmdBuffer.Begin();
+        cmdBuffer.ImageMemoryBarrier(texture->GetVulkanImage(),
+                                     {},
+                                     vk::AccessFlagBits::eTransferWrite,
+                                     vk::ImageLayout::eUndefined,
+                                     vk::ImageLayout::eTransferDstOptimal,
+                                     vk::PipelineStageFlagBits::eHost,
+                                     vk::PipelineStageFlagBits::eTransfer,
+                                     imageRange);
+        cmdBuffer.CopyBufferToImage(stagingBuffer->GetAPIBuffer(), texture->GetVulkanImage(), vk::ImageLayout::eTransferDstOptimal, copyRegion);
+        cmdBuffer.ImageMemoryBarrier(texture->GetVulkanImage(),
+                                     vk::AccessFlagBits::eTransferWrite,
+                                     vk::AccessFlagBits::eTransferRead,
+                                     vk::ImageLayout::eTransferDstOptimal,
+                                     vk::ImageLayout::eTransferSrcOptimal,
+                                     vk::PipelineStageFlagBits::eTransfer,
+                                     vk::PipelineStageFlagBits::eTransfer,
+                                     imageRange);
+        cmdBuffer.End();
+
+        Submit(cmdBuffer);
+
+        Vulkan::GetDevice().waitForFences(cmdBuffer.GetFence(), VK_TRUE, UINT64_MAX);
+    }
+
     void DeviceContext::NewFrame()
     {
         auto device = Vulkan::GetDevice();

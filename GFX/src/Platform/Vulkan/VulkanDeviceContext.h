@@ -11,6 +11,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanBuffer.h"
 #include "VulkanShader.h"
+#include "VulkanTexture.h"
 
 #include "GFX/Config.h"
 #include "GFX/Resources/ResourceDescriptions.h"
@@ -41,6 +42,7 @@ namespace gfx
         auto CreatePipeline(const PipelineDesc& desc) -> std::shared_ptr<Pipeline>;
 
         void Upload(Buffer* dst, const void* data);
+        void Upload(Texture* texture);
 
         void NewFrame();
 
