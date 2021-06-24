@@ -51,6 +51,55 @@ namespace gfx
         float LineWidth = 1.0f;
     };
 
+    enum class TextureFormat
+    {
+        eNone = 0,
+        eRGB,
+        eRGBA,
+        eRGBA16F,
+        eRGBA32F,
+        eRG32F,
+
+        eSRGB,
+
+        eDepth32F,
+        eDepth24Stencil8,
+
+        // Default
+        eDepth = eDepth24Stencil8
+    };
+
+    enum class TextureUsage
+    {
+        eNone = 0,
+        eTexture,
+        eAttachment,
+    };
+
+    struct TextureDesc
+    {
+        uint32_t Width = 0;
+        uint32_t Height = 0;
+        uint32_t Depth = 1;
+        uint32_t Layers = 1;
+        uint32_t Mips = 1;
+        TextureFormat Format;
+        TextureUsage Usage = TextureUsage::eTexture;
+        // TODO: Sampler Filter
+        // TODO: Sampler Wrap
+    };
+
+    namespace Utils
+    {
+        inline bool IsDepthFormat(TextureFormat format)
+        {
+            if (format == TextureFormat::eDepth32F || format == TextureFormat::eDepth24Stencil8) return true;
+
+            return false;
+        }
+
+    }  // namespace Utils
+
 }  // namespace gfx
 
 #endif  // PERSONAL_RENDERER_RESOURCEDESCRIPTIONS_H
