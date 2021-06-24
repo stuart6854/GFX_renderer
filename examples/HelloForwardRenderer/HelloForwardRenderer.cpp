@@ -8,6 +8,7 @@
 #include <GFX/Debug.h>
 #include <GFX/Resources/Primitives.h>
 #include <GFX/Renderers/RendererForward.h>
+#include <GFX/Resources/Texture.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -24,6 +25,9 @@ int main(int argc, char** argv)
 
         gfx::RendererForward renderer;
         renderer.Init(window);
+
+        gfx::TextureDesc textureDesc;
+        auto texture = std::make_shared<gfx::Texture>(renderer.GetDeviceContext(), "resources/models/backpack/textures/Scene_-_Root_baseColor.jpeg", textureDesc);
 
         auto plane = gfx::Primitives::CreatePlane(renderer.GetDeviceContext(), 10.0f);
 
