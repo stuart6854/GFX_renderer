@@ -138,11 +138,11 @@ namespace gfx
         cmdBuffer.CopyBufferToImage(stagingBuffer->GetAPIBuffer(), texture->GetVulkanImage(), vk::ImageLayout::eTransferDstOptimal, copyRegion);
         cmdBuffer.ImageMemoryBarrier(texture->GetVulkanImage(),
                                      vk::AccessFlagBits::eTransferWrite,
-                                     vk::AccessFlagBits::eTransferRead,
+                                     vk::AccessFlagBits::eShaderRead,
                                      vk::ImageLayout::eTransferDstOptimal,
-                                     vk::ImageLayout::eTransferSrcOptimal,
+                                     vk::ImageLayout::eShaderReadOnlyOptimal,
                                      vk::PipelineStageFlagBits::eTransfer,
-                                     vk::PipelineStageFlagBits::eTransfer,
+                                     vk::PipelineStageFlagBits::eFragmentShader,
                                      imageRange);
         cmdBuffer.End();
 
