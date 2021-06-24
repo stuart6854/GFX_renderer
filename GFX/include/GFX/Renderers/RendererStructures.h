@@ -30,22 +30,21 @@ namespace gfx
     struct DirectionalLight
     {
         glm::vec3 Direction = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 Radiance = { 0.0f, 0.0f, 0.0f };
-        float Multiplier = 0.0f;
+        glm::vec3 Color = { 0.0f, 0.0f, 0.0f };
         bool CastShadows = true;
     };
 
     struct PointLight
     {
         glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
-        float Multiplier = 0.0f;
-        glm::vec3 Radiance = { 0.0f, 0.0f, 0.0f };
-        float MinRadius = 0.001f;
-        float Radius = 25.0f;
-        float Falloff = 1.f;
-        float SourceSize = 0.1f;
+        float Padding = 0.0f;
+        glm::vec3 Color = { 0.0f, 0.0f, 0.0f };
+        float Constant = 0.001f;
+        float Linear = 25.0f;
+        float Quadratic = 1.f;
+        float Padding2 = 0.1f;
         bool CastsShadows = true;
-        char Padding[3]{ 0, 0, 0 };
+        char Padding3[3]{ 0, 0, 0 };
     };
 
     struct LightEnvironment

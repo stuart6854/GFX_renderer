@@ -27,7 +27,8 @@ int main(int argc, char** argv)
         renderer.Init(window);
 
         gfx::TextureDesc textureDesc;
-        auto texture = std::make_shared<gfx::Texture>(renderer.GetDeviceContext(), "resources/models/backpack/textures/Scene_-_Root_baseColor.jpeg", textureDesc);
+        auto texture =
+            std::make_shared<gfx::Texture>(renderer.GetDeviceContext(), "resources/models/backpack/textures/Scene_-_Root_baseColor.jpeg", textureDesc);
 
         auto plane = gfx::Primitives::CreatePlane(renderer.GetDeviceContext(), 10.0f);
 
@@ -48,8 +49,21 @@ int main(int argc, char** argv)
 
         gfx::LightEnvironment lightEnvironment{};
         lightEnvironment.DirectionalLights[0].Direction = glm::normalize(glm::vec3{ -0.2f, -1.0f, 0.3f });
-        lightEnvironment.DirectionalLights[0].Multiplier = 1.0f;
-        //        lightEnvironment.DirectionalLights[0].Radiance = glm::vec3{ -1, -1, 1 };
+        lightEnvironment.DirectionalLights[0].Color = { 1.0f, 1.0f, 1.0f };
+
+        auto& pointLight = lightEnvironment.PointLights.emplace_back();
+        pointLight.Position = { -1.0f, 1.0f, -1.0f };
+        pointLight.Color = { 1.0f, 0.0f, 0.0f };
+        pointLight.Constant = 1.0f;
+        pointLight.Linear = 0.35f;
+        pointLight.Quadratic = 0.44f;
+
+        auto& pointLight2 = lightEnvironment.PointLights.emplace_back();
+        pointLight2.Position = { 1.0f, 1.0f, -1.0f };
+        pointLight2.Color = { 0.0f, 0.0f, 1.0f };
+        pointLight2.Constant = 1.0f;
+        pointLight2.Linear = 0.35f;
+        pointLight2.Quadratic = 0.44f;
 
         using clock = std::chrono::high_resolution_clock;
         auto last = clock::now();

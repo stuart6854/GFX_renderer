@@ -64,8 +64,8 @@ namespace gfx
         {
             glm::vec3 Direction;
             float Padding = 0.0f;
-            glm::vec3 Radiance;
-            float Multiplier;
+            glm::vec3 Color;
+            float Padding2;
         };
 
         struct UBPointLights

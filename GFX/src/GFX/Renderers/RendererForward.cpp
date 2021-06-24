@@ -71,8 +71,7 @@ namespace gfx
 
         const auto& directionalLight = lightEnvironment.DirectionalLights[0];
         sceneData.Light.Direction = directionalLight.Direction;
-        sceneData.Light.Radiance = directionalLight.Radiance;
-        sceneData.Light.Multiplier = directionalLight.Multiplier;
+        sceneData.Light.Color = directionalLight.Color;
         sceneData.CameraPosition = cameraPosition;
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
