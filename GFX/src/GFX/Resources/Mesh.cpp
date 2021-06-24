@@ -18,7 +18,7 @@
 
 namespace gfx
 {
-    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_MakeLeftHanded;
+    static const uint32_t s_meshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_MakeLeftHanded;
 
     auto Mat4FromAssimpMat4(const aiMatrix4x4& matrix) -> glm::mat4
     {
@@ -73,12 +73,14 @@ namespace gfx
         const auto whiteTexture = std::make_shared<Texture>(m_deviceCtx, textureDesc, &whiteTextureData);
 
         const auto meshShader = ShaderLibrary::Get("PBR_Static");
-        const auto material = std::make_shared<Material>(meshShader);
-        material->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
-        material->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
-        material->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
-        material->Set("u_DiffuseTexture", whiteTexture);
-        m_materials.push_back(material);
+        const auto mat = std::make_shared<Material>(meshShader);
+        mat->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
+        mat->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
+        mat->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
+        mat->Set("u_DiffuseTexture", whiteTexture);
+        mat->Set("u_NormalTexture", whiteTexture);
+        mat->Set("u_MaterialUniforms.UseNormalMap", false);
+        m_materials.push_back(mat);
     }
 
     void Mesh::LoadMesh(const std::string& path)
@@ -127,6 +129,9 @@ namespace gfx
                 {
                     vertex.TexCoord = { mesh->mTextureCoords[0][vertIndex].x, mesh->mTextureCoords[0][vertIndex].y };
                 }
+
+                vertex.Tangent = { mesh->mTangents[vertIndex].x, mesh->mTangents[vertIndex].y, mesh->mTangents[vertIndex].z };
+                vertex.Bitangent = { mesh->mBitangents[vertIndex].x, mesh->mBitangents[vertIndex].y, mesh->mBitangents[vertIndex].z };
             }
 
             // Indices
@@ -218,6 +223,29 @@ namespace gfx
                     GFX_INFO("  No diffuse map");
                     mat->Set("u_DiffuseTexture", whiteTexture);
                 }
+
+                bool hasNormalMap = aiMaterial->GetTexture(aiTextureType_NORMALS, 0, &aiTexPath) == AI_SUCCESS;
+                fallback = !hasNormalMap;
+                if (hasNormalMap)
+                {
+                    std::filesystem::path texturePath = path;
+                    auto parentPath = texturePath.parent_path();
+                    parentPath /= std::string(aiTexPath.data);
+                    auto texturePathStr = parentPath.string();
+                    GFX_INFO("  Normal map path = {}", texturePathStr);
+
+                    TextureDesc desc{};
+                    auto texture = std::make_shared<Texture>(m_deviceCtx, texturePathStr, desc);
+                    m_textures.push_back(texture);
+                    mat->Set("u_NormalTexture", texture);
+                    mat->Set("u_MaterialUniforms.UseNormalMap", true);
+                }
+                if (fallback)
+                {
+                    GFX_INFO("  No normal map");
+                    mat->Set("u_NormalTexture", whiteTexture);
+                    mat->Set("u_MaterialUniforms.UseNormalMap", false);
+                }
             }
         }
         else
@@ -228,6 +256,8 @@ namespace gfx
             mat->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
             mat->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
             mat->Set("u_DiffuseTexture", whiteTexture);
+            mat->Set("u_NormalTexture", whiteTexture);
+            mat->Set("u_MaterialUniforms.UseNormalMap", false);
         }
 
         GFX_INFO("  Mesh loaded: {} vertices, {} indices", vertexCount, indexCount);

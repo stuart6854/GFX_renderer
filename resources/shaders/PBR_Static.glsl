@@ -6,6 +6,8 @@
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec2 a_TexCoord;
+layout(location = 3) in vec3 a_Tangent;
+layout(location = 4) in vec3 a_Bitangent;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -22,6 +24,7 @@ struct VertexOutput
     vec3 WorldPosition;
     vec3 Normal;
     vec2 TexCoord;
+    mat3 WorldNormals;    
 };
 
 layout (location = 0) out VertexOutput Output;
@@ -31,6 +34,16 @@ void main()
     Output.WorldPosition = vec3(u_Renderer.u_Model * vec4(a_Position, 1.0));
     Output.Normal = mat3(u_Renderer.u_Model) * a_Normal;
     Output.TexCoord = a_TexCoord;
+
+    // Use the "Gram-Schmidt" process to re-orthogonalize the WorldNormals.
+    // Slightly improves the normal mapping quality without too much extra cost.
+    vec3 T = normalize(vec3(u_Renderer.u_Model * vec4(a_Tangent, 0.0)));
+    vec3 N = normalize(vec3(u_Renderer.u_Model * vec4(a_Normal, 0.0)));
+    //Re-orthogonalize T with respect to N
+    T = normalize(T - dot(T, N) * N);
+    // Then retrieve perpendicular vector B with the cross product of T and N
+    vec3 B = cross(N, T);
+    Output.WorldNormals = mat3(T, B, N);
 
     gl_Position = u_ViewProjection * u_Renderer.u_Model *  vec4(a_Position, 1.0f);
 }
@@ -43,6 +56,7 @@ void main()
 layout (location = 0) out vec4 out_Color;
 
 layout(set = 0, binding = 5) uniform sampler2D u_DiffuseTexture;
+layout(set = 0, binding = 6) uniform sampler2D u_NormalTexture;
 
 struct DirectionalLight
 {
@@ -80,10 +94,10 @@ layout(push_constant) uniform Material
     layout(offset = 64) vec3 Ambient;
     vec3 Diffuse;
     vec3 Specular;
-//
+
 //    float EnvMapRotation;
-//
-//    bool UseNormalMap;
+
+   bool UseNormalMap;
 } u_MaterialUniforms;
 
 struct VertexOutput
@@ -91,6 +105,7 @@ struct VertexOutput
     vec3 WorldPosition;
     vec3 Normal;
     vec2 TexCoord;
+    mat3 WorldNormals;
 };
 
 layout(location = 0) in VertexOutput Input;
@@ -137,6 +152,12 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 void main()
 {
     vec3 norm = normalize(Input.Normal);
+    if(u_MaterialUniforms.UseNormalMap)
+    {
+        norm = normalize(2.0 * texture(u_NormalTexture, Input.TexCoord).rgb - 1.0);
+        norm = normalize(Input.WorldNormals * norm);
+    }
+
     vec3 viewDir = normalize(u_CameraPosition - Input.WorldPosition);
 
     // Calculate direction light
