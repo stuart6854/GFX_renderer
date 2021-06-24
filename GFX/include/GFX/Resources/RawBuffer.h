@@ -19,6 +19,14 @@ namespace gfx
         RawBuffer() : Data(nullptr), Size(0) {}
         RawBuffer(void* data, uint32_t size) : Data(data), Size(size) {}
 
+        static auto Copy(const void* src, uint32_t size) -> RawBuffer
+        {
+            RawBuffer buffer;
+            buffer.Allocate(size);
+            std::memcpy(buffer.Data, src, size);
+            return buffer;
+        }
+
         void Allocate(uint32_t size)
         {
             delete[] Data;
