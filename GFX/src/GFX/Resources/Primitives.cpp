@@ -4,16 +4,18 @@
 
 namespace gfx
 {
-    auto Primitives::CreatePlane(DeviceContext& deviceCtx,
-                                 float size,
-                                 const uint32_t resolution) -> std::shared_ptr<Mesh>
+    auto Primitives::CreatePlane(DeviceContext& deviceCtx, float size, const uint32_t resolution) -> std::shared_ptr<Mesh>
     {
+        const float halfSize = size / 2.0f;
+
         // Generate vertices
         std::vector<Vertex> vertices;
-        const float increment = (1.0f / static_cast<float>(resolution)) * size;
-        Vertex p{};
-        p.Position = { 0, 0, 0 };
-        p.Normal = { 0, 1, 0 };
+        const float increment = (size / static_cast<float>(resolution));
+        Vertex start{};
+        start.Position = { -halfSize, 0, -halfSize };
+        start.Normal = { 0.0f, 1.0f, 0.0f };
+
+        Vertex p = start;
         for (uint32_t z = 0; z < resolution + 1; z++)
         {
             for (uint32_t x = 0; x < resolution + 1; x++)
@@ -22,7 +24,7 @@ namespace gfx
                 p.Position.x += increment;
             }
 
-            p.Position.x = 0;
+            p.Position.x = start.Position.x;
             p.Position.z += increment;
         }
 
@@ -38,12 +40,12 @@ namespace gfx
                 auto v3 = v0 + (resolution + 2);
 
                 indices.push_back(v0);
-                indices.push_back(v2);
                 indices.push_back(v1);
+                indices.push_back(v2);
 
                 indices.push_back(v2);
-                indices.push_back(v3);
                 indices.push_back(v1);
+                indices.push_back(v3);
             }
         }
 
