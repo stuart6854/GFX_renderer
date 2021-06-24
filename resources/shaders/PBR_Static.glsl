@@ -19,6 +19,7 @@ layout(push_constant) uniform Transform
 
 struct VertexOutput
 {
+    vec3 WorldPosition;
     vec3 Normal;
     vec2 TexCoord;
 };
@@ -27,16 +28,17 @@ layout (location = 0) out VertexOutput Output;
 
 void main()
 {
-    Output.Normal = a_Normal;
+    Output.WorldPosition = vec3(u_Renderer.u_Model * vec4(a_Position, 1.0));
+    Output.Normal = mat3(u_Renderer.u_Model) * a_Normal;
     Output.TexCoord = a_TexCoord;
 
     gl_Position = u_ViewProjection * u_Renderer.u_Model *  vec4(a_Position, 1.0f);
 }
 
-    #type pixel
+#type pixel
 
-    #version 450
-    #extension GL_ARB_separate_shader_objects : enable
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
 
 layout (location = 0) out vec4 out_Color;
 
@@ -86,6 +88,7 @@ layout(push_constant) uniform Material
 
 struct VertexOutput
 {
+    vec3 WorldPosition;
     vec3 Normal;
     vec2 TexCoord;
 };
@@ -98,11 +101,17 @@ void main()
     vec3 ambient = ambientStrength * vec3(1, 1, 1);
 
     vec3 norm = normalize(Input.Normal);
-    vec3 lightDir = normalize(u_DirectionalLight.Direction);
+    vec3 lightDir = normalize(-u_DirectionalLight.Direction); // Light direction expected to point towards the light
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * vec3(1, 1, 1);
 
-    vec3 result = (ambient + diffuse) * u_MaterialUniforms.Diffuse;
+    float specularStrength = 0.5;
+    vec3 viewDir = normalize(u_CameraPosition - Input.WorldPosition);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * vec3(1, 1, 1);
+
+    vec3 result = (ambient + diffuse + specular) * u_MaterialUniforms.Diffuse;
     out_Color = vec4(result, 1.0);
     //    out_Color = vec4(1, 1, 1, 1);
 }

@@ -6,6 +6,7 @@
 
 #include <GFX/GFX.h>
 #include <GFX/Debug.h>
+#include <GFX/Resources/Primitives.h>
 #include <GFX/Renderers/RendererForward.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +25,8 @@ int main(int argc, char** argv)
         gfx::RendererForward renderer;
         renderer.Init(window);
 
+        auto plane = gfx::Primitives::CreatePlane(renderer.GetDeviceContext(), 10.0f);
+
         //        auto mesh = renderer.LoadMesh("resources/models/triangle/Triangle.gltf");
         //        auto mesh = renderer.LoadMesh("resources/models/cube.obj");
         //        auto mesh = renderer.LoadMesh("resources/models/stanford-bunny.obj");
@@ -33,14 +36,14 @@ int main(int argc, char** argv)
         auto proj = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 100.0f);
         proj[1][1] *= -1.0f;
 
-        auto view = glm::lookAt(glm::vec3{ 0, 1, -5 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
+        auto view = glm::lookAt(glm::vec3{ 0, 2, -6 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
 
         glm::vec3 position = { 0.0f, 0.0f, 0.0f };
         glm::vec3 rotation = { 0.0f, 20.0f, 0.0f };
         glm::vec3 scale = glm::vec3(1, 1, 1) * 0.01f;
 
         gfx::LightEnvironment lightEnvironment{};
-        lightEnvironment.DirectionalLights[0].Direction = glm::normalize(glm::vec3{ -0.8f, -1, 0.9f });
+        lightEnvironment.DirectionalLights[0].Direction = glm::normalize(glm::vec3{ -0.2f, -1.0f, 0.3f });
         lightEnvironment.DirectionalLights[0].Multiplier = 1.0f;
         //        lightEnvironment.DirectionalLights[0].Radiance = glm::vec3{ -1, -1, 1 };
 
@@ -59,6 +62,8 @@ int main(int argc, char** argv)
             window.PollEvents();
 
             renderer.BeginScene({ proj, view }, lightEnvironment);
+
+            renderer.DrawMesh({ plane.get() });
 
             {
                 rotation.y += 20.0f * delta;
