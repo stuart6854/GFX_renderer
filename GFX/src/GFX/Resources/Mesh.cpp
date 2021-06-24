@@ -61,6 +61,9 @@ namespace gfx
 
         const auto meshShader = ShaderLibrary::Get("PBR_Static");
         const auto material = std::make_shared<Material>(meshShader);
+        material->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
+        material->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
+        material->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
         m_materials.push_back(material);
     }
 
@@ -185,9 +188,10 @@ namespace gfx
         else
         {
             GFX_INFO("  No materials. Creating a default one...");
-
             auto mat = std::make_shared<Material>(meshShader);
-            mat->Set("u_MaterialUniforms.AlbedoColor", Color(0.8f, 0.1f, 0.3f));
+            mat->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
+            mat->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
+            mat->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
         }
 
         GFX_INFO("  Mesh loaded: {} vertices, {} indices", vertexCount, indexCount);
