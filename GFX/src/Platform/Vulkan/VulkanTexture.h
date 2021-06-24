@@ -15,6 +15,7 @@ namespace gfx
     {
     public:
         Texture(DeviceContext& deviceCtx, const std::string& path, const TextureDesc& desc);
+        Texture(DeviceContext& deviceCtx, const TextureDesc& desc, const void* data);
 
         auto GetHash() const -> uint64_t;
         auto GetDesc() const -> const TextureDesc& { return m_desc; }

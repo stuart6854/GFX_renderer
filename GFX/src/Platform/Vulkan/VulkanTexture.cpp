@@ -27,7 +27,7 @@ namespace gfx
         }
     }  // namespace Utils
 
-    Texture::Texture(DeviceContext& deviceCtx, const std::string& path, const TextureDesc& desc) : m_deviceCtx(deviceCtx)
+    Texture::Texture(DeviceContext& deviceCtx, const std::string& path, const TextureDesc& desc) : m_deviceCtx(deviceCtx), m_desc(desc)
     {
         int width, height, channels;
 
@@ -53,6 +53,16 @@ namespace gfx
         m_desc.Layers = 1;
 
         GFX_ASSERT(m_desc.Format != TextureFormat::eNone);
+
+        Invalidate();
+    }
+
+    Texture::Texture(DeviceContext& deviceCtx, const TextureDesc& desc, const void* data) : m_deviceCtx(deviceCtx), m_desc(desc)
+    {
+        GFX_ASSERT(m_desc.Format == TextureFormat::eRGBA);
+
+        const uint32_t size = m_desc.Width * m_desc.Height * 4;
+        m_imageData = RawBuffer::Copy(data, size);
 
         Invalidate();
     }
