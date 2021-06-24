@@ -27,10 +27,10 @@ int main(int argc, char** argv)
         renderer.Init(window);
 
         gfx::TextureDesc textureDesc;
-        auto texture =
-            std::make_shared<gfx::Texture>(renderer.GetDeviceContext(), "resources/models/backpack/textures/Scene_-_Root_baseColor.jpeg", textureDesc);
+        const auto woodTexture = std::make_shared<gfx::Texture>(renderer.GetDeviceContext(), "resources/textures/wood.png", textureDesc);
 
         auto plane = gfx::Primitives::CreatePlane(renderer.GetDeviceContext(), 10.0f);
+        plane->GetMaterials().at(0)->Set("u_DiffuseTexture", woodTexture);
 
         //        auto mesh = renderer.LoadMesh("resources/models/triangle/Triangle.gltf");
         //        auto mesh = renderer.LoadMesh("resources/models/cube.obj");
