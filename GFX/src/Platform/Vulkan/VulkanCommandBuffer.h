@@ -39,6 +39,16 @@ namespace gfx
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance);
 
         void CopyBuffer(vk::Buffer src, vk::Buffer dst, uint32_t size);
+        void CopyBufferToImage(vk::Buffer src, vk::Image dst, vk::ImageLayout layout, vk::BufferImageCopy region);
+
+        void ImageMemoryBarrier(vk::Image image,
+                                vk::AccessFlags srcAccessMask,
+                                vk::AccessFlags dstAccessMask,
+                                vk::ImageLayout oldLayout,
+                                vk::ImageLayout newLayout,
+                                vk::PipelineStageFlags srcStageMask,
+                                vk::PipelineStageFlags dstStageMask,
+                                vk::ImageSubresourceRange range);
 
         auto GetAPIResource() -> vk::CommandBuffer;
         void SetAPIResource(vk::CommandBuffer cmdBuffer);

@@ -148,6 +148,31 @@ namespace gfx
         m_cmdBuffer.copyBuffer(src, dst, copyRegion);
     }
 
+    void CommandBuffer::CopyBufferToImage(vk::Buffer src, vk::Image dst, vk::ImageLayout layout, vk::BufferImageCopy region)
+    {
+        m_cmdBuffer.copyBufferToImage(src, dst, layout, region);
+    }
+
+    void CommandBuffer::ImageMemoryBarrier(vk::Image image,
+                                           vk::AccessFlags srcAccessMask,
+                                           vk::AccessFlags dstAccessMask,
+                                           vk::ImageLayout oldLayout,
+                                           vk::ImageLayout newLayout,
+                                           vk::PipelineStageFlags srcStageMask,
+                                           vk::PipelineStageFlags dstStageMask,
+                                           vk::ImageSubresourceRange range)
+    {
+        vk::ImageMemoryBarrier imageMemoryBarrier{};
+        imageMemoryBarrier.setSrcAccessMask(srcAccessMask);
+        imageMemoryBarrier.setDstAccessMask(dstAccessMask);
+        imageMemoryBarrier.setOldLayout(oldLayout);
+        imageMemoryBarrier.setNewLayout(newLayout);
+        imageMemoryBarrier.setImage(image);
+        imageMemoryBarrier.setSubresourceRange(range);
+
+        m_cmdBuffer.pipelineBarrier(srcStageMask, dstStageMask, {}, {}, {}, imageMemoryBarrier);
+    }
+
     auto CommandBuffer::GetAPIResource() -> vk::CommandBuffer { return m_cmdBuffer; }
 
     void CommandBuffer::SetAPIResource(vk::CommandBuffer cmdBuffer) { m_cmdBuffer = cmdBuffer; }
