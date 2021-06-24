@@ -42,7 +42,7 @@ void main()
 
 layout (location = 0) out vec4 out_Color;
 
-//layout(set = 0, binding = 5) uniform sampler2D u_AlbedoTexture;
+layout(set = 0, binding = 5) uniform sampler2D u_DiffuseTexture;
 
 struct DirectionalLight
 {
@@ -97,6 +97,8 @@ layout(location = 0) in VertexOutput Input;
 
 void main()
 {
+    vec3 objDiffuse = texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Diffuse;
+
     float ambientStrength = 0.1;
     vec3 ambient = ambientStrength * vec3(1, 1, 1);
 
@@ -111,7 +113,7 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * vec3(1, 1, 1);
 
-    vec3 result = (ambient + diffuse + specular) * u_MaterialUniforms.Diffuse;
+    vec3 result = (ambient + diffuse + specular) * objDiffuse;
     out_Color = vec4(result, 1.0);
     //    out_Color = vec4(1, 1, 1, 1);
 }

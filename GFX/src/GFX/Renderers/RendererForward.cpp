@@ -38,8 +38,9 @@ namespace gfx
 
     auto RendererForward::LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>
     {
-        auto mesh = std::make_shared<Mesh>(path);
+        auto mesh = std::make_shared<Mesh>(m_deviceContext, path);
 
+        //TODO: Move uploads to Mesh.cpp
         m_deviceContext.Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
         m_deviceContext.Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
 

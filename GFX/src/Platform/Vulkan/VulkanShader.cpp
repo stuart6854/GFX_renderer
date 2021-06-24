@@ -65,7 +65,7 @@ namespace gfx
 
     static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::UniformBuffer*>> s_UniformBuffers;  // set -> binding point -> buffer
     //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, Shader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
-   
+
     Shader::Shader(const std::string& path, bool forceCompile) : m_path(path)
     {
         // Get name of shader from filename without ext
@@ -112,6 +112,18 @@ namespace gfx
         result.DescriptorSets.push_back(descriptorSet);
 
         return result;
+    }
+
+    auto Shader::GetDescriptorSet(const std::string& name, uint32_t set) const -> const vk::WriteDescriptorSet*
+    {
+        GFX_ASSERT(set < m_shaderDescriptorSets.size());
+        GFX_ASSERT(m_shaderDescriptorSets[set]);
+        const auto& writeSets = m_shaderDescriptorSets.at(set).WriteDescriptorSets;
+        if (writeSets.find(name) == writeSets.end())
+        {
+            return nullptr;
+        }
+        return &writeSets.at(name);
     }
 
     auto Shader::ReadShaderFromFile(const std::string& filepath) -> std::string
@@ -355,6 +367,32 @@ namespace gfx
             }
         }
 
+        GFX_INFO("Sampled Images: ");
+        for (const auto& resource : resources.sampled_images)
+        {
+            const auto& name = resource.name;
+            auto& baseType = compiler.get_type(resource.base_type_id);
+            auto& type = compiler.get_type(resource.type_id);
+            uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32_t descriptorSet = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            uint32_t dimension = baseType.image.dim;
+            uint32_t arraySize = type.array[0];
+            if (arraySize == 0) arraySize = 1;
+            if (descriptorSet >= m_shaderDescriptorSets.size()) m_shaderDescriptorSets.resize(descriptorSet + 1);
+
+            auto& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
+            auto& imageSampler = shaderDescriptorSet.ImageSamplers[binding];
+            imageSampler.BindingPoint = binding;
+            imageSampler.DescriptorSet = descriptorSet;
+            imageSampler.Name = name;
+            imageSampler.ArraySize = arraySize;
+            imageSampler.ShaderStage = shaderStage;
+
+            m_resources[name] = ShaderResourceDeclaration(name, binding, 1);
+
+            GFX_INFO("  {} (set={}, binding={})", name, descriptorSet, binding);
+        }
+
         GFX_INFO("===========================");
     }
 
@@ -386,6 +424,12 @@ namespace gfx
                 typeCount.setType(vk::DescriptorType::eUniformBuffer);
                 typeCount.setDescriptorCount(shaderDescriptorSet.UniformBuffers.size());
             }
+            if (!shaderDescriptorSet.ImageSamplers.empty())
+            {
+                auto& typeCount = m_typeCounts[set].emplace_back();
+                typeCount.setType(vk::DescriptorType::eCombinedImageSampler);
+                typeCount.setDescriptorCount(shaderDescriptorSet.ImageSamplers.size());
+            }
 
             /*
              * Descriptor Set Layout
@@ -398,19 +442,36 @@ namespace gfx
                 layoutBinding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
                 layoutBinding.setDescriptorCount(1);
                 layoutBinding.setStageFlags(uniformBuffer->ShaderStage);
-                layoutBinding.binding = binding;
+                layoutBinding.setBinding(binding);
 
                 auto& writeSet = shaderDescriptorSet.WriteDescriptorSets[uniformBuffer->Name];
-                writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                writeSet.setDescriptorType(layoutBinding.descriptorType);
                 writeSet.setDescriptorCount(1);
+                writeSet.setDstBinding(layoutBinding.binding);
+            }
+            for (auto& [binding, imageSampler] : shaderDescriptorSet.ImageSamplers)
+            {
+                auto& layoutBinding = layoutBindings.emplace_back();
+                layoutBinding.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+                layoutBinding.setDescriptorCount(imageSampler.ArraySize);
+                layoutBinding.setStageFlags(imageSampler.ShaderStage);
+                layoutBinding.setBinding(binding);
+
+                GFX_ASSERT(shaderDescriptorSet.UniformBuffers.find(binding) == shaderDescriptorSet.UniformBuffers.end(), "Binding is already present!");
+
+                auto& writeSet = shaderDescriptorSet.WriteDescriptorSets[imageSampler.Name];
+                writeSet.setDescriptorType(layoutBinding.descriptorType);
+                writeSet.setDescriptorCount(imageSampler.ArraySize);
                 writeSet.setDstBinding(layoutBinding.binding);
             }
 
             vk::DescriptorSetLayoutCreateInfo descriptorLayout{};
             descriptorLayout.setBindings(layoutBindings);
 
-            GFX_INFO(
-                "Creating descriptor set {} with {} ubo's" /*, {} ssbo's, {} samplers and {} storage images"*/, set, shaderDescriptorSet.UniformBuffers.size());
+            GFX_INFO("Creating descriptor set {} with {} ubo's and {} samplers",
+                     set,
+                     shaderDescriptorSet.UniformBuffers.size(),
+                     shaderDescriptorSet.ImageSamplers.size());
 
             if (set >= m_descriptorSetLayouts.size()) m_descriptorSetLayouts.resize(set + 1);
             m_descriptorSetLayouts[set] = device.createDescriptorSetLayout(descriptorLayout);

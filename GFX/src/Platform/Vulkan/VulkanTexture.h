@@ -16,6 +16,7 @@ namespace gfx
     public:
         Texture(DeviceContext& deviceCtx, const std::string& path, const TextureDesc& desc);
 
+        auto GetHash() const -> uint64_t;
         auto GetDesc() const -> const TextureDesc& { return m_desc; }
 
         auto GetImageData() -> RawBuffer& { return m_imageData; }
@@ -24,6 +25,7 @@ namespace gfx
         auto GetVulkanAllocation() const -> const VmaAllocation& { return m_allocation; }
         auto GetVulkanView() const -> const vk::ImageView& { return m_view; }
         auto GetVulkanSampler() const -> const vk::Sampler& { return m_sampler; }
+        auto GetVulkanDescriptorInfo() const -> const vk::DescriptorImageInfo& { return m_descriptorImageInfo; }
 
     private:
         void Invalidate();
@@ -38,5 +40,7 @@ namespace gfx
         vk::Sampler m_sampler;
 
         RawBuffer m_imageData;
+
+        vk::DescriptorImageInfo m_descriptorImageInfo;
     };
-} // namespace gfx
+}  // namespace gfx

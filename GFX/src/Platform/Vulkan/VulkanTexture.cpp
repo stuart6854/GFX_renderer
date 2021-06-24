@@ -39,7 +39,7 @@ namespace gfx
         }
         else
         {
-            // stbi_set_flip_vertically_on_load(1);
+            stbi_set_flip_vertically_on_load(1);
             m_imageData.Data = stbi_load(path.c_str(), &width, &height, &channels, 4);
             m_imageData.Size = width * height * 4;
             m_desc.Format = TextureFormat::eRGBA;
@@ -56,6 +56,8 @@ namespace gfx
 
         Invalidate();
     }
+
+    auto Texture::GetHash() const -> uint64_t { return reinterpret_cast<uint64_t>(static_cast<VkImage>(m_image)); }
 
     void Texture::Invalidate()
     {
@@ -100,7 +102,7 @@ namespace gfx
         vk::ImageViewCreateInfo viewInfo;
         viewInfo.setFormat(vulkanFormat);
         viewInfo.setViewType(m_desc.Layers > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D);
-        viewInfo.setComponents({vk::ComponentSwizzle::eR,vk::ComponentSwizzle::eG,vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA});
+        viewInfo.setComponents({ vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA });
         viewInfo.subresourceRange.setAspectMask(aspectMask);
         viewInfo.subresourceRange.setBaseMipLevel(0);
         viewInfo.subresourceRange.setLevelCount(m_desc.Mips);
@@ -126,6 +128,15 @@ namespace gfx
         m_sampler = device.createSampler(samplerInfo);
 
         m_deviceCtx.Upload(this);
+
+        /* Update descriptor image info */
+        if (m_desc.Format == TextureFormat::eDepth24Stencil8 || m_desc.Format == TextureFormat::eDepth32F)
+            m_descriptorImageInfo.setImageLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+        else
+            m_descriptorImageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        m_descriptorImageInfo.setImageView(m_view);
+        m_descriptorImageInfo.setSampler(m_sampler);
     }
 
 }  // namespace gfx

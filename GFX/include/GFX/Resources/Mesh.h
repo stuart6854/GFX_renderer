@@ -7,7 +7,6 @@
 
 #include "Vertex.h"
 #include "Buffer.h"
-#include "Material.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -18,6 +17,10 @@
 
 namespace gfx
 {
+    class DeviceContext;
+    class Texture;
+    class Material;
+
     class Submesh
     {
     public:
@@ -32,9 +35,8 @@ namespace gfx
     class Mesh
     {
     public:
-        Mesh() = default;
-        Mesh(const std::string& path);
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+        Mesh(DeviceContext& deviceCtx, const std::string& path);
+        Mesh(DeviceContext& deviceCtx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
 
         ~Mesh() = default;
 
@@ -44,6 +46,7 @@ namespace gfx
         auto GetIndices() const -> const std::vector<uint32_t>& { return m_indices; }
 
         auto GetSubmeshes() const -> const std::vector<Submesh>& { return m_submeshes; }
+        auto GetTextures() const -> const std::vector<std::shared_ptr<Texture>>& { return m_textures; }
         auto GetMaterials() const -> const std::vector<std::shared_ptr<Material>>& { return m_materials; }
 
         auto GetVertexBuffer() -> std::shared_ptr<Buffer> { return m_vertexBuffer; }
@@ -55,10 +58,13 @@ namespace gfx
         void TraverseNodes(aiNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f), uint32_t level = 0);
 
     private:
+        DeviceContext& m_deviceCtx;
+
         std::vector<Vertex> m_vertices;
         std::vector<uint32_t> m_indices;
 
         std::vector<Submesh> m_submeshes;
+        std::vector<std::shared_ptr<Texture>> m_textures;
         std::vector<std::shared_ptr<Material>> m_materials;
 
         std::shared_ptr<Buffer> m_vertexBuffer;

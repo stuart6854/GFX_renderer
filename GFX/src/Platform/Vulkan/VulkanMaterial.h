@@ -21,6 +21,8 @@
 
 namespace gfx
 {
+    class Texture;
+
     class Material
     {
     public:
@@ -34,6 +36,7 @@ namespace gfx
         void Set(const std::string& name, const glm::vec4& value);
         void Set(const std::string& name, const glm::mat3& value);
         void Set(const std::string& name, const glm::mat4& value);
+        void Set(const std::string& name, const std::shared_ptr<Texture>& texture);
 
         auto GetFloat(const std::string& name) -> float&;
         auto GetInt(const std::string& name) -> int&;
@@ -43,12 +46,16 @@ namespace gfx
         auto GetVec4(const std::string& name) -> glm::vec4&;
         auto GetMat3(const std::string& name) -> glm::mat3&;
         auto GetMat4(const std::string& name) -> glm::mat4&;
+        auto GetTexture(const std::string& name) -> std::shared_ptr<Texture>;
 
         template <typename T>
         void Set(const std::string& name, const T& value);
 
         template <typename T>
         auto Get(const std::string& name) -> T&;
+
+        template <typename T>
+        auto GetResource(const std::string& name) -> std::shared_ptr<T>;
 
         auto GetShader() const -> const std::shared_ptr<Shader>& { return m_shader; }
 
@@ -63,14 +70,37 @@ namespace gfx
 
         void AllocateStorage();
 
+        void SetVulkanDescriptor(const std::string& name, const std::shared_ptr<Texture>& texture);
+
         auto FindUniformDeclaration(const std::string& name) -> const ShaderUniform*;
+        auto FindResourceDeclaration(const std::string& name) -> const ShaderResourceDeclaration*;
 
     private:
         std::shared_ptr<Shader> m_shader;
 
         RawBuffer m_uniformStorageBuffer;
+        std::vector<std::shared_ptr<Texture>> m_textures;
 
         std::array<Shader::ShaderMaterialDescriptorSet, Config::FramesInFlight> m_descriptorSets;
+
+        enum class PendingDescriptorType
+        {
+            eNone = 0,
+            eTexture2D,
+            eTextureCube
+        };
+
+        struct PendingDescriptor
+        {
+            PendingDescriptorType Type = PendingDescriptorType::eNone;
+            vk::WriteDescriptorSet WDS;
+            vk::DescriptorImageInfo ImageInfo;
+            std::shared_ptr<Texture> Texture;
+            vk::DescriptorImageInfo SubmittedImageInfo{};
+        };
+
+        std::unordered_map<uint32_t, std::shared_ptr<PendingDescriptor>> m_residentDescriptors;
+        std::vector<std::shared_ptr<PendingDescriptor>> m_pendingDescriptors;
 
         std::vector<std::vector<vk::WriteDescriptorSet>> m_writeDescriptors;
     };
@@ -92,6 +122,16 @@ namespace gfx
         GFX_ASSERT(decl, "Uniform declaration not found!");
         auto& buffer = m_uniformStorageBuffer;
         return buffer.Read<T>(decl->GetOffset());
+    }
+
+    template <typename T>
+    auto Material::GetResource(const std::string& name) -> std::shared_ptr<T>
+    {
+        auto* decl = FindResourceDeclaration(name);
+        GFX_ASSERT(decl, "Resource declaration not found!");
+        const auto slot = decl->GetRegister();
+        GFX_ASSERT(slot < m_textures.size(), "Texture slot is invalid!");
+        return std::shared_ptr<T>(m_textures[slot]);
     }
 
 }  // namespace gfx

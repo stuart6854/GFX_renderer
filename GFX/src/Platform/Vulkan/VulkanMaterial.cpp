@@ -7,6 +7,7 @@
     #include "VulkanMaterial.h"
 
     #include "VulkanCore.h"
+    #include "VulkanTexture.h"
 
     #include "GFX/Debug.h"
 
@@ -24,6 +25,7 @@ namespace gfx
     void Material::Set(const std::string& name, const glm::vec4& value) { Set<glm::vec4>(name, value); }
     void Material::Set(const std::string& name, const glm::mat3& value) { Set<glm::mat3>(name, value); }
     void Material::Set(const std::string& name, const glm::mat4& value) { Set<glm::mat4>(name, value); }
+    void Material::Set(const std::string& name, const std::shared_ptr<Texture>& texture) { SetVulkanDescriptor(name, texture); }
 
     auto Material::GetFloat(const std::string& name) -> float& { return Get<float>(name); }
     auto Material::GetInt(const std::string& name) -> int& { return Get<int>(name); }
@@ -33,6 +35,7 @@ namespace gfx
     auto Material::GetVec4(const std::string& name) -> glm::vec4& { return Get<glm::vec4>(name); }
     auto Material::GetMat3(const std::string& name) -> glm::mat3& { return Get<glm::mat3>(name); }
     auto Material::GetMat4(const std::string& name) -> glm::mat4& { return Get<glm::mat4>(name); }
+    auto Material::GetTexture(const std::string& name) -> std::shared_ptr<Texture> { return GetResource<Texture>(name); }
 
     auto Material::GetDescriptorSet(uint32_t frameIndex) const -> vk::DescriptorSet
     {
@@ -53,6 +56,18 @@ namespace gfx
             {
                 m_writeDescriptors[frameIndex].push_back(writeDesc);
             }
+        }
+
+        for (auto&& [binding, pd] : m_residentDescriptors)
+        {
+            if (pd->Type == PendingDescriptorType::eTexture2D)
+            {
+                const auto texture = pd->Texture;
+                pd->ImageInfo = texture->GetVulkanDescriptorInfo();
+                pd->WDS.pImageInfo = &pd->ImageInfo;
+            }
+
+            m_writeDescriptors[frameIndex].push_back(pd->WDS);
         }
 
         auto descriptorSet = m_shader->AllocateDescriptorSet(0, frameIndex);
@@ -84,6 +99,29 @@ namespace gfx
         }
     }
 
+    void Material::SetVulkanDescriptor(const std::string& name, const std::shared_ptr<Texture>& texture)
+    {
+        const auto* resource = FindResourceDeclaration(name);
+        GFX_ASSERT(resource);
+
+        const auto binding = resource->GetRegister();
+        // Texture is already set
+        if (binding < m_textures.size() && m_textures[binding] && texture->GetHash() == m_textures[binding]->GetHash()) return;
+
+        if (binding >= m_textures.size()) m_textures.resize(binding + 1);
+
+        m_textures[binding] = texture;
+
+        const auto* wds = m_shader->GetDescriptorSet(name);
+        GFX_ASSERT(wds);
+
+        PendingDescriptor pendingDescriptor{};
+        pendingDescriptor.Type = PendingDescriptorType::eTexture2D;
+        pendingDescriptor.WDS = *wds;
+        pendingDescriptor.Texture = texture;
+        m_residentDescriptors[binding] = std::make_shared<PendingDescriptor>(pendingDescriptor);
+    }
+
     auto Material::FindUniformDeclaration(const std::string& name) -> const ShaderUniform*
     {
         const auto& shaderBuffers = m_shader->GetShaderBuffers();
@@ -97,6 +135,16 @@ namespace gfx
             return &buffer.Uniforms.at(name);
         }
 
+        return nullptr;
+    }
+
+    auto Material::FindResourceDeclaration(const std::string& name) -> const ShaderResourceDeclaration*
+    {
+        const auto& resources = m_shader->GetShaderResources();
+        for (const auto& [n, resource] : resources)
+        {
+            if (resource.GetName() == name) return &resource;
+        }
         return nullptr;
     }
 

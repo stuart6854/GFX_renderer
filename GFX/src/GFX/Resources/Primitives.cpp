@@ -49,8 +49,9 @@ namespace gfx
             }
         }
 
-        auto mesh = std::make_shared<Mesh>(vertices, indices);
+        auto mesh = std::make_shared<Mesh>(deviceCtx, vertices, indices);
 
+        //TODO: Move uploads to Mesh.cpp
         deviceCtx.Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
         deviceCtx.Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
 

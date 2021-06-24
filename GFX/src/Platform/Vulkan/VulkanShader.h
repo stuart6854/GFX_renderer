@@ -35,9 +35,19 @@ namespace gfx
             uint32_t Size = 0;
         };
 
+        struct ImageSampler
+        {
+            uint32_t BindingPoint = 0;
+            uint32_t DescriptorSet = 0;
+            uint32_t ArraySize = 0;
+            std::string Name;
+            vk::ShaderStageFlagBits ShaderStage = {};
+        };
+
         struct ShaderDescriptorSet
         {
             std::unordered_map<uint32_t, UniformBuffer*> UniformBuffers;
+            std::unordered_map<uint32_t, ImageSampler> ImageSamplers;
 
             std::unordered_map<std::string, vk::WriteDescriptorSet> WriteDescriptorSets;
 
@@ -59,6 +69,7 @@ namespace gfx
         auto GetHash() const -> size_t;
 
         auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& { return m_buffers; }
+        auto GetShaderResources() const -> const std::unordered_map<std::string, ShaderResourceDeclaration>& { return m_resources; }
 
         auto GetPipelineShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
@@ -72,6 +83,7 @@ namespace gfx
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
 
         auto AllocateDescriptorSet(uint32_t set = 0, uint32_t frameIndex = 0) -> ShaderMaterialDescriptorSet;
+        auto GetDescriptorSet(const std::string& name, uint32_t set = 0) const -> const vk::WriteDescriptorSet*;
 
     private:
         static auto ReadShaderFromFile(const std::string& filepath) -> std::string;

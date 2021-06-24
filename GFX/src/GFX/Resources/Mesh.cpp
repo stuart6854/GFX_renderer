@@ -6,11 +6,15 @@
 
 #include "GFX/Debug.h"
 #include "GFX/Resources/Shader.h"
+#include "GFX/Resources/Texture.h"
+#include "GFX/Resources/Material.h"
 #include "GFX/Resources/ResourceDescriptions.h"
 #include "GFX/Utility/Color.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+
+#include <filesystem>
 
 namespace gfx
 {
@@ -39,9 +43,10 @@ namespace gfx
         return result;
     }
 
-    Mesh::Mesh(const std::string& path) { LoadMesh(path); }
+    Mesh::Mesh(DeviceContext& deviceCtx, const std::string& path) : m_deviceCtx(deviceCtx) { LoadMesh(path); }
 
-    Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : m_vertices(vertices), m_indices(indices)
+    Mesh::Mesh(DeviceContext& deviceCtx, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+        : m_deviceCtx(deviceCtx), m_vertices(vertices), m_indices(indices)
     {
         auto& submesh = m_submeshes.emplace_back();
         submesh.BaseVertex = 0;
@@ -145,6 +150,7 @@ namespace gfx
         {
             GFX_INFO("  Materials: {}", scene->mNumMaterials);
 
+            m_textures.resize(scene->mNumMaterials);
             m_materials.resize(scene->mNumMaterials);
 
             for (uint32_t matIndex = 0; matIndex < scene->mNumMaterials; matIndex++)
@@ -172,17 +178,29 @@ namespace gfx
                 mat->Set("u_MaterialUniforms.Specular", specular);
                 GFX_INFO("    Specular = {}, {}, {}", aiColor.r, aiColor.g, aiColor.b);
 
-                /*float shininess;
-                float metalness;
-                if (aiMaterial->Get(AI_MATKEY_SHININESS, shininess) != AI_SUCCESS) shininess = 80.0f;    // Default value
-                if (aiMaterial->Get(AI_MATKEY_REFLECTIVITY, metalness) != AI_SUCCESS) metalness = 0.0f;  // Default value
+                /* Get Textures */
+                aiString aiTexPath;
+                bool hasDiffuseMap = aiMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexPath) == AI_SUCCESS;
+                bool fallback = !hasDiffuseMap;
+                if (hasDiffuseMap)
+                {
+                    std::filesystem::path texturePath = path;
+                    auto parentPath = texturePath.parent_path();
+                    parentPath /= std::string(aiTexPath.data);
+                    auto texturePathStr = parentPath.string();
+                    GFX_INFO("  Diffuse map path = {}", texturePathStr);
 
-                float roughness = 1.0f - glm::sqrt(shininess / 100.0f);
-                GFX_INFO("    Metalness = {}", metalness);
-                GFX_INFO("    Roughness = {}", roughness);
-
-                mat->Set("u_MaterialUniforms.Metalness", metalness);
-                mat->Set("u_MaterialUniforms.Roughness", roughness);*/
+                    TextureDesc desc{};
+                    auto texture = std::make_shared<Texture>(m_deviceCtx, texturePathStr, desc);
+                    m_textures[matIndex] = texture;
+                    mat->Set("u_DiffuseTexture", texture);
+                    mat->Set("u_MaterialUniforms.Diffuse", glm::vec3(1.0f));
+                }
+                if (fallback)
+                {
+                    GFX_INFO("  No diffuse map");
+                    // TODO: mat->Set("u_DiffuseTexture", whiteTexture);
+                }
             }
         }
         else
