@@ -6,6 +6,7 @@ IncludeDir = {}
 IncludeDir["Assimp"] = "%{wks.location}/dependencies/assimp/include"
 IncludeDir["GLFW"] = "%{wks.location}/dependencies/glfw/include"
 IncludeDir["glm"] = "%{wks.location}/dependencies/glm"
+IncludeDir["stb"] = "%{wks.location}/dependencies/stb/include"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}

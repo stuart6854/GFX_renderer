@@ -52,6 +52,7 @@ project "GFX"
         "%{IncludeDir.Assimp}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.glm}",
+        "%{IncludeDir.stb}",
         "%{IncludeDir.VulkanSDK}",
     }
 
