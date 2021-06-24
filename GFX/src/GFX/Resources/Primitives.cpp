@@ -14,6 +14,7 @@ namespace gfx
         Vertex start{};
         start.Position = { -halfSize, 0, -halfSize };
         start.Normal = { 0.0f, 1.0f, 0.0f };
+        start.TexCoord = { 0.0f, 0.0f };
 
         Vertex p = start;
         for (uint32_t z = 0; z < resolution + 1; z++)
@@ -22,10 +23,13 @@ namespace gfx
             {
                 vertices.push_back(p);
                 p.Position.x += increment;
+                p.TexCoord.x += 1.0f / resolution;
             }
 
             p.Position.x = start.Position.x;
             p.Position.z += increment;
+            p.TexCoord.x = 0.0f;
+            p.TexCoord.y += 1.0f / resolution;
         }
 
         // Generate faces
@@ -51,7 +55,7 @@ namespace gfx
 
         auto mesh = std::make_shared<Mesh>(deviceCtx, vertices, indices);
 
-        //TODO: Move uploads to Mesh.cpp
+        // TODO: Move uploads to Mesh.cpp
         deviceCtx.Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
         deviceCtx.Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
 
