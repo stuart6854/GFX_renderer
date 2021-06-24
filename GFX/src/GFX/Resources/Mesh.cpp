@@ -64,11 +64,20 @@ namespace gfx
         indexBufferDesc.Size = sizeof(uint32_t) * submesh.IndexCount;
         m_indexBuffer = std::make_shared<Buffer>(indexBufferDesc);
 
+        // TODO: Move somewhere appropriate
+        TextureDesc textureDesc{};
+        textureDesc.Width = textureDesc.Height = 1;
+        textureDesc.Format = TextureFormat::eRGBA;
+
+        uint32_t whiteTextureData = 0xffffffff;
+        const auto whiteTexture = std::make_shared<Texture>(m_deviceCtx, textureDesc, &whiteTextureData);
+
         const auto meshShader = ShaderLibrary::Get("PBR_Static");
         const auto material = std::make_shared<Material>(meshShader);
         material->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
         material->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
         material->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
+        material->Set("u_DiffuseTexture", whiteTexture);
         m_materials.push_back(material);
     }
 
@@ -146,6 +155,14 @@ namespace gfx
 
         const auto meshShader = ShaderLibrary::Get("PBR_Static");
 
+        // TODO: Move somewhere appropriate
+        TextureDesc textureDesc{};
+        textureDesc.Width = textureDesc.Height = 1;
+        textureDesc.Format = TextureFormat::eRGBA;
+
+        uint32_t whiteTextureData = 0xffffffff;
+        const auto whiteTexture = std::make_shared<Texture>(m_deviceCtx, textureDesc, &whiteTextureData);
+
         if (scene->HasMaterials())
         {
             GFX_INFO("  Materials: {}", scene->mNumMaterials);
@@ -199,7 +216,7 @@ namespace gfx
                 if (fallback)
                 {
                     GFX_INFO("  No diffuse map");
-                    // TODO: mat->Set("u_DiffuseTexture", whiteTexture);
+                    mat->Set("u_DiffuseTexture", whiteTexture);
                 }
             }
         }
@@ -210,6 +227,7 @@ namespace gfx
             mat->Set("u_MaterialUniforms.Ambient", { 0.8f, 0.8f, 0.8f });
             mat->Set("u_MaterialUniforms.Diffuse", { 0.8f, 0.8f, 0.8f });
             mat->Set("u_MaterialUniforms.Specular", { 0.8f, 0.8f, 0.8f });
+            mat->Set("u_DiffuseTexture", whiteTexture);
         }
 
         GFX_INFO("  Mesh loaded: {} vertices, {} indices", vertexCount, indexCount);
