@@ -6,20 +6,58 @@
 
     #include "VulkanFramebuffer.h"
 
-    #include <utility>
+    #include "VulkanRenderSurface.h"
+
+    #include "GFX/Debug.h"
 
 namespace gfx
 {
-    Framebuffer::Framebuffer(vk::Framebuffer framebuffer, vk::RenderPass renderpass, vk::Extent2D extent)
-        : m_framebuffer(framebuffer), m_renderpass(renderpass), m_extent(extent), m_swapchainTarget(true)
+    Framebuffer::Framebuffer(RenderSurface* renderSurface)
     {
+        m_desc.IsSwapChainTarget = true;
+        m_desc.SwapChainTarget = renderSurface;
+
+        GFX_ASSERT(renderSurface != nullptr, "Cannot create a framebuffer with a null RenderSurface!");
+
+        Resize(renderSurface->GetWidth(), renderSurface->GetHeight(), true);
     }
 
-    auto Framebuffer::GetFramebuffer() const -> vk::Framebuffer { return m_framebuffer; }
+    Framebuffer::Framebuffer(const FramebufferDesc& desc) : m_desc(desc)
+    {
+        GFX_ASSERT(m_desc.Width != 0 && m_desc.Height != 0, "Framebuffer width & height cannot be 0!");
+        
+        GFX_ASSERT(!m_desc.Attachments.empty(), "Cannot create framebuffer with 0 attachments!");
 
-    auto Framebuffer::GetRenderPass() const -> vk::RenderPass { return m_renderpass; }
+        // Create all image objects immediately
+        for (auto& attachmentDesc : m_desc.Attachments)
+        {
+            if (Utils::IsDepthFormat(attachmentDesc.Format))
+            {
+            }
+            else
+            {
+            }
+        }
 
-    auto Framebuffer::GetExtent() const -> vk::Extent2D { return m_extent; }
+        Resize(m_desc.Width, m_desc.Height, true);
+    }
+
+    void Framebuffer::Resize(uint32_t width, uint32_t height, bool forceRecreate)
+    {
+        if (!forceRecreate && (m_desc.Width == width && m_desc.Height == height)) return;
+
+        m_desc.Width = width;
+        m_desc.Height = height;
+
+        if (!m_desc.IsSwapChainTarget)
+        {
+            // Invalidate();
+        }
+        else
+        {
+            m_renderPass = m_desc.SwapChainTarget->GetRenderPass();
+        }
+    }
 
 }  // namespace gfx
 

@@ -9,10 +9,14 @@
 #include "Framebuffer.h"
 #include "VertexLayout.h"
 
+#include <glm/vec3.hpp>
+
 #include <cstdint>
 
 namespace gfx
 {
+    class RenderSurface;
+
     enum class BufferType
     {
         eNone = 0,
@@ -87,6 +91,24 @@ namespace gfx
         TextureUsage Usage = TextureUsage::eTexture;
         // TODO: Sampler Filter
         // TODO: Sampler Wrap
+    };
+
+    struct FramebufferAttachmentDesc
+    {
+        TextureFormat Format;
+    };
+
+    struct FramebufferDesc
+    {
+        uint32_t Width = 0;
+        uint32_t Height = 0;
+        glm::vec3 ClearColor = { 0.0f, 0.0f, 0.0f };
+        std::vector<FramebufferAttachmentDesc> Attachments;
+        uint32_t Samples = 1;  // Multisampling
+
+        // SwapChainTarget = screen buffer (no framebuffer)
+        bool IsSwapChainTarget = false;
+        RenderSurface* SwapChainTarget;
     };
 
     namespace Utils

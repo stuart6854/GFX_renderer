@@ -23,8 +23,9 @@ int main(int argc, char** argv)
 
         gfx::DeviceContext deviceContext;
 
-        gfx::RenderContext renderContext;
+        gfx::Framebuffer framebuffer(&renderSurface);
 
+        gfx::RenderContext renderContext;
         while (!window.ShouldClose())
         {
             window.PollEvents();
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
             renderContext.Begin();
 
             // auto framebuffer = deviceContext.GetFramebuffer();
-            // renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), framebuffer.get());
+            renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), &framebuffer);
 
             renderContext.EndRenderPass();
             renderContext.End();

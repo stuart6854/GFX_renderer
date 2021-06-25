@@ -17,6 +17,10 @@ namespace gfx
         explicit RenderSurface(IWindowSurface& windowSurface);
         ~RenderSurface();
 
+        auto GetWidth() const -> uint32_t { return m_swapChainWidth; }
+        auto GetHeight() const -> uint32_t { return m_swapChainHeight; }
+        auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
+
         void Resize(uint32_t width, uint32_t height);
 
         void NewFrame();

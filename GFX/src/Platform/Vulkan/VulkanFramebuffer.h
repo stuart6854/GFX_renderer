@@ -5,26 +5,27 @@
 #ifndef PERSONAL_RENDERER_VULKANFRAMEBUFFER_H
 #define PERSONAL_RENDERER_VULKANFRAMEBUFFER_H
 
-#include <vulkan/vulkan.hpp>
+#include "GFX/Resources/ResourceDescriptions.h"
 
 namespace gfx
 {
+    class RenderSurface;
+
     class Framebuffer
     {
     public:
         Framebuffer() = default;
-        Framebuffer(vk::Framebuffer framebuffer, vk::RenderPass renderpass, vk::Extent2D extent);
+        Framebuffer(RenderSurface* renderSurface);
+        Framebuffer(const FramebufferDesc& desc);
 
-        auto GetFramebuffer() const -> vk::Framebuffer;
-        auto GetRenderPass() const -> vk::RenderPass;
-        auto GetExtent() const -> vk::Extent2D;
-        auto IsSwapchainTarget() const -> bool { return m_swapchainTarget; }
+        auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
+        auto IsSwapchainTarget() const -> bool { return m_desc.IsSwapChainTarget; }
+
+        void Resize(uint32_t width, uint32_t height, bool forceRecreate = false);
 
     private:
-        vk::Framebuffer m_framebuffer;
-        vk::RenderPass m_renderpass;
-        vk::Extent2D m_extent;
-        bool m_swapchainTarget = false;
+        FramebufferDesc m_desc;
+        vk::RenderPass m_renderPass;
     };
 }  // namespace gfx
 
