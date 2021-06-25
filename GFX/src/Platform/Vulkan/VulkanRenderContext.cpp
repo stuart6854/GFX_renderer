@@ -31,7 +31,8 @@ namespace gfx
         beginInfo.renderPass = framebuffer->GetRenderPass();
         beginInfo.framebuffer = framebuffer->GetFramebuffer();
         beginInfo.renderArea.setOffset({ 0, 0 });
-        beginInfo.renderArea.extent = framebuffer->GetExtent();
+        beginInfo.renderArea.extent.setWidth(framebuffer->GetWidth());
+        beginInfo.renderArea.extent.setHeight(framebuffer->GetHeight());
         beginInfo.setClearValues(clearValues);
 
         GetCommandBuffer().BeginRenderPass(beginInfo);
