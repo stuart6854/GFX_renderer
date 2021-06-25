@@ -8,6 +8,7 @@
 #include <GFX/Core/RenderSurface.h>
 #include <GFX/DeviceContext.h>
 #include <GFX/RenderContext.h>
+#include <GFX/Resources/Framebuffer.h>
 
 #include <iostream>
 
@@ -34,7 +35,6 @@ int main(int argc, char** argv)
 
             renderContext.Begin();
 
-            // auto framebuffer = deviceContext.GetFramebuffer();
             renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), &framebuffer);
 
             renderContext.EndRenderPass();

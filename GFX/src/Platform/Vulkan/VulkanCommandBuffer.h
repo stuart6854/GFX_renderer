@@ -7,6 +7,7 @@
 
 #include "GFX/Resources/Buffer.h"
 #include "GFX/Resources/Pipeline.h"
+#include "GFX/Resources/ShaderUniform.h"
 
 #include <vulkan/vulkan.hpp>
 

@@ -5,6 +5,8 @@
 
 #include "vk_mem_alloc.h"
 
+#include <vulkan/vulkan.hpp>
+
 #include <string>
 
 namespace gfx

@@ -2,6 +2,8 @@
 
 #include "GFX/Resources/Primitives.h"
 
+#include "GFX/DeviceContext.h"
+
 namespace gfx
 {
     auto Primitives::CreatePlane(DeviceContext& deviceCtx, float size, const uint32_t resolution) -> std::shared_ptr<Mesh>

@@ -5,17 +5,18 @@
 #ifndef PERSONAL_RENDERER_RESOURCEDESCRIPTIONS_H
 #define PERSONAL_RENDERER_RESOURCEDESCRIPTIONS_H
 
-#include "Shader.h"
-#include "Framebuffer.h"
 #include "VertexLayout.h"
 
 #include <glm/vec3.hpp>
 
 #include <cstdint>
+#include <memory>
 
 namespace gfx
 {
     class RenderSurface;
+    class Framebuffer;
+    class Shader;
 
     enum class BufferType
     {
