@@ -26,9 +26,6 @@ namespace gfx
     class DeviceContext
     {
     public:
-        DeviceContext();
-        ~DeviceContext();
-
         auto CreateBuffer(BufferDesc desc) -> std::shared_ptr<Buffer>;
         auto CreateShader(const std::string& path) -> std::shared_ptr<Shader>;
         auto CreatePipeline(const PipelineDesc& desc) -> std::shared_ptr<Pipeline>;

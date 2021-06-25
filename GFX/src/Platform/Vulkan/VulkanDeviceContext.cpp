@@ -11,10 +11,6 @@
 
 namespace gfx
 {
-    DeviceContext::DeviceContext() {}
-
-    DeviceContext::~DeviceContext() {}
-
     auto DeviceContext::CreateBuffer(BufferDesc desc) -> std::shared_ptr<Buffer>
     {
         auto allocator = Vulkan::GetAllocator();
