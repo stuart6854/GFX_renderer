@@ -21,16 +21,13 @@ namespace gfx
 
         {
             ShaderLibrary::Load("resources/shaders/PBR_Static.glsl", true);
-            m_geometryShader = ShaderLibrary::Get("PBR_Static");//m_deviceContext.CreateShader("resources/shaders/PBR_Static.glsl");
+            m_geometryShader = ShaderLibrary::Get("PBR_Static");  // m_deviceContext.CreateShader("resources/shaders/PBR_Static.glsl");
 
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;
             pipelineDesc.Layout = {
-                { ShaderDataType::Float3, "a_Position" },
-                { ShaderDataType::Float3, "a_Normal" },
-                { ShaderDataType::Float2, "a_TexCoord" },
-                { ShaderDataType::Float3, "a_Tangent" },
-                { ShaderDataType::Float3, "a_Bitangent" },
+                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
+                { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },
             };
             pipelineDesc.Framebuffer = m_deviceContext.GetFramebuffer();
 
@@ -42,7 +39,7 @@ namespace gfx
     {
         auto mesh = std::make_shared<Mesh>(m_deviceContext, path);
 
-        //TODO: Move uploads to Mesh.cpp
+        // TODO: Move uploads to Mesh.cpp
         m_deviceContext.Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
         m_deviceContext.Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
 
@@ -98,6 +95,58 @@ namespace gfx
     }
 
     void RendererForward::Flush()
+    {
+        ShadowPass();
+        GeometryPass();
+    }
+
+    void RendererForward::ShadowPass()
+    {
+        // m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, framebuffer.get());
+
+        m_renderContext.BindPipeline(m_shadowPipeline.get());
+
+        for (const auto& drawCall : m_shadowDrawCalls)
+        {
+            m_renderContext.BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
+            m_renderContext.BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
+
+            auto& materials = drawCall.mesh->GetMaterials();
+            for (auto& material : materials)
+            {
+                UpdateMaterialForRendering(material, m_uniformBufferSet);
+            }
+
+            auto& submeshes = drawCall.mesh->GetSubmeshes();
+            for (const auto& submesh : submeshes)
+            {
+                auto& material = drawCall.mesh->GetMaterials()[submesh.MaterialIndex];
+                auto layout = m_geometryPipeline->GetAPIPipelineLayout();
+                auto descriptorSet = material->GetDescriptorSet(m_deviceContext.GetCurrentFrameIndex());
+
+                std::vector<vk::DescriptorSet> descriptorSets = {
+                    descriptorSet,
+                    // m_rendererDescriptorSet
+                };
+
+                m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
+
+                const auto modelTransform = drawCall.transform * submesh.Transform;
+
+                auto& buffer = material->GetUniformStorageBuffer();
+                m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
+                m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
+
+                m_renderContext.DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+            }
+        }
+
+        m_renderContext.EndRenderPass();
+
+        m_shadowDrawCalls.clear();
+    }
+
+    void RendererForward::GeometryPass()
     {
         auto framebuffer = m_deviceContext.GetFramebuffer();
         m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, framebuffer.get());
