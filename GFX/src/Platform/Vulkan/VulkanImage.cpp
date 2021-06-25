@@ -1,75 +1,14 @@
-#include "VulkanTexture.h"
+﻿#ifdef GFX_API_VULKAN
 
-#include "VulkanCore.h"
+    #include "VulkanImage.h"
 
-#include "GFX/Debug.h"
-#include "GFX/DeviceContext.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+    #include "VulkanCore.h"
 
 namespace gfx
 {
-    namespace Utils
-    {
-        auto VulkanTextureFormat(ImageFormat format) -> vk::Format
-        {
-            switch (format)
-            {
-                case ImageFormat::eRGB: return vk::Format::eR8G8B8Unorm;
-                case ImageFormat::eRGBA: return vk::Format::eR8G8B8A8Unorm;
-                case ImageFormat::eDepth32F: return vk::Format::eD32Sfloat;
-                case ImageFormat::eDepth24Stencil8: return vk::Format::eD24UnormS8Uint;
-                default: break;
-            }
-            GFX_ASSERT(false);
-            return vk::Format::eUndefined;
-        }
-    }  // namespace Utils
+    Image::Image(const ImageDesc& desc) : m_desc(desc) {}
 
-    Texture::Texture(DeviceContext& deviceCtx, const std::string& path, const TextureDesc& desc) : m_deviceCtx(deviceCtx), m_desc(desc)
-    {
-        int width, height, channels;
-
-        if (stbi_is_hdr(path.c_str()))
-        {
-            m_imageData.Data = (uint8_t*)stbi_loadf(path.c_str(), &width, &height, &channels, 4);
-            m_imageData.Size = width * height * 4 * sizeof(float);
-            m_desc.Format = ImageFormat::eRGBA32F;
-        }
-        else
-        {
-            stbi_set_flip_vertically_on_load(1);
-            m_imageData.Data = stbi_load(path.c_str(), &width, &height, &channels, 4);
-            m_imageData.Size = width * height * 4;
-            m_desc.Format = ImageFormat::eRGBA;
-        }
-
-        GFX_ASSERT(m_imageData.Data, "Failed to load image!");
-
-        m_desc.Width = width;
-        m_desc.Height = height;
-        m_desc.Depth = 1;
-        m_desc.Layers = 1;
-
-        GFX_ASSERT(m_desc.Format != ImageFormat::eNone);
-
-        Invalidate();
-    }
-
-    Texture::Texture(DeviceContext& deviceCtx, const TextureDesc& desc, const void* data) : m_deviceCtx(deviceCtx), m_desc(desc)
-    {
-        GFX_ASSERT(m_desc.Format == ImageFormat::eRGBA);
-
-        const uint32_t size = m_desc.Width * m_desc.Height * 4;
-        m_imageData = RawBuffer::Copy(data, size);
-
-        Invalidate();
-    }
-
-    auto Texture::GetHash() const -> uint64_t { return reinterpret_cast<uint64_t>(static_cast<VkImage>(m_image)); }
-
-    void Texture::Invalidate()
+    void Image::Invalidate()
     {
         const auto device = Vulkan::GetDevice();
         const auto allocator = Vulkan::GetAllocator();
@@ -87,20 +26,19 @@ namespace gfx
             usage |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
         }
 
-        auto vulkanFormat = Utils::VulkanTextureFormat(m_desc.Format);
+        const auto vulkanFormat = Utils::VulkanTextureFormat(m_desc.Format);
 
         vk::ImageCreateInfo imageInfo{};
         imageInfo.setImageType(vk::ImageType::e2D);
         imageInfo.setFormat(vulkanFormat);
         imageInfo.extent.setWidth(m_desc.Width);
         imageInfo.extent.setHeight(m_desc.Height);
-        imageInfo.extent.setDepth(m_desc.Depth);
+        imageInfo.extent.setDepth(1);
         imageInfo.setMipLevels(m_desc.Mips);
         imageInfo.setArrayLayers(m_desc.Layers);
         imageInfo.setUsage(usage);
         imageInfo.setSamples(vk::SampleCountFlagBits::e1);
         imageInfo.setTiling(vk::ImageTiling::eOptimal);
-
         allocator.Allocate(imageInfo, VMA_MEMORY_USAGE_GPU_ONLY, &m_image, &m_allocation);
         GFX_ASSERT(m_image);
         GFX_ASSERT(m_allocation);
@@ -119,7 +57,6 @@ namespace gfx
         viewInfo.subresourceRange.setBaseArrayLayer(0);
         viewInfo.subresourceRange.setLayerCount(m_desc.Layers);
         viewInfo.setImage(m_image);
-
         m_view = device.createImageView(viewInfo);
 
         vk::SamplerCreateInfo samplerInfo{};
@@ -134,12 +71,24 @@ namespace gfx
         samplerInfo.setMinLod(0.0f);
         samplerInfo.setMaxLod(1.0f);
         samplerInfo.setBorderColor(vk::BorderColor::eFloatOpaqueWhite);
-
         m_sampler = device.createSampler(samplerInfo);
 
-        m_deviceCtx.Upload(this);
+        UpdateDescriptor();
+    }
 
-        /* Update descriptor image info */
+    void Image::Release()
+    {
+        const auto device = Vulkan::GetDevice();
+        const auto allocator = Vulkan::GetAllocator();
+
+        device.destroy(m_sampler);
+        device.destroy(m_view);
+
+        allocator.Free(m_image, m_allocation);
+    }
+
+    void Image::UpdateDescriptor()
+    {
         if (m_desc.Format == ImageFormat::eDepth24Stencil8 || m_desc.Format == ImageFormat::eDepth32F)
             m_descriptorImageInfo.setImageLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
         else
@@ -149,4 +98,24 @@ namespace gfx
         m_descriptorImageInfo.setSampler(m_sampler);
     }
 
+    namespace Utils
+    {
+        auto VulkanTextureFormat(const ImageFormat format) -> vk::Format
+        {
+            switch (format)
+            {
+                case ImageFormat::eRGB: return vk::Format::eR8G8B8Unorm;
+                case ImageFormat::eRGBA: return vk::Format::eR8G8B8A8Unorm;
+                case ImageFormat::eDepth32F: return vk::Format::eD32Sfloat;
+                case ImageFormat::eDepth24Stencil8: return vk::Format::eD24UnormS8Uint;
+                default: break;
+            }
+            GFX_ASSERT(false);
+            return vk::Format::eUndefined;
+        }
+
+    }  // namespace Utils
+
 }  // namespace gfx
+
+#endif

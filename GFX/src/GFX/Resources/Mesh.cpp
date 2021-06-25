@@ -67,7 +67,7 @@ namespace gfx
         // TODO: Move somewhere appropriate
         TextureDesc textureDesc{};
         textureDesc.Width = textureDesc.Height = 1;
-        textureDesc.Format = TextureFormat::eRGBA;
+        textureDesc.Format = ImageFormat::eRGBA;
 
         uint32_t whiteTextureData = 0xffffffff;
         const auto whiteTexture = std::make_shared<Texture>(m_deviceCtx, textureDesc, &whiteTextureData);
@@ -163,7 +163,7 @@ namespace gfx
         // TODO: Move somewhere appropriate
         TextureDesc textureDesc{};
         textureDesc.Width = textureDesc.Height = 1;
-        textureDesc.Format = TextureFormat::eRGBA;
+        textureDesc.Format = ImageFormat::eRGBA;
 
         uint32_t whiteTextureData = 0xffffffff;
         const auto whiteTexture = std::make_shared<Texture>(m_deviceCtx, textureDesc, &whiteTextureData);

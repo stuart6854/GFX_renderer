@@ -55,7 +55,7 @@ namespace gfx
         float LineWidth = 1.0f;
     };
 
-    enum class TextureFormat
+    enum class ImageFormat
     {
         eNone = 0,
         eRGB,
@@ -73,11 +73,21 @@ namespace gfx
         eDepth = eDepth24Stencil8
     };
 
-    enum class TextureUsage
+    enum class ImageUsage
     {
         eNone = 0,
         eTexture,
         eAttachment,
+    };
+
+    struct ImageDesc
+    {
+        uint32_t Width = 0;
+        uint32_t Height = 0;
+        uint32_t Layers = 1;
+        uint32_t Mips = 1;
+        ImageFormat Format = ImageFormat::eRGBA;
+        ImageUsage Usage = ImageUsage::eTexture;
     };
 
     struct TextureDesc
@@ -87,15 +97,15 @@ namespace gfx
         uint32_t Depth = 1;
         uint32_t Layers = 1;
         uint32_t Mips = 1;
-        TextureFormat Format;
-        TextureUsage Usage = TextureUsage::eTexture;
+        ImageFormat Format;
+        ImageUsage Usage = ImageUsage::eTexture;
         // TODO: Sampler Filter
         // TODO: Sampler Wrap
     };
 
     struct FramebufferAttachmentDesc
     {
-        TextureFormat Format;
+        ImageFormat Format;
     };
 
     struct FramebufferDesc
@@ -103,6 +113,8 @@ namespace gfx
         uint32_t Width = 0;
         uint32_t Height = 0;
         glm::vec3 ClearColor = { 0.0f, 0.0f, 0.0f };
+        bool ClearOnLoad = true;
+
         std::vector<FramebufferAttachmentDesc> Attachments;
         uint32_t Samples = 1;  // Multisampling
 
@@ -113,9 +125,9 @@ namespace gfx
 
     namespace Utils
     {
-        inline bool IsDepthFormat(TextureFormat format)
+        inline bool IsDepthFormat(ImageFormat format)
         {
-            if (format == TextureFormat::eDepth32F || format == TextureFormat::eDepth24Stencil8) return true;
+            if (format == ImageFormat::eDepth32F || format == ImageFormat::eDepth24Stencil8) return true;
 
             return false;
         }
