@@ -265,6 +265,7 @@ namespace gfx
         for (int i = 0; i < m_swapChainImages.size(); i++)
         {
             auto& swapChainImage = m_swapChainImages.at(i);
+            swapChainImage.Image = swapChainImages.at(i);
 
             viewInfo.setImage(swapChainImage.Image);
             swapChainImage.View = device.createImageView(viewInfo);
