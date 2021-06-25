@@ -19,10 +19,14 @@ namespace gfx
         explicit Framebuffer(RenderSurface* renderSurface);
         explicit Framebuffer(const FramebufferDesc& desc);
 
-        auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
+        auto GetWidth() const -> uint32_t { return m_desc.Width; }
+        auto GetHeight() const -> uint32_t { return m_desc.Height; }
         auto IsSwapchainTarget() const -> bool { return m_desc.IsSwapChainTarget; }
 
         void Resize(uint32_t width, uint32_t height, bool forceRecreate = false);
+
+        auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
+        auto GetFramebuffer() const -> vk::Framebuffer;
 
     private:
         void Invalidate();

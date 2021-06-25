@@ -68,6 +68,13 @@ namespace gfx
         }
     }
 
+    auto Framebuffer::GetFramebuffer() const -> vk::Framebuffer
+    {
+        if (!m_desc.IsSwapChainTarget) return m_framebuffer;
+
+        return m_desc.SwapChainTarget->GetCurrentFramebuffer();
+    }
+
     void Framebuffer::Invalidate()
     {
         const auto& device = Vulkan::GetDevice();
@@ -89,7 +96,7 @@ namespace gfx
         }
 
         /* RenderPass */
-        
+
         std::vector<vk::AttachmentDescription> attachmentDescriptions;
         std::vector<vk::AttachmentReference> colorAttachmentsReferences;
         vk::AttachmentReference depthAttachmentReference;
