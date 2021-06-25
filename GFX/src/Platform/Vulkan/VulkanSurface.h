@@ -9,7 +9,7 @@
 
 namespace gfx
 {
-    class ISurface
+    class IWindowSurface
     {
     public:
         virtual auto GetSurfaceWidth() -> uint32_t = 0;

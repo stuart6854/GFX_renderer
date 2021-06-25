@@ -18,14 +18,14 @@
 
 namespace gfx
 {
-    class ISurface;
+    class IWindowSurface;
     class Mesh;
     class Pipeline;
 
     class RendererForward
     {
     public:
-        void Init(ISurface& surface);
+        void Init(IWindowSurface& surface);
 
         auto LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>;
 

@@ -10,7 +10,7 @@
 
 namespace gfx
 {
-    void RendererForward::Init(ISurface& surface)
+    void RendererForward::Init(IWindowSurface& surface)
     {
         m_deviceContext.ProcessWindowChanges(surface, surface.GetSurfaceWidth(), surface.GetSurfaceHeight());
 

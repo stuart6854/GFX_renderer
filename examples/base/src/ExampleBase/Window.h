@@ -8,14 +8,14 @@
 #include <cstdint>
 #include <string>
 
-#include <GFX/Surface.h>
+#include <GFX/IWindowSurface.h>
 
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 
 namespace example
 {
-    class Window : public gfx::ISurface
+    class Window : public gfx::IWindowSurface
     {
     public:
         Window(std::string title = "ExampleBase", int w = 720, int h = 480);

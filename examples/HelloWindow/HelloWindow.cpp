@@ -5,6 +5,7 @@
 #include <ExampleBase/Window.h>
 
 #include <GFX/GFX.h>
+#include <GFX/Core/RenderSurface.h>
 #include <GFX/DeviceContext.h>
 #include <GFX/RenderContext.h>
 
@@ -18,8 +19,9 @@ int main(int argc, char** argv)
     {
         example::Window window;
 
+        gfx::RenderSurface renderSurface(window);
+
         gfx::DeviceContext deviceContext;
-        deviceContext.ProcessWindowChanges(window, window.GetWidth(), window.GetHeight());
 
         gfx::RenderContext renderContext;
 
@@ -27,18 +29,18 @@ int main(int argc, char** argv)
         {
             window.PollEvents();
 
-            deviceContext.NewFrame();
+            renderSurface.NewFrame();
 
             renderContext.Begin();
 
-            auto framebuffer = deviceContext.GetFramebuffer();
-            renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), framebuffer.get());
+            // auto framebuffer = deviceContext.GetFramebuffer();
+            // renderContext.BeginRenderPass(gfx::Color(1.0f, 0.0f, 0.0f), framebuffer.get());
 
             renderContext.EndRenderPass();
             renderContext.End();
 
-            deviceContext.Submit(renderContext);
-            deviceContext.Present();
+            renderSurface.Submit(renderContext);
+            renderSurface.Present();
         }
     }
     gfx::Shutdown();
