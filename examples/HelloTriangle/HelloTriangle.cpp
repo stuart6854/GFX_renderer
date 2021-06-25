@@ -5,13 +5,15 @@
 #include <ExampleBase/Window.h>
 
 #include <GFX/GFX.h>
-#include "GFX/Debug.h"
+#include <GFX/Debug.h>
+#include <GFX/Core/RenderSurface.h>
 #include <GFX/DeviceContext.h>
 #include <GFX/RenderContext.h>
 #include <GFX/Resources/Vertex.h>
 #include <GFX/Resources/Buffer.h>
 #include <GFX/Resources/Shader.h>
 #include <GFX/Resources/Pipeline.h>
+#include <GFX/Resources/Framebuffer.h>
 
 #include <iostream>
 #include <vector>
@@ -34,8 +36,11 @@ int main(int argc, char** argv)
     {
         example::Window window;
 
+        gfx::RenderSurface renderSurface(window);
+
         gfx::DeviceContext deviceContext;
-        deviceContext.ProcessWindowChanges(window, window.GetWidth(), window.GetHeight());
+
+        auto framebuffer = std::make_shared<gfx::Framebuffer>(&renderSurface);
 
         const uint32_t vertexBufferSize = sizeof(gfx::Vertex) * triVerts.size();
         gfx::BufferDesc vertexBufferDesc = { .Type = gfx::BufferType::eVertex, .Size = vertexBufferSize };
@@ -53,10 +58,10 @@ int main(int argc, char** argv)
         gfx::PipelineDesc pipelineDesc;
         pipelineDesc.Shader = shader;
         pipelineDesc.Layout = {
-            { gfx::ShaderDataType::Float3, "a_Position" },
-            { gfx::ShaderDataType::Float3, "a_Color" },
+            { gfx::ShaderDataType::Float3, "a_Position" }, { gfx::ShaderDataType::Float3, "a_Normal" },    { gfx::ShaderDataType::Float2, "a_TexCoord" },
+            { gfx::ShaderDataType::Float3, "a_Tangent" },  { gfx::ShaderDataType::Float3, "a_Bitangent" },
         };
-        pipelineDesc.Framebuffer = deviceContext.GetFramebuffer();
+        pipelineDesc.Framebuffer = framebuffer;
 
         auto pipeline = deviceContext.CreatePipeline(pipelineDesc);
 
@@ -66,11 +71,9 @@ int main(int argc, char** argv)
         {
             window.PollEvents();
 
-            deviceContext.NewFrame();
+            renderSurface.NewFrame();
 
             renderContext.Begin();
-
-            auto framebuffer = deviceContext.GetFramebuffer();
             renderContext.BeginRenderPass(gfx::Color(0.156f, 0.176f, 0.196f), framebuffer.get());
 
             renderContext.BindPipeline(pipeline.get());
@@ -78,13 +81,13 @@ int main(int argc, char** argv)
             renderContext.BindVertexBuffer(vertexBuffer.get());
             renderContext.BindIndexBuffer(indexBuffer.get());
 
-            renderContext.DrawIndexed(3, 0, 0, 0, 0);
+            renderContext.DrawIndexed(3, 1, 0, 0, 0);
 
             renderContext.EndRenderPass();
             renderContext.End();
 
-            deviceContext.Submit(renderContext);
-            deviceContext.Present();
+            renderSurface.Submit(renderContext);
+            renderSurface.Present();
         }
     }
     gfx::Shutdown();
