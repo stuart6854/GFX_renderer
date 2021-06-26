@@ -123,26 +123,25 @@ struct VertexOutput
 
 layout(location = 0) in VertexOutput Input;
 
-vec3 AmbientColor = vec3(0.1, 0.1, 0.1);
+vec3 AmbientColor = vec3(0.05, 0.05, 0.05);
 vec3 SpecularColor = vec3(0.5, 0.5, 0.5);
 
-vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir, float shadow)
+vec3 CalcDirLight_Diffuse(DirectionalLight light, vec3 normal, vec3 objDiffuseColor)
 {
     vec3 lightDir = normalize(-light.Direction);
-    // Diffuse 
     float diff = max(dot(normal, lightDir), 0.0);
-    //Specular
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // TODO: Replace 32 with material shininess
-    // Combine
-    vec3 ambient = AmbientColor * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Ambient);
-    vec3 diffuse = light.Color * diff * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Diffuse);
-    vec3 specular = SpecularColor * spec * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Specular);
-    // return (ambient + diffuse + specular);
-    return (ambient + (1.0 - shadow ) * (diffuse + specular));
+    return light.Color * diff * objDiffuseColor;
 }
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow)
+vec3 CalcDirLight_Specular(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 objSpecularColor)
+{
+    vec3 lightDir = normalize(-light.Direction);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // TODO: Replace 32 with material shininess
+    return SpecularColor * spec * objSpecularColor;
+}
+
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.Position - fragPos);
     // Diffuse
@@ -160,8 +159,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, f
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    // return (ambient + diffuse + specular);
-    return (ambient + (1.0 - shadow ) * (diffuse + specular));
+    return (ambient + diffuse + specular);
+    // return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
 
 float ShadowCalculation(vec4 fragPosLightSpace)
@@ -173,7 +172,7 @@ float ShadowCalculation(vec4 fragPosLightSpace)
     // Get closest depth value from lights perspective
     float closestDepth = texture(u_ShadowMapTexture, projCoords.xy).r;
     // Get depth of current pixel from lights perspective
-    float currentDepth = projCoords.z;
+    float currentDepth = fragPosLightSpace.z;
     // Check whether current pixel is in shadow
     float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
     return shadow;
@@ -193,13 +192,19 @@ void main()
     // Calculate shadow
     float shadow = ShadowCalculation(Input.ShadowMapCoords);
 
-    // Calculate direction light
-    vec3 result = CalcDirLight(u_DirectionalLight, norm, viewDir, shadow);
-    
+    vec3 ambient = AmbientColor * texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Ambient;
+
+    vec3 objDiffuseColor = texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Diffuse;
+    vec3 diffuse = CalcDirLight_Diffuse(u_DirectionalLight, norm, objDiffuseColor);
+
+    vec3 objSpecularColor = texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Diffuse;
+    vec3 specular = CalcDirLight_Specular(u_DirectionalLight, norm, viewDir, objSpecularColor);
+
+    vec3 result = (1 - shadow) * texture(u_DiffuseTexture, Input.TexCoord).xyz;
+
     // Calculate point lights
     for(int i = 0; i < u_PointLightsCount; i++)
-        result += CalcPointLight(u_PointLights[i], norm, Input.WorldPosition, viewDir, shadow);
-
+        result += CalcPointLight(u_PointLights[i], norm, Input.WorldPosition, viewDir);
 
     out_Color = vec4(result, 1.0);
     //    out_Color = vec4(1, 1, 1, 1);
