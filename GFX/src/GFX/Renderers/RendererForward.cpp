@@ -5,19 +5,28 @@
 #include "GFX/Renderers/RendererForward.h"
 
 #include "GFX/Config.h"
+#include "GFX/Core/RenderSurface.h"
 #include "GFX/Resources/Mesh.h"
 #include "GFX/Resources/Shader.h"
+#include "GFX/Resources/Framebuffer.h"
 
 namespace gfx
 {
-    void RendererForward::Init(IWindowSurface& surface)
+    void RendererForward::Init(IWindowSurface& windowSurface)
     {
-        // m_deviceContext.ProcessWindowChanges(surface, surface.GetSurfaceWidth(), surface.GetSurfaceHeight());
+        m_renderSurface = std::make_shared<RenderSurface>(windowSurface);
+
+        /* Uniform Buffers */
 
         m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
         m_uniformBufferSet->Create(sizeof(UBScene), 2);
         m_uniformBufferSet->Create(sizeof(UBPointLights), 4);
+
+        /* Framebuffers */
+        m_swapChainFramebuffer = std::make_shared<Framebuffer>(m_renderSurface.get());
+
+        /* Pipelines */
 
         {
             ShaderLibrary::Load("resources/shaders/PBR_Static.glsl", true);
@@ -29,7 +38,7 @@ namespace gfx
                 { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
                 { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },
             };
-            // pipelineDesc.Framebuffer = m_deviceContext.GetFramebuffer();
+            pipelineDesc.Framebuffer = m_swapChainFramebuffer;
 
             m_geometryPipeline = m_deviceContext.CreatePipeline(pipelineDesc);
         }
@@ -48,7 +57,7 @@ namespace gfx
 
     void RendererForward::BeginScene(const Camera& camera, const LightEnvironment& lightEnvironment)
     {
-        // auto currentFrameIndex = m_deviceContext.GetCurrentFrameIndex();
+        const auto currentFrameIndex = m_renderSurface->GetFrameIndex();
 
         /*
          * Update uniform Buffers
@@ -57,24 +66,24 @@ namespace gfx
         auto& pointLightsData = PointLightsData;
         auto& sceneData = SceneData;
 
-        auto cameraPosition = glm::inverse(camera.ViewMatrix)[3];
+        const auto cameraPosition = glm::inverse(camera.ViewMatrix)[3];
 
-        auto viewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
+        const auto viewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
         cameraData.ViewProjection = viewProjection;
-        // m_uniformBufferSet->Get(0, 0, currentFrameIndex)->SetData(&cameraData, sizeof(cameraData));
+        m_uniformBufferSet->Get(0, 0, currentFrameIndex)->SetData(&cameraData, sizeof(cameraData));
 
         auto& pointLights = lightEnvironment.PointLights;
         pointLightsData.Count = pointLights.size();
         std::memcpy(pointLightsData.PointLights, pointLights.data(), sizeof(PointLight) * pointLightsData.Count);
-        // m_uniformBufferSet->Get(4, 0, currentFrameIndex)->SetData(&pointLightsData, 16ull + sizeof(PointLight) * pointLightsData.Count);
+        m_uniformBufferSet->Get(4, 0, currentFrameIndex)->SetData(&pointLightsData, 16ull + sizeof(PointLight) * pointLightsData.Count);
 
         const auto& directionalLight = lightEnvironment.DirectionalLights[0];
         sceneData.Light.Direction = directionalLight.Direction;
         sceneData.Light.Color = directionalLight.Color;
         sceneData.CameraPosition = cameraPosition;
-        // m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
+        m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
-        // m_deviceContext.NewFrame();
+        m_renderSurface->NewFrame();
         m_renderContext.Begin();
     }
 
@@ -83,8 +92,8 @@ namespace gfx
         Flush();
 
         m_renderContext.End();
-        // m_deviceContext.Submit(m_renderContext);
-        // m_deviceContext.Present();
+        m_renderSurface->Submit(m_renderContext);
+        m_renderSurface->Present();
     }
 
     void RendererForward::DrawMesh(const DrawCall& drawCall)
@@ -96,7 +105,7 @@ namespace gfx
 
     void RendererForward::Flush()
     {
-        ShadowPass();
+        // ShadowPass();
         GeometryPass();
     }
 
@@ -121,11 +130,11 @@ namespace gfx
             for (const auto& submesh : submeshes)
             {
                 auto& material = drawCall.mesh->GetMaterials()[submesh.MaterialIndex];
-                auto layout = m_geometryPipeline->GetAPIPipelineLayout();
-                // auto descriptorSet = material->GetDescriptorSet(m_deviceContext.GetCurrentFrameIndex());
+                const auto layout = m_geometryPipeline->GetAPIPipelineLayout();
+                const auto descriptorSet = material->GetDescriptorSet(m_renderSurface->GetFrameIndex());
 
                 std::vector<vk::DescriptorSet> descriptorSets = {
-                    // descriptorSet,
+                    descriptorSet,
                     // m_rendererDescriptorSet
                 };
 
@@ -148,8 +157,7 @@ namespace gfx
 
     void RendererForward::GeometryPass()
     {
-        // auto framebuffer = m_deviceContext.GetFramebuffer();
-        // m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, framebuffer.get());
+        m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, m_swapChainFramebuffer.get());
 
         m_renderContext.BindPipeline(m_geometryPipeline.get());
 
@@ -168,11 +176,11 @@ namespace gfx
             for (const auto& submesh : submeshes)
             {
                 auto& material = drawCall.mesh->GetMaterials()[submesh.MaterialIndex];
-                auto layout = m_geometryPipeline->GetAPIPipelineLayout();
-                // auto descriptorSet = material->GetDescriptorSet(m_deviceContext.GetCurrentFrameIndex());
+                const auto layout = m_geometryPipeline->GetAPIPipelineLayout();
+                const auto descriptorSet = material->GetDescriptorSet(m_renderSurface->GetFrameIndex());
 
                 std::vector<vk::DescriptorSet> descriptorSets = {
-                    // descriptorSet,
+                    descriptorSet,
                     // m_rendererDescriptorSet
                 };
 
@@ -198,7 +206,7 @@ namespace gfx
         -> const std::vector<std::vector<vk::WriteDescriptorSet>>&
     {
         // Check for existing writeDescriptors
-        auto shaderHash = material->GetShader()->GetHash();
+        const auto shaderHash = material->GetShader()->GetHash();
         if (m_uniformBufferWriteDescriptorCache.find(uniformBufferSet.get()) != m_uniformBufferWriteDescriptorCache.end())
         {
             const auto& shaderMap = m_uniformBufferWriteDescriptorCache.at(uniformBufferSet.get());
@@ -210,7 +218,7 @@ namespace gfx
         }
 
         // Create & Cache writeDescriptors
-        auto shader = material->GetShader();
+        const auto shader = material->GetShader();
         if (shader->HasDescriptorSet(0))
         {
             const auto& shaderDescriptorsSets = shader->GetShaderDescriptorSets();
@@ -222,7 +230,7 @@ namespace gfx
                 {
                     for (uint32_t frame = 0; frame < Config::FramesInFlight; frame++)
                     {
-                        auto uniformBuffer = uniformBufferSet->Get(binding, 0, frame);
+                        const auto uniformBuffer = uniformBufferSet->Get(binding, 0, frame);
 
                         vk::WriteDescriptorSet writeDesc{};
                         writeDesc.setDescriptorCount(1);
@@ -242,13 +250,13 @@ namespace gfx
     {
         if (uniformBufferSet != nullptr)
         {
-            auto writeDescriptors = CreateOrRetrieveUniformBufferWriteDescriptors(material, uniformBufferSet);
+            const auto writeDescriptors = CreateOrRetrieveUniformBufferWriteDescriptors(material, uniformBufferSet);
 
-            // material->UpdateForRendering(m_deviceContext.GetCurrentFrameIndex(), writeDescriptors);
+            material->UpdateForRendering(m_renderSurface->GetFrameIndex(), writeDescriptors);
         }
         else
         {
-            // material->UpdateForRendering(m_deviceContext.GetCurrentFrameIndex());
+            material->UpdateForRendering(m_renderSurface->GetFrameIndex());
         }
     }
 

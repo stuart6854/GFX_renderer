@@ -25,7 +25,7 @@ namespace gfx
     class RendererForward
     {
     public:
-        void Init(IWindowSurface& surface);
+        void Init(IWindowSurface& windowSurface);
 
         auto LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>;
 
@@ -47,6 +47,7 @@ namespace gfx
         void UpdateMaterialForRendering(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet);
 
     private:
+        std::shared_ptr<RenderSurface> m_renderSurface;
         DeviceContext m_deviceContext;
         RenderContext m_renderContext;
 
@@ -55,6 +56,8 @@ namespace gfx
 
         std::vector<DrawCall> m_geometryDrawCalls;
         std::vector<DrawCall> m_shadowDrawCalls;
+
+        std::shared_ptr<Framebuffer> m_swapChainFramebuffer;
 
         std::shared_ptr<UniformBufferSet> m_uniformBufferSet;
 
