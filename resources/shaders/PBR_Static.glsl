@@ -14,6 +14,11 @@ layout(std140, binding = 0) uniform Camera
     mat4 u_ViewProjection;
 };
 
+layout (std140, binding = 1) uniform ShadowData
+{
+	mat4 u_LightViewProj;
+};
+
 layout(push_constant) uniform Transform
 {
     mat4 u_Model;
@@ -25,6 +30,8 @@ struct VertexOutput
     vec3 Normal;
     vec2 TexCoord;
     mat3 WorldNormals;    
+
+    vec4 ShadowMapCoords;
 };
 
 layout (location = 0) out VertexOutput Output;
@@ -44,6 +51,8 @@ void main()
     // Then retrieve perpendicular vector B with the cross product of T and N
     vec3 B = cross(N, T);
     Output.WorldNormals = mat3(T, B, N);
+
+    Output.ShadowMapCoords = u_LightViewProj * vec4(Output.WorldPosition, 1.0);
 
     gl_Position = u_ViewProjection * u_Renderer.u_Model *  vec4(a_Position, 1.0f);
 }
@@ -107,7 +116,9 @@ struct VertexOutput
     vec3 WorldPosition;
     vec3 Normal;
     vec2 TexCoord;
-    mat3 WorldNormals;
+    mat3 WorldNormals;    
+
+    vec4 ShadowMapCoords;
 };
 
 layout(location = 0) in VertexOutput Input;
@@ -115,7 +126,7 @@ layout(location = 0) in VertexOutput Input;
 vec3 AmbientColor = vec3(0.1, 0.1, 0.1);
 vec3 SpecularColor = vec3(0.5, 0.5, 0.5);
 
-vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir)
+vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir, float shadow)
 {
     vec3 lightDir = normalize(-light.Direction);
     // Diffuse 
@@ -127,10 +138,11 @@ vec3 CalcDirLight(DirectionalLight light, vec3 normal, vec3 viewDir)
     vec3 ambient = AmbientColor * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Ambient);
     vec3 diffuse = light.Color * diff * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Diffuse);
     vec3 specular = SpecularColor * spec * (texture(u_DiffuseTexture, Input.TexCoord).xyz * u_MaterialUniforms.Specular);
-    return (ambient + diffuse + specular);
+    // return (ambient + diffuse + specular);
+    return (ambient + (1.0 - shadow ) * (diffuse + specular));
 }
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow)
 {
     vec3 lightDir = normalize(light.Position - fragPos);
     // Diffuse
@@ -148,7 +160,23 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    // return (ambient + diffuse + specular);
+    return (ambient + (1.0 - shadow ) * (diffuse + specular));
+}
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // Perspective divide. -> [-1,1]
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // [-1,1] -> [0,1]
+    projCoords = projCoords * 0.5 + 0.5;
+    // Get closest depth value from lights perspective
+    float closestDepth = texture(u_ShadowMapTexture, projCoords.xy).r;
+    // Get depth of current pixel from lights perspective
+    float currentDepth = projCoords.z;
+    // Check whether current pixel is in shadow
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+    return shadow;
 }
 
 void main()
@@ -162,12 +190,16 @@ void main()
 
     vec3 viewDir = normalize(u_CameraPosition - Input.WorldPosition);
 
+    // Calculate shadow
+    float shadow = ShadowCalculation(Input.ShadowMapCoords);
+
     // Calculate direction light
-    vec3 result = CalcDirLight(u_DirectionalLight, norm, viewDir);
+    vec3 result = CalcDirLight(u_DirectionalLight, norm, viewDir, shadow);
     
     // Calculate point lights
     for(int i = 0; i < u_PointLightsCount; i++)
-        result += CalcPointLight(u_PointLights[i], norm, Input.WorldPosition, viewDir);
+        result += CalcPointLight(u_PointLights[i], norm, Input.WorldPosition, viewDir, shadow);
+
 
     out_Color = vec4(result, 1.0);
     //    out_Color = vec4(1, 1, 1, 1);

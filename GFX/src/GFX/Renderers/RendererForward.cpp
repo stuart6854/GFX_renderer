@@ -121,10 +121,11 @@ namespace gfx
         sceneData.CameraPosition = cameraPosition;
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
-        SetSceneEnvironment(m_shadowFramebuffer->GetDepthImage());
-
         m_renderSurface->NewFrame();
         m_renderContext.Begin();
+
+        // Wait for command buffer to be finished before updating descriptors
+        SetSceneEnvironment(m_shadowFramebuffer->GetDepthImage());
     }
 
     void RendererForward::EndScene()
@@ -230,6 +231,8 @@ namespace gfx
 
     void RendererForward::SetSceneEnvironment(const std::shared_ptr<Image>& shadowMap)
     {
+        // TODO: Make API agnostic
+
         const auto frameIndex = m_renderSurface->GetFrameIndex();
 
         if (m_rendererDescriptorSet.empty())
