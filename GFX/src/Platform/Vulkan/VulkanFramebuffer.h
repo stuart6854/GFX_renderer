@@ -28,6 +28,8 @@ namespace gfx
         auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
         auto GetFramebuffer() const -> vk::Framebuffer;
 
+        auto GetClearValues() const -> const std::vector<vk::ClearValue>& { return m_clearValues; }
+
     private:
         void Invalidate();
 
@@ -36,6 +38,8 @@ namespace gfx
 
         std::vector<std::shared_ptr<Image>> m_attachmentImages;
         std::shared_ptr<Image> m_depthAttachmentImage;
+
+        std::vector<vk::ClearValue> m_clearValues;
 
         vk::RenderPass m_renderPass;
         vk::Framebuffer m_framebuffer;

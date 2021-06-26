@@ -65,6 +65,12 @@ namespace gfx
         else
         {
             m_renderPass = m_desc.SwapChainTarget->GetRenderPass();
+
+            m_clearValues.clear();
+
+            const std::array clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+            m_clearValues.emplace_back().setColor(clearColor);
+            m_clearValues.emplace_back().setDepthStencil({ 1.0f, 0 });
         }
     }
 
@@ -101,6 +107,11 @@ namespace gfx
         std::vector<vk::AttachmentReference> colorAttachmentsReferences;
         vk::AttachmentReference depthAttachmentReference;
 
+        m_clearValues.resize(m_desc.Attachments.size());
+
+        const auto& clearColor = m_desc.ClearColor;
+        const std::array clearColorArray = { clearColor.r, clearColor.g, clearColor.b, 1.0f };
+
         uint32_t attachmentIndex = 0;
         for (const auto& attachmentDesc : m_desc.Attachments)
         {
@@ -124,6 +135,8 @@ namespace gfx
                     attachmentReference.setFinalLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
                     depthAttachmentReference = { attachmentIndex, vk::ImageLayout::eDepthStencilAttachmentOptimal };
                 }
+
+                m_clearValues[attachmentIndex].setDepthStencil({ 1.0f, 0 });
             }
             else
             {
@@ -145,6 +158,8 @@ namespace gfx
                 attachmentReference.setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
                 colorAttachmentsReferences.emplace_back(vk::AttachmentReference{ attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal });
+
+                m_clearValues[attachmentIndex].setColor(clearColorArray);
             }
 
             attachmentIndex++;

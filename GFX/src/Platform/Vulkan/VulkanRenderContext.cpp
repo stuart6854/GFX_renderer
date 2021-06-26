@@ -19,21 +19,13 @@ namespace gfx
 
     void RenderContext::BeginRenderPass(const Color& clearColor, Framebuffer* framebuffer)
     {
-        vk::ClearValue colorClear;
-        colorClear.setColor({ clearColor.ToArray() });
-
-        vk::ClearValue depthClear;
-        depthClear.setDepthStencil({ 1.0f, 0 });
-
-        auto clearValues = { colorClear, depthClear };
-
         vk::RenderPassBeginInfo beginInfo{};
         beginInfo.renderPass = framebuffer->GetRenderPass();
         beginInfo.framebuffer = framebuffer->GetFramebuffer();
         beginInfo.renderArea.setOffset({ 0, 0 });
         beginInfo.renderArea.extent.setWidth(framebuffer->GetWidth());
         beginInfo.renderArea.extent.setHeight(framebuffer->GetHeight());
-        beginInfo.setClearValues(clearValues);
+        beginInfo.setClearValues(framebuffer->GetClearValues());
 
         GetCommandBuffer().BeginRenderPass(beginInfo);
     }
