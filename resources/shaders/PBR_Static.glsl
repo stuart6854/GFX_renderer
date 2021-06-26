@@ -55,9 +55,6 @@ void main()
 
 layout (location = 0) out vec4 out_Color;
 
-layout(set = 0, binding = 5) uniform sampler2D u_DiffuseTexture;
-layout(set = 0, binding = 6) uniform sampler2D u_NormalTexture;
-
 struct DirectionalLight
 {
     vec3 Direction;
@@ -88,6 +85,11 @@ layout(std140, binding = 4) uniform PointLightData
     uint u_PointLightsCount;
     PointLight u_PointLights[16];
 };
+
+layout(set = 0, binding = 5) uniform sampler2D u_DiffuseTexture;
+layout(set = 0, binding = 6) uniform sampler2D u_NormalTexture;
+
+layout(set = 1, binding = 9) uniform sampler2D u_ShadowMapTexture;
 
 layout(push_constant) uniform Material
 {

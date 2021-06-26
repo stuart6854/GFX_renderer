@@ -42,6 +42,8 @@ namespace gfx
         void ShadowPass();
         void GeometryPass();
 
+        void SetSceneEnvironment(const std::shared_ptr<Image>& shadowMap);
+
         auto CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
             -> const std::vector<std::vector<vk::WriteDescriptorSet>>&;
         void UpdateMaterialForRendering(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet);
@@ -65,6 +67,8 @@ namespace gfx
         std::shared_ptr<Framebuffer> m_swapChainFramebuffer;
 
         std::shared_ptr<UniformBufferSet> m_uniformBufferSet;
+        std::vector<Shader::ShaderMaterialDescriptorSet> m_rendererDescriptorSet;
+        vk::DescriptorSet m_activeRendererDescriptorSet;
 
         struct UBCamera
         {

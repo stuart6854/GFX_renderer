@@ -10,6 +10,8 @@
 #include "GFX/Resources/Shader.h"
 #include "GFX/Resources/Framebuffer.h"
 
+#include "Platform/Vulkan/VulkanCore.h"
+
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -119,6 +121,8 @@ namespace gfx
         sceneData.CameraPosition = cameraPosition;
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
+        SetSceneEnvironment(m_shadowFramebuffer->GetDepthImage());
+
         m_renderSurface->NewFrame();
         m_renderContext.Begin();
     }
@@ -205,10 +209,7 @@ namespace gfx
                 const auto layout = m_geometryPipeline->GetAPIPipelineLayout();
                 const auto descriptorSet = material->GetDescriptorSet(m_renderSurface->GetFrameIndex());
 
-                std::vector<vk::DescriptorSet> descriptorSets = {
-                    descriptorSet,
-                    // m_rendererDescriptorSet
-                };
+                std::vector<vk::DescriptorSet> descriptorSets = { descriptorSet, m_activeRendererDescriptorSet };
 
                 m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
 
@@ -225,6 +226,30 @@ namespace gfx
         m_renderContext.EndRenderPass();
 
         m_geometryDrawCalls.clear();
+    }
+
+    void RendererForward::SetSceneEnvironment(const std::shared_ptr<Image>& shadowMap)
+    {
+        const auto frameIndex = m_renderSurface->GetFrameIndex();
+
+        if (m_rendererDescriptorSet.empty())
+        {
+            m_rendererDescriptorSet.resize(Config::FramesInFlight);
+            for (uint32_t i = 0; i < Config::FramesInFlight; i++) m_rendererDescriptorSet.at(i) = m_geometryShader->CreateDescriptorSet(1, frameIndex);
+        }
+
+        const auto descriptorSet = m_rendererDescriptorSet.at(frameIndex).DescriptorSets[0];
+        m_activeRendererDescriptorSet = descriptorSet;
+
+        std::array<vk::WriteDescriptorSet, 1> writeDescriptors;
+
+        writeDescriptors[0] = *m_geometryShader->GetDescriptorSet("u_ShadowMapTexture", 1);
+        writeDescriptors[0].dstSet = descriptorSet;
+        const auto& shadowImageInfo = shadowMap->GetVulkanDescriptorInfo();
+        writeDescriptors[0].pImageInfo = &shadowImageInfo;
+
+        const auto device = Vulkan::GetDevice();
+        device.updateDescriptorSets(writeDescriptors, {});
     }
 
     auto RendererForward::CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material,

@@ -22,6 +22,7 @@ namespace gfx
         auto GetWidth() const -> uint32_t { return m_desc.Width; }
         auto GetHeight() const -> uint32_t { return m_desc.Height; }
         auto IsSwapchainTarget() const -> bool { return m_desc.IsSwapChainTarget; }
+        auto GetDepthImage() const -> const std::shared_ptr<Image>& { return m_depthAttachmentImage; }
 
         void Resize(uint32_t width, uint32_t height, bool forceRecreate = false);
 

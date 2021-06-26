@@ -83,6 +83,7 @@ namespace gfx
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
 
         auto AllocateDescriptorSet(uint32_t set = 0, uint32_t frameIndex = 0) -> ShaderMaterialDescriptorSet;
+        auto CreateDescriptorSet(uint32_t set = 0, uint32_t frameIndex = 0) -> ShaderMaterialDescriptorSet;
         auto GetDescriptorSet(const std::string& name, uint32_t set = 0) const -> const vk::WriteDescriptorSet*;
 
     private:

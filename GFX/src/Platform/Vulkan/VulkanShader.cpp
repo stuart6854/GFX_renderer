@@ -114,10 +114,31 @@ namespace gfx
         return result;
     }
 
+    auto Shader::CreateDescriptorSet(uint32_t set, uint32_t frameIndex) -> ShaderMaterialDescriptorSet
+    {
+        const auto device = Vulkan::GetDevice();
+
+        ShaderMaterialDescriptorSet result{};
+
+        GFX_ASSERT(m_typeCounts.find(set) != m_typeCounts.end());
+
+        vk::DescriptorPoolCreateInfo poolInfo{};
+        poolInfo.setPoolSizes(m_typeCounts.at(set));
+        poolInfo.setMaxSets(1);
+        result.Pool = device.createDescriptorPool(poolInfo);
+
+        vk::DescriptorSetAllocateInfo allocInfo{};
+        allocInfo.setDescriptorPool(result.Pool);
+        allocInfo.setDescriptorSetCount(1);
+        allocInfo.setSetLayouts(m_descriptorSetLayouts[set]);
+        result.DescriptorSets.emplace_back(device.allocateDescriptorSets(allocInfo).at(0));
+
+        return result;
+    }
+
     auto Shader::GetDescriptorSet(const std::string& name, uint32_t set) const -> const vk::WriteDescriptorSet*
     {
         GFX_ASSERT(set < m_shaderDescriptorSets.size());
-        GFX_ASSERT(m_shaderDescriptorSets[set]);
         const auto& writeSets = m_shaderDescriptorSets.at(set).WriteDescriptorSets;
         if (writeSets.find(name) == writeSets.end())
         {
