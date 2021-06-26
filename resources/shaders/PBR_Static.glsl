@@ -136,8 +136,9 @@ vec3 CalcDirLight_Diffuse(DirectionalLight light, vec3 normal, vec3 objDiffuseCo
 vec3 CalcDirLight_Specular(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 objSpecularColor)
 {
     vec3 lightDir = normalize(-light.Direction);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // TODO: Replace 32 with material shininess
+    // Blinn-Phong
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(viewDir, halfwayDir), 0.0), 32); // TODO: Replace 32 with material shininess
     return SpecularColor * spec * objSpecularColor;
 }
 
@@ -147,8 +148,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // Diffuse
     float diff = max(dot(normal, lightDir), 0.0);
     //Specular
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // TODO: Replace 32 with material shininess
+    // Blinn-Phong
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(viewDir, halfwayDir), 0.0), 32); // TODO: Replace 32 with material shininess
     // Attenuation
     float distance = length(light.Position - fragPos);
     float attenuation = 1.0 / (light.Constant + light.Linear * distance * light.Quadratic * (distance * distance));
