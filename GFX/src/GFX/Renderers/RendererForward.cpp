@@ -45,7 +45,8 @@ namespace gfx
 
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_shadowShader;
-            // pipelineDesc.BackFaceCulling = false;
+            pipelineDesc.CullMode = FaceCullMode::eFront;
+            pipelineDesc.DepthBias = true;
             pipelineDesc.Layout = {
                 { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
                 { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },

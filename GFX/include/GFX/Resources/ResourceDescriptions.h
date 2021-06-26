@@ -43,17 +43,29 @@ namespace gfx
         eTriangles
     };
 
+    enum class FaceCullMode
+    {
+        eNone = 0,
+        eBack,
+        eFront,
+        eBoth
+    };
+
     struct PipelineDesc
     {
         std::shared_ptr<Shader> Shader;
         VertexLayout Layout;
         std::shared_ptr<Framebuffer> Framebuffer;
         PrimitiveTopology Topology = PrimitiveTopology::eTriangles;
-        bool BackFaceCulling = true;
+        FaceCullMode CullMode = FaceCullMode::eBack;
         bool DepthTest = true;
         bool DepthWrite = true;
         bool Wireframe = false;
         float LineWidth = 1.0f;
+
+        bool DepthBias = false;
+        float DepthBiasConstantFactor = 4.0f;
+        bool DepthBiasSlopeFactor = 1.5f;
     };
 
     enum class ImageFormat

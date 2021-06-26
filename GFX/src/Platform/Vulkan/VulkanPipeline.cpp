@@ -28,6 +28,19 @@ namespace gfx
         return {};
     }
 
+    static auto VulkanCullMode(const FaceCullMode mode) -> vk::CullModeFlags
+    {
+        switch (mode)
+        {
+            case FaceCullMode::eBack: return vk::CullModeFlagBits::eBack;
+            case FaceCullMode::eFront: return vk::CullModeFlagBits::eFront;
+            case FaceCullMode::eBoth: return vk::CullModeFlagBits::eFrontAndBack;
+            case FaceCullMode::eNone:
+            default: break;
+        }
+        return {};
+    }
+
     static auto ShaderDataTypeToVulkanFormat(ShaderDataType type) -> vk::Format
     {
         switch (type)
@@ -85,11 +98,14 @@ namespace gfx
 
         vk::PipelineRasterizationStateCreateInfo rasterizationState{};
         rasterizationState.setPolygonMode(m_desc.Wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill);
-        rasterizationState.setCullMode(m_desc.BackFaceCulling ? vk::CullModeFlagBits::eBack : vk::CullModeFlagBits::eNone);
+        rasterizationState.setCullMode(VulkanCullMode(m_desc.CullMode));
         rasterizationState.setFrontFace(vk::FrontFace::eCounterClockwise);
         rasterizationState.setDepthClampEnable(false);
         rasterizationState.setRasterizerDiscardEnable(false);
         rasterizationState.setDepthBiasClamp(false);
+        rasterizationState.setDepthBiasEnable(m_desc.DepthBias);
+        rasterizationState.setDepthBiasConstantFactor(m_desc.DepthBiasConstantFactor);
+        rasterizationState.setDepthBiasSlopeFactor(m_desc.DepthBiasSlopeFactor);
         rasterizationState.setLineWidth(m_desc.LineWidth);  // Dynamic
 
         // TODO: Setup PipelineColorBlendAttachmentState
