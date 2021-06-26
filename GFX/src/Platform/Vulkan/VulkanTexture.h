@@ -9,9 +9,12 @@
 
 #include <string>
 
+#include "VulkanImage.h"
+
 namespace gfx
 {
     class DeviceContext;
+    class Image;
 
     class Texture
     {
@@ -24,11 +27,11 @@ namespace gfx
 
         auto GetImageData() -> RawBuffer& { return m_imageData; }
 
-        auto GetVulkanImage() const -> const vk::Image& { return m_image; }
-        auto GetVulkanAllocation() const -> const VmaAllocation& { return m_allocation; }
-        auto GetVulkanView() const -> const vk::ImageView& { return m_view; }
-        auto GetVulkanSampler() const -> const vk::Sampler& { return m_sampler; }
-        auto GetVulkanDescriptorInfo() const -> const vk::DescriptorImageInfo& { return m_descriptorImageInfo; }
+        auto GetVulkanImage() const -> const vk::Image& { return m_image->GetVulkanImage(); }
+        auto GetVulkanAllocation() const -> const VmaAllocation& { return m_image->GetVulkanAllocation(); }
+        auto GetVulkanView() const -> const vk::ImageView& { return m_image->GetVulkanView(); }
+        auto GetVulkanSampler() const -> const vk::Sampler& { return m_image->GetVulkanSampler(); }
+        auto GetVulkanDescriptorInfo() const -> const vk::DescriptorImageInfo& { return m_image->GetVulkanDescriptorInfo(); }
 
     private:
         void Invalidate();
@@ -37,13 +40,8 @@ namespace gfx
         DeviceContext& m_deviceCtx;
         TextureDesc m_desc;
 
-        vk::Image m_image;
-        VmaAllocation m_allocation;
-        vk::ImageView m_view;
-        vk::Sampler m_sampler;
+        std::shared_ptr<Image> m_image;
 
         RawBuffer m_imageData;
-
-        vk::DescriptorImageInfo m_descriptorImageInfo;
     };
 }  // namespace gfx
