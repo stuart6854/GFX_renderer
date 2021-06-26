@@ -510,3 +510,5 @@ FodyWeavers.xsd
 **.nsight-gfxproj
 **.DotSettings
 **.user
+
+_tmp/
