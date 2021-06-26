@@ -53,7 +53,7 @@ int main(int argc, char** argv)
         deviceContext.Upload(vertexBuffer.get(), &triVerts[0]);
         deviceContext.Upload(indexBuffer.get(), &triIndices[0]);
 
-        auto shader = std::make_shared<gfx::Shader>("resources/shaders/triangle_shader.glsl");
+        auto shader = std::make_shared<gfx::Shader>("resources/shaders/triangle_shader.glsl", true);
 
         gfx::PipelineDesc pipelineDesc;
         pipelineDesc.Shader = shader;
