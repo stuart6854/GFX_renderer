@@ -13,7 +13,6 @@ layout(std140, binding = 0) uniform Camera
 
 layout(push_constant) uniform Transform
 {
-//    mat4 u_Model;
     float pos;
 } u_Transform;
 
@@ -28,7 +27,7 @@ void main()
 {
     Output.Color = vec4(a_Color, 1.0f);
 
-    gl_Position = /*u_ViewProjection * u_Transform.u_Model * */ vec4(a_Position + vec3(u_Transform.pos, 0, 0), 1.0f);
+    gl_Position = vec4(a_Position + vec3(u_Transform.pos, 0, 0), 1.0f);
 }
 
 #type pixel
