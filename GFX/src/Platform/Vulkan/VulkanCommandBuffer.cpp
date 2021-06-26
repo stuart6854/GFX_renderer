@@ -76,15 +76,15 @@ namespace gfx
         // TODO: Viewport size
         m_cmdBuffer.beginRenderPass(beginInfo, vk::SubpassContents::eInline);
         vk::Viewport viewport;
-        viewport.width = 1080;
-        viewport.height = 720;
+        viewport.width = beginInfo.renderArea.extent.width;
+        viewport.height = beginInfo.renderArea.extent.height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         // TODO: Scissor size
         vk::Rect2D scissor;
-        scissor.extent.width = 1080;
-        scissor.extent.height = 720;
+        scissor.extent.width = beginInfo.renderArea.extent.width;
+        scissor.extent.height = beginInfo.renderArea.extent.height;
 
         m_cmdBuffer.setViewport(0, viewport);
         m_cmdBuffer.setScissor(0, scissor);
