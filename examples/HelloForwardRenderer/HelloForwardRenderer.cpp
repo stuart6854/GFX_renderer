@@ -6,8 +6,9 @@
 
 #include <GFX/GFX.h>
 #include <GFX/Debug.h>
-#include <GFX/Resources/Primitives.h>
+#include <GFX/Core/RenderSurface.h>
 #include <GFX/Renderers/RendererForward.h>
+#include <GFX/Resources/Primitives.h>
 #include <GFX/Resources/Texture.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -41,7 +42,8 @@ int main(int argc, char** argv)
         auto proj = glm::perspective(glm::radians(60.0f), (float)window.GetWidth() / (float)window.GetHeight(), 0.01f, 100.0f);
         proj[1][1] *= -1.0f;
 
-        auto view = glm::lookAt(glm::vec3{ 0, 7, -7 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
+        // auto view = glm::lookAt(glm::vec3{ 0, 7, -7 }, glm::vec3{ 0, 0, 0 }, glm::vec3{ 0, 1, 0 });
+        auto view = glm::lookAt(glm::vec3{ 0, 3, -3 }, glm::vec3{ 0, 2, 0 }, glm::vec3{ 0, 1, 0 });
 
         glm::vec3 position = { 0.0f, 2.0f, 0.0f };
         glm::vec3 rotation = { 0.0f, 20.0f, 0.0f };
