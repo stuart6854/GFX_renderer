@@ -10,6 +10,9 @@
 #include "GFX/Resources/Shader.h"
 #include "GFX/Resources/Framebuffer.h"
 
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace gfx
 {
     void RendererForward::Init(IWindowSurface& windowSurface)
@@ -20,17 +23,43 @@ namespace gfx
 
         m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
         m_uniformBufferSet->Create(sizeof(UBCamera), 0);
+        m_uniformBufferSet->Create(sizeof(UBShadow), 1);
         m_uniformBufferSet->Create(sizeof(UBScene), 2);
         m_uniformBufferSet->Create(sizeof(UBPointLights), 4);
 
         /* Framebuffers */
-        m_swapChainFramebuffer = std::make_shared<Framebuffer>(m_renderSurface.get());
-
-        /* Pipelines */
 
         {
+            // Shadow Pass
+            FramebufferDesc framebufferDesc{};
+            framebufferDesc.Width = 2048;
+            framebufferDesc.Height = 2048;
+            framebufferDesc.Attachments = { { ImageFormat::eDepth32F } };
+
+            m_shadowFramebuffer = std::make_shared<Framebuffer>(framebufferDesc);
+
+            ShaderLibrary::Load("resources/shaders/ShadowMap.glsl", true);
+            m_shadowShader = ShaderLibrary::Get("ShadowMap");
+
+            PipelineDesc pipelineDesc;
+            pipelineDesc.Shader = m_shadowShader;
+            // pipelineDesc.BackFaceCulling = false;
+            pipelineDesc.Layout = {
+                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
+                { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },
+            };
+            pipelineDesc.Framebuffer = m_shadowFramebuffer;
+
+            m_shadowPipeline = m_deviceContext.CreatePipeline(pipelineDesc);
+            m_shadowMaterial = std::make_shared<Material>(m_shadowShader);
+        }
+
+        {
+            // Geometry Pass
+            m_swapChainFramebuffer = std::make_shared<Framebuffer>(m_renderSurface.get());
+
             ShaderLibrary::Load("resources/shaders/PBR_Static.glsl", true);
-            m_geometryShader = ShaderLibrary::Get("PBR_Static");  // m_deviceContext.CreateShader("resources/shaders/PBR_Static.glsl");
+            m_geometryShader = ShaderLibrary::Get("PBR_Static");
 
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;
@@ -63,6 +92,7 @@ namespace gfx
          * Update uniform Buffers
          * */
         auto& cameraData = CameraData;
+        auto& shadowData = ShadowData;
         auto& pointLightsData = PointLightsData;
         auto& sceneData = SceneData;
 
@@ -72,13 +102,19 @@ namespace gfx
         cameraData.ViewProjection = viewProjection;
         m_uniformBufferSet->Get(0, 0, currentFrameIndex)->SetData(&cameraData, sizeof(cameraData));
 
+        const auto& dirLight = lightEnvironment.DirectionalLights;
+        const auto dirLightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 20.0f);
+        const auto dirLightView = glm::lookAt(dirLight->Position, dirLight->Target, glm::vec3{ 0, 1, 0 });
+        shadowData.LightViewProj = dirLightProj * dirLightView;
+        m_uniformBufferSet->Get(1, 0, currentFrameIndex)->SetData(&shadowData, sizeof(shadowData));
+
         auto& pointLights = lightEnvironment.PointLights;
         pointLightsData.Count = pointLights.size();
         std::memcpy(pointLightsData.PointLights, pointLights.data(), sizeof(PointLight) * pointLightsData.Count);
         m_uniformBufferSet->Get(4, 0, currentFrameIndex)->SetData(&pointLightsData, 16ull + sizeof(PointLight) * pointLightsData.Count);
 
         const auto& directionalLight = lightEnvironment.DirectionalLights[0];
-        sceneData.Light.Direction = directionalLight.Direction;
+        sceneData.Light.Direction = directionalLight.Position;
         sceneData.Light.Color = directionalLight.Color;
         sceneData.CameraPosition = cameraPosition;
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
@@ -105,46 +141,36 @@ namespace gfx
 
     void RendererForward::Flush()
     {
-        // ShadowPass();
+        ShadowPass();
         GeometryPass();
     }
 
     void RendererForward::ShadowPass()
     {
-        // m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, framebuffer.get());
+        m_renderContext.BeginRenderPass({ 0.0f, 0.0f, 0.0f }, m_shadowFramebuffer.get());
 
-        // m_renderContext.BindPipeline(m_shadowPipeline.get());
+        m_renderContext.BindPipeline(m_shadowPipeline.get());
 
         for (const auto& drawCall : m_shadowDrawCalls)
         {
             m_renderContext.BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
             m_renderContext.BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
 
-            auto& materials = drawCall.mesh->GetMaterials();
-            for (auto& material : materials)
-            {
-                UpdateMaterialForRendering(material, m_uniformBufferSet);
-            }
+            UpdateMaterialForRendering(m_shadowMaterial, m_uniformBufferSet);
+
+            const auto layout = m_shadowPipeline->GetAPIPipelineLayout();
+            const auto descriptorSet = m_shadowMaterial->GetDescriptorSet(m_renderSurface->GetFrameIndex());
+            if (descriptorSet) m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, { descriptorSet }, {});
+
+            auto& buffer = m_shadowMaterial->GetUniformStorageBuffer();
+            if (buffer) m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
 
             auto& submeshes = drawCall.mesh->GetSubmeshes();
             for (const auto& submesh : submeshes)
             {
-                auto& material = drawCall.mesh->GetMaterials()[submesh.MaterialIndex];
-                const auto layout = m_geometryPipeline->GetAPIPipelineLayout();
-                const auto descriptorSet = material->GetDescriptorSet(m_renderSurface->GetFrameIndex());
-
-                std::vector<vk::DescriptorSet> descriptorSets = {
-                    descriptorSet,
-                    // m_rendererDescriptorSet
-                };
-
-                m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
-
                 const auto modelTransform = drawCall.transform * submesh.Transform;
 
-                auto& buffer = material->GetUniformStorageBuffer();
                 m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
-                m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
 
                 m_renderContext.DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
             }

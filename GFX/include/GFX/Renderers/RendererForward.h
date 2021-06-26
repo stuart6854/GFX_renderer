@@ -51,12 +51,17 @@ namespace gfx
         DeviceContext m_deviceContext;
         RenderContext m_renderContext;
 
+        std::vector<DrawCall> m_shadowDrawCalls;
+        std::vector<DrawCall> m_geometryDrawCalls;
+
+        std::shared_ptr<Shader> m_shadowShader;
+        std::shared_ptr<Pipeline> m_shadowPipeline;
+        std::shared_ptr<Material> m_shadowMaterial;
+
         std::shared_ptr<Shader> m_geometryShader;
         std::shared_ptr<Pipeline> m_geometryPipeline;
 
-        std::vector<DrawCall> m_geometryDrawCalls;
-        std::vector<DrawCall> m_shadowDrawCalls;
-
+        std::shared_ptr<Framebuffer> m_shadowFramebuffer;
         std::shared_ptr<Framebuffer> m_swapChainFramebuffer;
 
         std::shared_ptr<UniformBufferSet> m_uniformBufferSet;
@@ -65,6 +70,11 @@ namespace gfx
         {
             glm::mat4 ViewProjection;
         } CameraData;
+
+        struct UBShadow
+        {
+            glm::mat4 LightViewProj;
+        } ShadowData;
 
         struct DirLight
         {

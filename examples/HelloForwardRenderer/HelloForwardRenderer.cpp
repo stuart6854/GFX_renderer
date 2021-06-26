@@ -50,7 +50,8 @@ int main(int argc, char** argv)
         glm::vec3 scale = glm::vec3(1, 1, 1) * 0.005f;
 
         gfx::LightEnvironment lightEnvironment{};
-        lightEnvironment.DirectionalLights[0].Direction = glm::normalize(glm::vec3{ -0.2f, -1.0f, 0.3f });
+        lightEnvironment.DirectionalLights[0].Position = glm::vec3{ 8, 10, -8 };
+        lightEnvironment.DirectionalLights[0].Target = glm::vec3{ 0.0f, 0.0f, 0.0f };
         lightEnvironment.DirectionalLights[0].Color = { 1.0f, 1.0f, 1.0f };
 
         auto& pointLight = lightEnvironment.PointLights.emplace_back();
