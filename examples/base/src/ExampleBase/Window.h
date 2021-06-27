@@ -26,6 +26,8 @@ namespace example
         auto GetWidth() const -> uint32_t { return m_width; }
         auto GetHeight() const -> uint32_t { return m_height; }
 
+        void SetTitle(const std::string& title);
+
         auto ShouldClose() const -> bool;
 
         void PollEvents();

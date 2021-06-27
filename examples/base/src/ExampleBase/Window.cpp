@@ -34,6 +34,8 @@ namespace example
         glfwTerminate();
     }
 
+    void Window::SetTitle(const std::string& title) { glfwSetWindowTitle(m_handle, title.c_str()); }
+
     auto Window::ShouldClose() const -> bool { return glfwWindowShouldClose(m_handle); }
 
     void Window::PollEvents()
