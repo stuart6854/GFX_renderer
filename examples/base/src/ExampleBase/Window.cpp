@@ -19,6 +19,13 @@ namespace example
         {
             std::cerr << "Failed to create GLFW window!" << std::endl;
         }
+
+        glfwSetWindowUserPointer(m_handle, this);
+
+        glfwSetKeyCallback(m_handle, [](GLFWwindow* windowHandle, const int key, const int scanCode, const int action, const int mods) {
+            Window* window = static_cast<Window*>(glfwGetWindowUserPointer(windowHandle));
+            window->GetInput().SetKeyState(key, action != GLFW_RELEASE);
+        });
     }
 
     Window::~Window()
@@ -29,7 +36,11 @@ namespace example
 
     auto Window::ShouldClose() const -> bool { return glfwWindowShouldClose(m_handle); }
 
-    void Window::PollEvents() { glfwPollEvents(); }
+    void Window::PollEvents()
+    {
+        m_input.NewFrame();
+        glfwPollEvents();
+    }
 
     auto Window::CreateSurface(vk::Instance instance) -> vk::SurfaceKHR
     {

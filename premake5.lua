@@ -144,6 +144,7 @@ function AddExample(example_name, src)
 
         defines
         {
+            "GLFW_INCLUDE_VULKAN",
             "GLM_FORCE_DEPTH_ZERO_TO_ONE",
             "GLM_FORCE_LEFT_HANDED",
             "GFX_API_VULKAN",

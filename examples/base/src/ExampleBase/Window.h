@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <string>
 
+#include "Input.h"
+
 #include <GFX/IWindowSurface.h>
 
 #include <vulkan/vulkan.hpp>
@@ -28,6 +30,8 @@ namespace example
 
         void PollEvents();
 
+        auto GetInput() -> Input& { return m_input; }
+
         auto GetSurfaceWidth() -> uint32_t override { return m_width; }
         auto GetSurfaceHeight() -> uint32_t override { return m_height; }
 
@@ -39,6 +43,8 @@ namespace example
         uint32_t m_height;
 
         GLFWwindow* m_handle;
+
+        Input m_input;
     };
 }  // namespace example
 

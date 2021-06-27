@@ -11,6 +11,8 @@
 #include <GFX/Resources/Primitives.h>
 #include <GFX/Resources/Texture.h>
 
+#include <GLFW/glfw3.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
@@ -23,6 +25,7 @@ int main(int argc, char** argv)
     gfx::Init();
     {
         example::Window window("HelloForwardRenderer", 1080, 720);
+        auto& input = window.GetInput();
 
         gfx::RendererForward renderer;
         renderer.Init(window);
