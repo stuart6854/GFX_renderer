@@ -512,3 +512,4 @@ FodyWeavers.xsd
 **.user
 
 _tmp/
+!vendor/premake5.exe
