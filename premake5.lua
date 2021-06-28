@@ -1,6 +1,7 @@
 workspace "PersonalRenderer"
     architecture "x64"
-    targetdir "build"
+    targetdir("bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
+    objdir("bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 
     configurations
     {
@@ -12,8 +13,6 @@ workspace "PersonalRenderer"
     {
         "MultiProcessorCompile"
     }
-
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 ExampleDir = "%{wks.location}" .. "/examples"
 include "Dependencies.lua"
@@ -28,9 +27,6 @@ project "GFX"
     language "C++"
     cppdialect "C++20"
     staticruntime "off"
-
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files
     {
@@ -48,8 +44,9 @@ project "GFX"
         "%{prj.name}/src",
 
         "dependencies/fmt/include",
-
+        
         "%{IncludeDir.Assimp}",
+        "E:/Dev/_C++/__Libraries/assimp_fork/include",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb}",
@@ -110,9 +107,6 @@ function AddExample(example_name, src)
         cppdialect "C++20"
         staticruntime "off"
 
-        targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-        objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
         debugdir "%{wks.location}"
 
         files
@@ -131,6 +125,7 @@ function AddExample(example_name, src)
             "dependencies/fmt/include",
 
             "%{IncludeDir.Assimp}",
+            "E:/Dev/_C++/__Libraries/assimp_fork/include",
             "%{IncludeDir.GLFW}",
             "%{IncludeDir.glm}",
             "%{IncludeDir.VulkanSDK}",
@@ -182,3 +177,21 @@ group "Examples"
     AddExample("HelloUniforms", "examples/HelloUniforms/HelloUniforms.cpp")
     AddExample("HelloForwardRenderer", "examples/HelloForwardRenderer/HelloForwardRenderer.cpp")
 group ""
+
+newaction
+{
+    trigger = "clean",
+    description = "Remove all binaries, intermediates and vs files",
+    execute = function ()
+        print("Removing binaries & intermediates")
+        os.rmdir("./bin")
+        os.rmdir("./bin-int")
+        print("Removing project files")
+        os.rmdir("./.vs")
+        os.remove("**.sln")
+        os.remove("**.vcxproj")
+        os.remove("**.vcxproj.user")
+        os.remove("**.vcxproj.filters")
+        print("Done")
+    end
+}
