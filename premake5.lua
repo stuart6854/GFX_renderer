@@ -46,6 +46,7 @@ project "GFX"
         "dependencies/fmt/include",
         
         "%{IncludeDir.Assimp}",
+        "E:/Dev/_C++/__Libraries/assimp_fork/include",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb}",
@@ -124,6 +125,7 @@ function AddExample(example_name, src)
             "dependencies/fmt/include",
 
             "%{IncludeDir.Assimp}",
+            "E:/Dev/_C++/__Libraries/assimp_fork/include",
             "%{IncludeDir.GLFW}",
             "%{IncludeDir.glm}",
             "%{IncludeDir.VulkanSDK}",
