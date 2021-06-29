@@ -123,7 +123,7 @@ namespace gfx
         m_uniformBufferSet->Get(4, 0, currentFrameIndex)->SetData(&pointLightsData, 16ull + sizeof(PointLight) * pointLightsData.Count);
 
         const auto& directionalLight = lightEnvironment.DirectionalLights[0];
-        sceneData.Light.Direction = directionalLight.Position;
+        sceneData.Light.Direction = glm::normalize(directionalLight.Target - directionalLight.Position);
         sceneData.Light.Color = directionalLight.Color;
         sceneData.CameraPosition = cameraPosition;
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));

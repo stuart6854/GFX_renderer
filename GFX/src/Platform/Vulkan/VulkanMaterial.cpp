@@ -19,7 +19,11 @@ namespace gfx
 
     void Material::Set(const std::string& name, float value) { Set<float>(name, value); }
     void Material::Set(const std::string& name, int value) { Set<int>(name, value); }
-    void Material::Set(const std::string& name, bool value) { Set<bool>(name, value); }
+    void Material::Set(const std::string& name, bool value)
+    {
+        // Bools are 4-byte ints
+        Set<int>(name, int(value));
+    }
     void Material::Set(const std::string& name, const glm::vec2& value) { Set<glm::vec2>(name, value); }
     void Material::Set(const std::string& name, const glm::vec3& value) { Set<glm::vec3>(name, value); }
     void Material::Set(const std::string& name, const glm::vec4& value) { Set<glm::vec4>(name, value); }
