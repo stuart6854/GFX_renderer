@@ -6,10 +6,8 @@
 #define PERSONAL_RENDERER_RENDERERFORWARD_H
 
 #include "RendererStructures.h"
-#include "GFX/DeviceContext.h"
-#include "GFX/RenderContext.h"
+#include "GFX/Resources/Shader.h"
 #include "GFX/Resources/UniformBufferSet.h"
-#include "GFX/Resources/Material.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -19,8 +17,13 @@
 namespace gfx
 {
     class IWindowSurface;
+    class RenderSurface;
+    class DeviceContext;
+    class RenderContext;
     class Mesh;
     class Pipeline;
+    class Material;
+    class Image;
 
     class RendererForward
     {
@@ -34,7 +37,7 @@ namespace gfx
 
         void DrawMesh(const DrawCall& drawCall);
 
-        auto GetDeviceContext() -> DeviceContext& { return m_deviceContext; }
+        auto GetDeviceContext() const -> std::shared_ptr<DeviceContext> { return m_deviceContext; }
 
     private:
         void Flush();
@@ -50,8 +53,8 @@ namespace gfx
 
     private:
         std::shared_ptr<RenderSurface> m_renderSurface;
-        DeviceContext m_deviceContext;
-        RenderContext m_renderContext;
+        std::shared_ptr<DeviceContext> m_deviceContext;
+        std::shared_ptr<RenderContext> m_renderContext;
 
         std::vector<DrawCall> m_shadowDrawCalls;
         std::vector<DrawCall> m_geometryDrawCalls;
