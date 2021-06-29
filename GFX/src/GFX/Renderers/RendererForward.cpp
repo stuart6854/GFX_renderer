@@ -6,8 +6,11 @@
 
 #include "GFX/Config.h"
 #include "GFX/Core/RenderSurface.h"
+#include "GFX/DeviceContext.h"
+#include "GFX/RenderContext.h"
 #include "GFX/Resources/Mesh.h"
 #include "GFX/Resources/Shader.h"
+#include "GFX/Resources/Material.h"
 #include "GFX/Resources/Framebuffer.h"
 
 #include "Platform/Vulkan/VulkanCore.h"
@@ -20,6 +23,9 @@ namespace gfx
     void RendererForward::Init(IWindowSurface& windowSurface)
     {
         m_renderSurface = std::make_shared<RenderSurface>(windowSurface);
+        m_deviceContext = std::make_shared<DeviceContext>();
+        m_renderContext = std::make_shared<RenderContext>();
+
 
         /* Uniform Buffers */
 
@@ -53,7 +59,7 @@ namespace gfx
             };
             pipelineDesc.Framebuffer = m_shadowFramebuffer;
 
-            m_shadowPipeline = m_deviceContext.CreatePipeline(pipelineDesc);
+            m_shadowPipeline = m_deviceContext->CreatePipeline(pipelineDesc);
             m_shadowMaterial = std::make_shared<Material>(m_shadowShader);
         }
 
@@ -72,17 +78,17 @@ namespace gfx
             };
             pipelineDesc.Framebuffer = m_swapChainFramebuffer;
 
-            m_geometryPipeline = m_deviceContext.CreatePipeline(pipelineDesc);
+            m_geometryPipeline = m_deviceContext->CreatePipeline(pipelineDesc);
         }
     }
 
     auto RendererForward::LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>
     {
-        auto mesh = std::make_shared<Mesh>(m_deviceContext, path);
+        auto mesh = std::make_shared<Mesh>(*m_deviceContext, path);
 
         // TODO: Move uploads to Mesh.cpp
-        m_deviceContext.Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
-        m_deviceContext.Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
+        m_deviceContext->Upload(mesh->GetVertexBuffer().get(), mesh->GetVertices().data());
+        m_deviceContext->Upload(mesh->GetIndexBuffer().get(), mesh->GetIndices().data());
 
         return mesh;
     }
@@ -123,7 +129,7 @@ namespace gfx
         m_uniformBufferSet->Get(2, 0, currentFrameIndex)->SetData(&sceneData, sizeof(sceneData));
 
         m_renderSurface->NewFrame();
-        m_renderContext.Begin();
+        m_renderContext->Begin();
 
         // Wait for command buffer to be finished before updating descriptors
         SetSceneEnvironment(m_shadowFramebuffer->GetDepthImage());
@@ -133,8 +139,8 @@ namespace gfx
     {
         Flush();
 
-        m_renderContext.End();
-        m_renderSurface->Submit(m_renderContext);
+        m_renderContext->End();
+        m_renderSurface->Submit(*m_renderContext);
         m_renderSurface->Present();
     }
 
@@ -153,50 +159,50 @@ namespace gfx
 
     void RendererForward::ShadowPass()
     {
-        m_renderContext.BeginRenderPass({ 0.0f, 0.0f, 0.0f }, m_shadowFramebuffer.get());
+        m_renderContext->BeginRenderPass({ 0.0f, 0.0f, 0.0f }, m_shadowFramebuffer.get());
 
-        m_renderContext.BindPipeline(m_shadowPipeline.get());
+        m_renderContext->BindPipeline(m_shadowPipeline.get());
 
         for (const auto& drawCall : m_shadowDrawCalls)
         {
-            m_renderContext.BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
-            m_renderContext.BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
+            m_renderContext->BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
+            m_renderContext->BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
 
             UpdateMaterialForRendering(m_shadowMaterial, m_uniformBufferSet);
 
             const auto layout = m_shadowPipeline->GetAPIPipelineLayout();
             const auto descriptorSet = m_shadowMaterial->GetDescriptorSet(m_renderSurface->GetFrameIndex());
-            if (descriptorSet) m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, { descriptorSet }, {});
+            if (descriptorSet) m_renderContext->BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, { descriptorSet }, {});
 
             auto& buffer = m_shadowMaterial->GetUniformStorageBuffer();
-            if (buffer) m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
+            if (buffer) m_renderContext->PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
 
             auto& submeshes = drawCall.mesh->GetSubmeshes();
             for (const auto& submesh : submeshes)
             {
                 const auto modelTransform = drawCall.transform * submesh.Transform;
 
-                m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
+                m_renderContext->PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
 
-                m_renderContext.DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+                m_renderContext->DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
             }
         }
 
-        m_renderContext.EndRenderPass();
+        m_renderContext->EndRenderPass();
 
         m_shadowDrawCalls.clear();
     }
 
     void RendererForward::GeometryPass()
     {
-        m_renderContext.BeginRenderPass({ 0.156f, 0.176f, 0.196f }, m_swapChainFramebuffer.get());
+        m_renderContext->BeginRenderPass({ 0.156f, 0.176f, 0.196f }, m_swapChainFramebuffer.get());
 
-        m_renderContext.BindPipeline(m_geometryPipeline.get());
+        m_renderContext->BindPipeline(m_geometryPipeline.get());
 
         for (const auto& drawCall : m_geometryDrawCalls)
         {
-            m_renderContext.BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
-            m_renderContext.BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
+            m_renderContext->BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
+            m_renderContext->BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
 
             auto& materials = drawCall.mesh->GetMaterials();
             for (auto& material : materials)
@@ -213,19 +219,19 @@ namespace gfx
 
                 std::vector<vk::DescriptorSet> descriptorSets = { descriptorSet, m_activeRendererDescriptorSet };
 
-                m_renderContext.BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
+                m_renderContext->BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, descriptorSets, {});
 
                 const auto modelTransform = drawCall.transform * submesh.Transform;
 
                 auto& buffer = material->GetUniformStorageBuffer();
-                m_renderContext.PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
-                m_renderContext.PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
+                m_renderContext->PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
+                m_renderContext->PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
 
-                m_renderContext.DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+                m_renderContext->DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
             }
         }
 
-        m_renderContext.EndRenderPass();
+        m_renderContext->EndRenderPass();
 
         m_geometryDrawCalls.clear();
     }
