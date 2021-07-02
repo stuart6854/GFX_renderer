@@ -41,6 +41,7 @@ namespace gfx::Vulkan
             VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
         };
 
+        // TODO: Check if validation layer is available
         const char* validationLayerName = "VK_LAYER_KHRONOS_validation";
 
         vk::InstanceCreateInfo instanceInfo{};
