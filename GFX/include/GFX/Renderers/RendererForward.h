@@ -36,6 +36,7 @@ namespace gfx
         void EndScene();
 
         void DrawMesh(const DrawCall& drawCall);
+        void DrawCollider(const DrawCall& drawCall);
 
         auto GetDeviceContext() const -> std::shared_ptr<DeviceContext> { return m_deviceContext; }
 
@@ -58,6 +59,7 @@ namespace gfx
 
         std::vector<DrawCall> m_shadowDrawCalls;
         std::vector<DrawCall> m_geometryDrawCalls;
+        std::vector<DrawCall> m_colliderDrawCalls;
 
         std::shared_ptr<Shader> m_shadowShader;
         std::shared_ptr<Pipeline> m_shadowPipeline;
@@ -65,6 +67,9 @@ namespace gfx
 
         std::shared_ptr<Shader> m_geometryShader;
         std::shared_ptr<Pipeline> m_geometryPipeline;
+        std::shared_ptr<Pipeline> m_geometryWireframePipeline;
+
+        std::shared_ptr<Material> m_colliderMaterial;
 
         std::shared_ptr<Framebuffer> m_shadowFramebuffer;
         std::shared_ptr<Framebuffer> m_swapChainFramebuffer;

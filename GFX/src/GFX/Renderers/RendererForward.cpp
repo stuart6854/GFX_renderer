@@ -26,7 +26,6 @@ namespace gfx
         m_deviceContext = std::make_shared<DeviceContext>();
         m_renderContext = std::make_shared<RenderContext>();
 
-
         /* Uniform Buffers */
 
         m_uniformBufferSet = std::make_shared<UniformBufferSet>(Config::FramesInFlight);
@@ -54,8 +53,8 @@ namespace gfx
             pipelineDesc.CullMode = FaceCullMode::eFront;
             pipelineDesc.DepthBias = true;
             pipelineDesc.Layout = {
-                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
-                { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },
+                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" }, { ShaderDataType::Float2, "a_TexCoord" },
+                { ShaderDataType::Float3, "a_Tangent" }, { ShaderDataType::Float3, "a_Bitangent" },
             };
             pipelineDesc.Framebuffer = m_shadowFramebuffer;
 
@@ -73,13 +72,32 @@ namespace gfx
             PipelineDesc pipelineDesc;
             pipelineDesc.Shader = m_geometryShader;
             pipelineDesc.Layout = {
-                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" },    { ShaderDataType::Float2, "a_TexCoord" },
-                { ShaderDataType::Float3, "a_Tangent" },  { ShaderDataType::Float3, "a_Bitangent" },
+                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" }, { ShaderDataType::Float2, "a_TexCoord" },
+                { ShaderDataType::Float3, "a_Tangent" }, { ShaderDataType::Float3, "a_Bitangent" },
             };
             pipelineDesc.Framebuffer = m_swapChainFramebuffer;
 
             m_geometryPipeline = m_deviceContext->CreatePipeline(pipelineDesc);
         }
+
+        {
+            ShaderLibrary::Load("resources/shaders/Wireframe.glsl", true);
+            PipelineDesc pipelineDesc;
+            pipelineDesc.Shader = ShaderLibrary::Get("Wireframe");
+            pipelineDesc.Wireframe = true;
+            pipelineDesc.DepthTest = true;
+            pipelineDesc.LineWidth = 2.0f;
+            pipelineDesc.Layout = {
+                { ShaderDataType::Float3, "a_Position" }, { ShaderDataType::Float3, "a_Normal" }, { ShaderDataType::Float2, "a_TexCoord" },
+                { ShaderDataType::Float3, "a_Tangent" }, { ShaderDataType::Float3, "a_Bitangent" },
+            };
+            pipelineDesc.Framebuffer = m_swapChainFramebuffer;
+
+            m_geometryWireframePipeline = m_deviceContext->CreatePipeline(pipelineDesc);
+        }
+
+        m_colliderMaterial = std::make_unique<Material>(ShaderLibrary::Get("Wireframe"));
+        m_colliderMaterial->Set("u_MaterialUniforms.Color", glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
     }
 
     auto RendererForward::LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>
@@ -149,6 +167,11 @@ namespace gfx
         // TODO: Culling, sorting, etc.
         m_geometryDrawCalls.emplace_back(drawCall);
         m_shadowDrawCalls.emplace_back(drawCall);
+    }
+
+    void RendererForward::DrawCollider(const DrawCall& drawCall)
+    {
+        m_colliderDrawCalls.emplace_back(drawCall);
     }
 
     void RendererForward::Flush()
@@ -231,9 +254,36 @@ namespace gfx
             }
         }
 
+        m_renderContext->BindPipeline(m_geometryWireframePipeline.get());
+        for (const auto& drawCall : m_colliderDrawCalls)
+        {
+            m_renderContext->BindVertexBuffer(drawCall.mesh->GetVertexBuffer().get());
+            m_renderContext->BindIndexBuffer(drawCall.mesh->GetIndexBuffer().get());
+
+            UpdateMaterialForRendering(m_colliderMaterial, m_uniformBufferSet);
+
+            const auto layout = m_geometryWireframePipeline->GetAPIPipelineLayout();
+            const auto descriptorSet = m_colliderMaterial->GetDescriptorSet(m_renderSurface->GetFrameIndex());
+            if (descriptorSet) m_renderContext->BindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, { descriptorSet }, {});
+
+            auto& buffer = m_colliderMaterial->GetUniformStorageBuffer();
+            if (buffer) m_renderContext->PushConstants(ShaderStage::ePixel, sizeof(glm::mat4), buffer.Size, buffer.Data);
+
+            auto& submeshes = drawCall.mesh->GetSubmeshes();
+            for (const auto& submesh : submeshes)
+            {
+                const auto modelTransform = drawCall.transform * submesh.Transform;
+
+                m_renderContext->PushConstants(ShaderStage::eVertex, 0, sizeof(glm::mat4), &modelTransform);
+
+                m_renderContext->DrawIndexed(submesh.IndexCount, 1, submesh.BaseIndex, submesh.BaseVertex, 0);
+            }
+        }
+
         m_renderContext->EndRenderPass();
 
         m_geometryDrawCalls.clear();
+        m_colliderDrawCalls.clear();
     }
 
     void RendererForward::SetSceneEnvironment(const std::shared_ptr<Image>& shadowMap)
@@ -264,7 +314,7 @@ namespace gfx
 
     auto RendererForward::CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material,
                                                                         const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
-        -> const std::vector<std::vector<vk::WriteDescriptorSet>>&
+    -> const std::vector<std::vector<vk::WriteDescriptorSet>>&
     {
         // Check for existing writeDescriptors
         const auto shaderHash = material->GetShader()->GetHash();
@@ -320,5 +370,4 @@ namespace gfx
             material->UpdateForRendering(m_renderSurface->GetFrameIndex());
         }
     }
-
-}  // namespace gfx
+} // namespace gfx
