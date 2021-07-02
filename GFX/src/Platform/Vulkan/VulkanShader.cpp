@@ -160,7 +160,7 @@ namespace gfx
         }
         else
         {
-            GFX_ERROR("Could not load shader!");
+            GFX_ERROR("Could not load shader: {}", filepath);
         }
         in.close();
         return result;
