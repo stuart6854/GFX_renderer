@@ -13,6 +13,7 @@ namespace gfx
     {
     public:
         Image(const ImageDesc& desc);
+        ~Image();
 
         auto GetHash() const -> uint64_t { return reinterpret_cast<uint64_t>(static_cast<VkImage>(m_image)); }
 

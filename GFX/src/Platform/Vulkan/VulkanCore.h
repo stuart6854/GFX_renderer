@@ -22,7 +22,7 @@ namespace gfx::Vulkan
     auto GetInstance() -> vk::Instance;
     auto GetPhysicalDevice() -> vk::PhysicalDevice;
     auto GetDevice() -> vk::Device;
-    auto GetAllocator() -> const VulkanAllocator&;
+    auto GetAllocator() -> VulkanAllocator&;
 
     auto GetGraphicsQueueFamily() -> uint32_t;
 
@@ -38,7 +38,6 @@ namespace gfx::Vulkan
                                                       VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                       const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                                       void* pUserData) -> VkBool32;
-
-}  // namespace gfx::Vulkan
+} // namespace gfx::Vulkan
 
 #endif  // PERSONAL_RENDERER_VULKANCORE_H

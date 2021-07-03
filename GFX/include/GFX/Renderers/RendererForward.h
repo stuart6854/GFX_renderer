@@ -29,6 +29,7 @@ namespace gfx
     {
     public:
         void Init(IWindowSurface& windowSurface);
+        void Shutdown();
 
         auto LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>;
 
@@ -48,8 +49,9 @@ namespace gfx
 
         void SetSceneEnvironment(const std::shared_ptr<Image>& shadowMap);
 
-        auto CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
-            -> const std::vector<std::vector<vk::WriteDescriptorSet>>&;
+        auto CreateOrRetrieveUniformBufferWriteDescriptors(const std::shared_ptr<Material>& material,
+                                                           const std::shared_ptr<UniformBufferSet>& uniformBufferSet)
+        -> const std::vector<std::vector<vk::WriteDescriptorSet>>&;
         void UpdateMaterialForRendering(const std::shared_ptr<Material>& material, const std::shared_ptr<UniformBufferSet>& uniformBufferSet);
 
     private:
@@ -111,8 +113,8 @@ namespace gfx
 
         // UniformBufferSet* -> Shader Hash -> Frame -> WriteDescriptor
         std::unordered_map<UniformBufferSet*, std::unordered_map<uint64_t, std::vector<std::vector<vk::WriteDescriptorSet>>>>
-            m_uniformBufferWriteDescriptorCache;
+        m_uniformBufferWriteDescriptorCache;
     };
-}  // namespace gfx
+} // namespace gfx
 
 #endif  // PERSONAL_RENDERER_RENDERERFORWARD_H

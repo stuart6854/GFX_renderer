@@ -100,6 +100,13 @@ namespace gfx
         m_colliderMaterial->Set("u_MaterialUniforms.Color", glm::vec4(0.2f, 1.0f, 0.2f, 1.0f));
     }
 
+    void RendererForward::Shutdown()
+    {
+        GFX_INFO("RendererForward shutting down");
+        //TODO: Make api agnostic
+        Vulkan::GetDevice().waitIdle();
+    }
+
     auto RendererForward::LoadMesh(const std::string& path) -> std::shared_ptr<Mesh>
     {
         auto mesh = std::make_shared<Mesh>(*m_deviceContext, path);

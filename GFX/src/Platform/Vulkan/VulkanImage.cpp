@@ -1,17 +1,25 @@
 ﻿#ifdef GFX_API_VULKAN
 
-    #include "VulkanImage.h"
+#include "VulkanImage.h"
 
-    #include "VulkanCore.h"
+#include "VulkanCore.h"
 
 namespace gfx
 {
-    Image::Image(const ImageDesc& desc) : m_desc(desc) {}
+    Image::Image(const ImageDesc& desc)
+        : m_desc(desc)
+    {
+    }
+
+    Image::~Image()
+    {
+        Release();
+    }
 
     void Image::Invalidate()
     {
         const auto device = Vulkan::GetDevice();
-        const auto allocator = Vulkan::GetAllocator();
+        auto& allocator = Vulkan::GetAllocator();
 
         vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eSampled;
         if (m_desc.Usage == ImageUsage::eAttachment)
@@ -79,7 +87,7 @@ namespace gfx
     void Image::Release()
     {
         const auto device = Vulkan::GetDevice();
-        const auto allocator = Vulkan::GetAllocator();
+        auto& allocator = Vulkan::GetAllocator();
 
         device.destroy(m_sampler);
         device.destroy(m_view);
@@ -113,9 +121,7 @@ namespace gfx
             GFX_ASSERT(false);
             return vk::Format::eUndefined;
         }
-
-    }  // namespace Utils
-
-}  // namespace gfx
+    } // namespace Utils
+}     // namespace gfx
 
 #endif

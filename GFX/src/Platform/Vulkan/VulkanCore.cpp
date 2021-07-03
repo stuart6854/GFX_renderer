@@ -158,6 +158,8 @@ namespace gfx::Vulkan
 
     void Shutdown()
     {
+        s_vkDevice.waitIdle();
+
         for (auto& pool : m_vkDescriptorPools)
         {
             s_vkDevice.destroy(pool);
@@ -176,7 +178,7 @@ namespace gfx::Vulkan
     auto GetInstance() -> vk::Instance { return s_vkInstance; }
     auto GetPhysicalDevice() -> vk::PhysicalDevice { return s_vkPhysicalDevice; }
     auto GetDevice() -> vk::Device { return s_vkDevice; }
-    auto GetAllocator() -> const VulkanAllocator& { return s_vkAllocator; }
+    auto GetAllocator() -> VulkanAllocator& { return s_vkAllocator; }
 
     auto GetGraphicsQueueFamily() -> uint32_t { return s_vkGraphicsQueueFamily; }
 

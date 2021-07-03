@@ -204,7 +204,7 @@ namespace gfx
     void RenderSurface::CreateDepthStencil()
     {
         const auto device = Vulkan::GetDevice();
-        const auto& allocator = Vulkan::GetAllocator();
+        auto& allocator = Vulkan::GetAllocator();
 
         const vk::Format depthFormat = Vulkan::GetDepthFormat();
 
