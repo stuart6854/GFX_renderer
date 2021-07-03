@@ -6,6 +6,17 @@
 
 namespace gfx::Vulkan
 {
+    bool IsLayerSupported(const std::string& layerName)
+    {
+        auto layers = vk::enumerateInstanceLayerProperties();
+        for (const auto& layer : layers)
+        {
+            if (layer.layerName == layerName)
+                return true;
+        }
+        return false;
+    }
+
     auto ChooseSurfaceFormat(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface) -> vk::SurfaceFormatKHR
     {
         auto surfaceFormats = physicalDevice.getSurfaceFormatsKHR(surface);
@@ -102,5 +113,4 @@ namespace gfx::Vulkan
 
         return VK_QUEUE_FAMILY_IGNORED;
     }
-
-}  // namespace gfx::Vulkan
+} // namespace gfx::Vulkan

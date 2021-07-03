@@ -9,6 +9,8 @@
 
 namespace gfx::Vulkan
 {
+    bool IsLayerSupported(const std::string& layerName);
+
     auto ChooseSurfaceFormat(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface) -> vk::SurfaceFormatKHR;
 
     auto ChoosePresentMode(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface) -> vk::PresentModeKHR;
@@ -18,7 +20,6 @@ namespace gfx::Vulkan
     auto FindDepthFormat(vk::PhysicalDevice physicalDevice) -> vk::Format;
 
     auto FindGraphicsQueueFamily(vk::PhysicalDevice physicalDevice) -> uint32_t;
-
-}  // namespace gfx::Vulkan
+} // namespace gfx::Vulkan
 
 #endif  // PERSONAL_RENDERER_VULKANUTILS_H

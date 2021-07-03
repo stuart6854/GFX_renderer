@@ -3,14 +3,14 @@
 //
 #ifdef GFX_API_VULKAN
 
-    #include "GFX/Debug.h"
-    #include "GFX/Config.h"
+#include "GFX/Debug.h"
+#include "GFX/Config.h"
 
-    #include "VulkanCore.h"
-    #include "VulkanUtils.h"
+#include "VulkanCore.h"
+#include "VulkanUtils.h"
 
-    #include <iostream>
-    #include <array>
+#include <iostream>
+#include <array>
 
 namespace gfx::Vulkan
 {
@@ -31,7 +31,7 @@ namespace gfx::Vulkan
         std::array<uint32_t, Config::FramesInFlight> m_vkDescriptorPoolAllocationCounts;
 
         vk::DebugUtilsMessengerEXT s_vkDebugCallback;
-    }  // namespace
+    } // namespace
 
     void CreateInstance(vk::ApplicationInfo appInfo)
     {
@@ -41,24 +41,28 @@ namespace gfx::Vulkan
             VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
         };
 
-        // TODO: Check if validation layer is available
-        const char* validationLayerName = "VK_LAYER_KHRONOS_validation";
-
         vk::InstanceCreateInfo instanceInfo{};
         instanceInfo.setPApplicationInfo(&appInfo);
         instanceInfo.setPEnabledExtensionNames(extensions);
-        instanceInfo.setEnabledLayerCount(1);
-        instanceInfo.setPEnabledLayerNames(validationLayerName);
+
+        const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
+        if (IsLayerSupported(validationLayerName))
+        {
+            const char* layerName = validationLayerName.c_str();
+            instanceInfo.setEnabledLayerCount(1);
+            instanceInfo.setPEnabledLayerNames(layerName);
+            GFX_INFO("Vulkan validation layer enabled.");
+        }
 
         s_vkInstance = vk::createInstance(instanceInfo);
 
         // Setup debug message callback
         vk::DebugUtilsMessengerCreateInfoEXT debugInfo{};
         debugInfo.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-                                     vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
         debugInfo.setPfnUserCallback(VkDebugCallback);
         debugInfo.setMessageType(vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                 vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
 
         vk::DispatchLoaderDynamic dldi(s_vkInstance, vkGetInstanceProcAddr);
         s_vkDebugCallback = s_vkInstance.createDebugUtilsMessengerEXT(debugInfo, nullptr, dldi);
@@ -211,7 +215,6 @@ namespace gfx::Vulkan
         }
         return VK_FALSE;
     }
-
-}  // namespace gfx::Vulkan
+} // namespace gfx::Vulkan
 
 #endif
