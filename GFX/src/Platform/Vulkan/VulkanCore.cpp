@@ -51,7 +51,7 @@ namespace gfx::Vulkan
             const char* layerName = validationLayerName.c_str();
             instanceInfo.setEnabledLayerCount(1);
             instanceInfo.setPEnabledLayerNames(layerName);
-            GFX_INFO("Vulkan validation layer enabled.");
+            GFX_WARN("Vulkan validation layer enabled.");
         }
 
         s_vkInstance = vk::createInstance(instanceInfo);

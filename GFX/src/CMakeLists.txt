@@ -1,5 +1,6 @@
 target_sources(gfx
 	PRIVATE 
+		"GFX/Debug.cpp"
 		"GFX/CommandBuffer.h"
 		"GFX/GFXAPI.h"
 		"GFX/Renderers/RendererForward.cpp"
