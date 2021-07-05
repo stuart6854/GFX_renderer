@@ -1,10 +1,12 @@
-#ifndef PERSONAL_RENDERER_GFX_H
-#define PERSONAL_RENDERER_GFX_H
+#pragma once
+
+#include "Backend.h"
 
 namespace gfx
 {
-    void Init();
-    void Shutdown();
-}
+    bool Init(const BackendType& backend);
+    void Shutdown(const BackendType& backend);
 
-#endif  // PERSONAL_RENDERER_GFX_H
+    auto GetBackendType() -> BackendType;
+    auto GetBackend() -> Backend*;
+}
