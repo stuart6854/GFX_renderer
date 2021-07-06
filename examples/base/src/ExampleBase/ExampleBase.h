@@ -14,7 +14,7 @@ namespace example
         void Run();
 
     protected:
-        std::shared_ptr<Window> m_window;
+        // std::shared_ptr<Window> m_window;
         Input* m_input;
 
         virtual void Init_() {}

@@ -8,7 +8,7 @@ namespace example
 {
     void ExampleBase::Run()
     {
-        Init();
+        /*Init();
 
         using clock = std::chrono::high_resolution_clock;
         auto last = clock::now();
@@ -32,15 +32,15 @@ namespace example
 
             Update_(delta);
             Render_();
-        }
+        }*/
     }
 
     void ExampleBase::Init()
     {
-        m_window = std::make_shared<Window>("ExampleBase", 1080, 720);
+        /*m_window = std::make_shared<Window>("ExampleBase", 1080, 720);
         m_input = &m_window->GetInput();
 
-        Init_();
+        Init_();*/
     }
 
 }  // namespace example

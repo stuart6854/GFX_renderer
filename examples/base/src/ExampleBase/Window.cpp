@@ -9,7 +9,7 @@
 
 namespace example
 {
-    Window::Window(std::string title, int w, int h) : m_title(std::move(title)), m_width(w), m_height(h)
+    /*Window::Window(std::string title, int w, int h) : m_title(std::move(title)), m_width(w), m_height(h)
     {
         glfwInit();
 
@@ -49,6 +49,6 @@ namespace example
         VkSurfaceKHR rawSurface{};
         auto result = glfwCreateWindowSurface(instance, m_handle, nullptr, &rawSurface);
         return vk::SurfaceKHR(rawSurface);
-    }
+    }*/
 
 }  // namespace example

@@ -5,14 +5,10 @@
 #include <ExampleBase/ExampleBase.h>
 
 #include <GFX/GFX.h>
-#include <GFX/Core/RenderSurface.h>
-#include <GFX/DeviceContext.h>
-#include <GFX/RenderContext.h>
-#include <GFX/Resources/Framebuffer.h>
 
 #include <iostream>
 
-class HelloWindow : public example::ExampleBase
+/*class HelloWindow : public example::ExampleBase
 {
 public:
     HelloWindow() : ExampleBase("Hello Window") {}
@@ -53,16 +49,28 @@ private:
     std::shared_ptr<gfx::RenderContext> m_renderContext;
 
     std::shared_ptr<gfx::Framebuffer> m_framebuffer;
-};
+};*/
 
 int main(int argc, char** argv)
 {
     std::cout << "Running example \"HelloWindow\"" << std::endl;
 
-    gfx::Init();
+    /*gfx::Init();
     {
         HelloWindow example;
         example.Run();
+    }
+    gfx::Shutdown();*/
+
+    gfx::Init(gfx::BackendType::eVulkan);
+    {
+        gfx::Window window(720, 480, "Hello Window");
+
+        while(!window.IsCloseRequested())
+        {
+            window.PollEvents();
+            window.Present();
+        }
     }
     gfx::Shutdown();
 

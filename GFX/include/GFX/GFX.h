@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Backend.h"
+#include "GFX/Core/GFXCore.h"
+#include "GFX/Core/Backend.h"
+#include "GFX/Core/Window.h"
+#include "GFX/Core/SwapChain.h"
 
-namespace gfx
-{
-    bool Init(const BackendType& backend);
-    void Shutdown(const BackendType& backend);
+// Resources
+#include "GFX/Resources/MeshBuilder.h"
+#include "GFX/Resources/MeshImporter.h"
 
-    auto GetBackendType() -> BackendType;
-    auto GetBackend() -> Backend*;
-}
+#include "GFX/Resources/TextureBuilder.h"
+#include "GFX/Resources/TextureImporter.h"
