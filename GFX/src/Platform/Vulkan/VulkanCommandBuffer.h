@@ -15,7 +15,7 @@ namespace gfx
     {
     public:
         VulkanCommandBuffer(uint32_t count = 0);
-        ~VulkanCommandBuffer();
+        ~VulkanCommandBuffer() override;
 
         auto GetHandle() const -> vk::CommandBuffer { return m_currentCmdBuffer; }
         auto GetFence() const -> vk::Fence { return m_currentFence; }

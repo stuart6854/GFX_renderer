@@ -22,6 +22,8 @@ namespace gfx
         {
         }
 
+        virtual ~Framebuffer() = default;
+
         auto GetWidth() const -> uint32_t { return m_width; }
         auto GetHeight() const -> uint32_t { return m_height; }
 
@@ -31,7 +33,7 @@ namespace gfx
         // auto GetDepthImage() const -> Image* { return m_depthAttachmentImage.get(); }
 
         virtual void Resize(uint32_t width, uint32_t height) = 0;
-        
+
     private:
         virtual void Invalidate() = 0;
 

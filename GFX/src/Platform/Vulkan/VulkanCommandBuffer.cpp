@@ -39,6 +39,17 @@ namespace gfx
 
     VulkanCommandBuffer::~VulkanCommandBuffer()
     {
+        auto* backend = VulkanBackend::Get();
+        auto& device = backend->GetDevice();
+        auto vkDevice = device.GetHandle();
+
+        for (auto& fence : m_fences)
+        {
+            device.WaitForFence(fence);
+            vkDevice.destroy(fence);
+        }
+
+        vkDevice.destroy(m_cmdPool);
     }
 
     void VulkanCommandBuffer::Begin()
