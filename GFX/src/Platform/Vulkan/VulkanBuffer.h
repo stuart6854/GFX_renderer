@@ -9,12 +9,20 @@
 
 namespace gfx
 {
-    struct VulkanBuffer : public Buffer
+    class VulkanBuffer : public Buffer
     {
-        uint32_t Size;
-        vk::Buffer Buffer;
-        VmaAllocation Allocation;
-    };
+    public:
+        VulkanBuffer(BufferUsage usage, uint64_t size, const void* data = nullptr);
+        ~VulkanBuffer() override;
 
-    auto CreateBuffer() -> Buffer;
+        auto GetSize() const -> uint64_t { return m_size; }
+
+        auto GetHandle() const -> vk::Buffer { return m_buffer; }
+
+    private:
+        uint64_t m_size;
+
+        vk::Buffer m_buffer;
+        VmaAllocation m_allocation;
+    };
 }

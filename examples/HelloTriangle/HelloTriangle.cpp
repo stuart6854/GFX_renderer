@@ -2,22 +2,11 @@
 // Created by stumi on 07/06/21.
 //
 
-#include <ExampleBase/Window.h>
+#include <ExampleBase/ExampleBase.h>
 
 #include <GFX/GFX.h>
-#include <GFX/Debug.h>
-#include <GFX/Core/RenderSurface.h>
-#include <GFX/DeviceContext.h>
-#include <GFX/RenderContext.h>
-#include <GFX/Resources/Vertex.h>
-#include <GFX/Resources/Buffer.h>
-#include <GFX/Resources/Shader.h>
-#include <GFX/Resources/Pipeline.h>
-#include <GFX/Resources/Framebuffer.h>
 
 #include <iostream>
-#include <vector>
-#include <filesystem>
 
 const std::vector<gfx::Vertex> triVerts = {
     { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
@@ -30,7 +19,7 @@ int main(int argc, char** argv)
 {
     std::cout << "Running example \"HelloTriangle\"" << std::endl;
 
-    GFX_INFO("Working Directory: {}", std::filesystem::current_path().string());
+    /*GFX_INFO("Working Directory: {}", std::filesystem::current_path().string());
 
     gfx::Init();
     {
@@ -88,6 +77,39 @@ int main(int argc, char** argv)
 
             renderSurface.Submit(renderContext);
             renderSurface.Present();
+        }
+    }
+    gfx::Shutdown();*/
+
+    gfx::SetDebugCallback([](gfx::DebugLevel level, std::string msg)
+    {
+        if (level <= gfx::DebugLevel::eWarn)
+            std::cout << "[GFX] " << msg << std::endl;
+        else
+            std::cerr << "[GFX] " << msg << std::endl;
+    });
+
+    gfx::Init(gfx::BackendType::eVulkan);
+
+    {
+        gfx::Window window(720, 480, "Hello Triangle");
+
+        auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(gfx::Vertex) * triVerts.size(), triVerts.data());
+
+        auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
+        auto cmdBuffer = gfx::CommandBuffer::Create();
+
+        while (!window.IsCloseRequested())
+        {
+            window.PollEvents();
+            window.GetSwapChain()->NewFrame();
+
+            cmdBuffer->Begin();
+            cmdBuffer->BeginRenderPass(framebuffer.get());
+            cmdBuffer->EndRenderPass();
+            cmdBuffer->End();
+
+            window.GetSwapChain()->Present(cmdBuffer.get());
         }
     }
     gfx::Shutdown();

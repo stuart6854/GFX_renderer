@@ -12,6 +12,8 @@
 #include "GFX/Resources/Framebuffer.h"
 #include "GFX/Resources/CommandBuffer.h"
 
+#include "GFX/Resources/Buffer.h"
+
 #include "GFX/Resources/MeshBuilder.h"
 #include "GFX/Resources/MeshImporter.h"
 

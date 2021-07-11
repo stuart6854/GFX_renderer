@@ -2,32 +2,32 @@
 // Created by stumi on 07/06/21.
 //
 
-#include <ExampleBase/Window.h>
+// #include <ExampleBase/Window.h>
+//
+// #include <GFX/GFX.h>
+// #include <GFX/Debug.h>
+// #include <GFX/Core/RenderSurface.h>
+// #include <GFX/DeviceContext.h>
+// #include <GFX/RenderContext.h>
+// #include <GFX/Resources/Vertex.h>
+// #include <GFX/Resources/Buffer.h>
+// #include <GFX/Resources/Shader.h>
+// #include <GFX/Resources/Pipeline.h>
+// #include <GFX/Resources/Framebuffer.h>
+//
+// #include <iostream>
+// #include <vector>
 
-#include <GFX/GFX.h>
-#include <GFX/Debug.h>
-#include <GFX/Core/RenderSurface.h>
-#include <GFX/DeviceContext.h>
-#include <GFX/RenderContext.h>
-#include <GFX/Resources/Vertex.h>
-#include <GFX/Resources/Buffer.h>
-#include <GFX/Resources/Shader.h>
-#include <GFX/Resources/Pipeline.h>
-#include <GFX/Resources/Framebuffer.h>
-
-#include <iostream>
-#include <vector>
-
-const std::vector<gfx::Vertex> triVerts = {
-    { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
-    { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },
-    { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
-};
-const std::vector<uint32_t> triIndices = { 0, 1, 2 };
+// const std::vector<gfx::Vertex> triVerts = {
+//     { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
+//     { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },
+//     { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
+// };
+// const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 
 int main(int argc, char** argv)
 {
-    GFX_INFO("Running example \"HelloUniforms\"");
+    /*GFX_INFO("Running example \"HelloUniforms\"");
 
     gfx::Init();
     {
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
             renderSurface.Present();
         }
     }
-    gfx::Shutdown();
+    gfx::Shutdown();*/
 
     return 0;
 }
