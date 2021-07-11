@@ -31,6 +31,8 @@ namespace gfx
 
     void Shutdown()
     {
+        s_backend->WaitIdle();
+
         // Destroy backend
         s_backend = nullptr;
         s_backendType = BackendType::eNone;
