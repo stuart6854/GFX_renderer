@@ -1,8 +1,9 @@
 #include "Platform/Vulkan/VulkanSwapChain.h"
 
-#include "VulkanBackend.h"
 #include "GFX/Debug.h"
 #include "GFX/Core/Window.h"
+#include "VulkanBackend.h"
+#include "VulkanCommandBuffer.h"
 
 #include <GLFW/glfw3.h>
 
@@ -66,11 +67,16 @@ namespace gfx
         //TODO: Assert glfwVulkanSupported();
 
         auto* backend = VulkanBackend::Get();
+        auto& device = backend->GetDevice();
+        auto& gpu = backend->GetPhysicalDevice();
+        auto vkGpu = gpu.GetHandle();
 
         VkSurfaceKHR rawSurface = nullptr;
         glfwCreateWindowSurface(backend->GetInstance(), window->GetHandle(), nullptr, &rawSurface);
         m_surface = rawSurface;
         GFX_ASSERT(m_surface, "glfwCreateWindowSurface() failed!");
+
+        vkGpu.getSurfaceSupportKHR(gpu.GetQueueFamilyIndices().Graphics, m_surface);
 
         CreateFrameResources();
 
@@ -144,7 +150,7 @@ namespace gfx
 
         auto& frame = GetCurrentFrame();
         // Wait until GPU has finished rendering the last frame
-        if (frame.RenderFence) device.WaitForFence(frame.RenderFence);
+        // if (frame.RenderFence) device.WaitForFence(frame.RenderFence);
 
         // Vulkan::ResetDescriptorPool(GetFrameIndex());
 
@@ -152,10 +158,22 @@ namespace gfx
         m_imageIndex = device.AcquireNextImage(m_swapChain, frame.PresentComplete);
     }
 
-    void VulkanSwapChain::Present()
+    void VulkanSwapChain::Present(CommandBuffer* cmdBuffer)
     {
         auto* backend = VulkanBackend::Get();
         auto& device = backend->GetDevice();
+        auto* vkCmdBuffer = static_cast<VulkanCommandBuffer*>(cmdBuffer);
+
+        auto cmdBufferHandle = vkCmdBuffer->GetHandle();
+        std::vector<vk::PipelineStageFlags> waitStages = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+
+        vk::SubmitInfo submitInfo{};
+        submitInfo.setCommandBuffers(cmdBufferHandle);
+        submitInfo.setWaitSemaphores(GetCurrentFrame().PresentComplete);
+        submitInfo.setSignalSemaphores(GetCurrentFrame().RenderComplete);
+        submitInfo.setWaitDstStageMask(waitStages);
+
+        device.GetGraphicsQueue().submit(submitInfo, vkCmdBuffer->GetFence());
 
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setSwapchains(m_swapChain);

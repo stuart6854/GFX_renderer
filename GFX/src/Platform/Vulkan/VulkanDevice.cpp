@@ -52,6 +52,11 @@ namespace gfx
         m_device.waitIdle();
     }
 
+    void VulkanDevice::ResetFence(vk::Fence fence)
+    {
+        m_device.resetFences(fence);
+    }
+
     auto VulkanDevice::AcquireNextImage(vk::SwapchainKHR swapchain, vk::Semaphore semaphore) -> uint32_t
     {
         return m_device.acquireNextImageKHR(swapchain, UINT64_MAX, semaphore).value;

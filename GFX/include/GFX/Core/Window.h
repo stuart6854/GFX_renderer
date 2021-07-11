@@ -27,6 +27,8 @@ namespace gfx
 
         auto GetHandle() const -> GLFWwindow* { return m_handle; }
 
+        auto GetSwapChain() -> SwapChain* { return m_swapChain.get(); }
+
         bool IsCloseRequested() const;
 
         void PollEvents();

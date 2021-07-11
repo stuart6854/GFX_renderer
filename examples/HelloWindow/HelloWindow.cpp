@@ -75,10 +75,20 @@ int main(int argc, char** argv)
     {
         gfx::Window window(720, 480, "Hello Window");
 
+        auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
+        auto cmdBuffer = gfx::CommandBuffer::Create();
+
         while (!window.IsCloseRequested())
         {
             window.PollEvents();
-            window.Present();
+            window.GetSwapChain()->NewFrame();
+
+            cmdBuffer->Begin();
+            cmdBuffer->BeginRenderPass(framebuffer.get());
+            cmdBuffer->EndRenderPass();
+            cmdBuffer->End();
+
+            window.GetSwapChain()->Present(cmdBuffer.get());
         }
     }
     gfx::Shutdown();

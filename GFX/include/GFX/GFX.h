@@ -9,6 +9,9 @@
 #include "GFX/Core/SwapChain.h"
 
 // Resources
+#include "GFX/Resources/Framebuffer.h"
+#include "GFX/Resources/CommandBuffer.h"
+
 #include "GFX/Resources/MeshBuilder.h"
 #include "GFX/Resources/MeshImporter.h"
 

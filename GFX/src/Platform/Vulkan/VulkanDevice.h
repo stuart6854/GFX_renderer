@@ -18,6 +18,8 @@ namespace gfx
         void WaitForFence(vk::Fence fence);
         void WaitIdle();
 
+        void ResetFence(vk::Fence fence);
+
         auto AcquireNextImage(vk::SwapchainKHR swapchain, vk::Semaphore semaphore) -> uint32_t;
 
         auto GetCommandBuffer(bool begin) -> vk::CommandBuffer;

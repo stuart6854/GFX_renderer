@@ -17,10 +17,17 @@ namespace gfx
         VulkanSwapChain(Window* window);
         ~VulkanSwapChain();
 
+        auto GetWidth() const -> uint32_t override { return m_width; }
+        auto GetHeight() const -> uint32_t override { return m_height; }
+
+        auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
+
+        auto GetCurrentFramebuffer() const -> vk::Framebuffer { return m_framebuffers.at(m_imageIndex); }
+
         void Recreate(uint32_t width, uint32_t height) override;
 
-        void NewFrame();
-        void Present() override;
+        void NewFrame() override;
+        void Present(CommandBuffer* cmdBuffer) override;
 
     private:
         struct Frame

@@ -38,6 +38,6 @@ namespace gfx
 
     void Window::Present()
     {
-        m_swapChain->Present();
+        // m_swapChain->Present();
     }
 }
