@@ -4,6 +4,7 @@ message(STATUS "GFX Graphics API=${GFX_GRAPHICS_API}")
 set(GFX_HEADERS 
     "include/GFX/GFX.h"
     "include/GFX/Config.h"
+    "include/GFX/Debug.h"
     "include/GFX/Core/GFXCore.h"
     "include/GFX/Core/Base.h"
     "include/GFX/Core/Backend.h"
@@ -21,6 +22,7 @@ set(GFX_HEADERS
 )
 
 set(GFX_SOURCES
+    "src/Debug.cpp"
     "src/Core/GFXCore.cpp"
 	"src/Core/Backend.cpp"
 	"src/Core/Window.cpp"

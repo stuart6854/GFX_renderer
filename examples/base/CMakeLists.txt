@@ -10,3 +10,5 @@ add_library(example_base
 target_include_directories(example_base PUBLIC src)
 
 target_link_libraries(example_base PUBLIC gfx)
+
+set_target_properties (example_base PROPERTIES FOLDER Examples)

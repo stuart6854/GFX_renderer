@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Config.h"
+#include "Debug.h"
+
 #include "GFX/Core/GFXCore.h"
 #include "GFX/Core/Backend.h"
 #include "GFX/Core/Window.h"

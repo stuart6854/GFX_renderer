@@ -1,6 +1,7 @@
 #include "Platform/Vulkan/VulkanSwapChain.h"
 
 #include "VulkanBackend.h"
+#include "GFX/Debug.h"
 #include "GFX/Core/Window.h"
 
 #include <GLFW/glfw3.h>
@@ -69,6 +70,7 @@ namespace gfx
         VkSurfaceKHR rawSurface = nullptr;
         glfwCreateWindowSurface(backend->GetInstance(), window->GetHandle(), nullptr, &rawSurface);
         m_surface = rawSurface;
+        GFX_ASSERT(m_surface, "glfwCreateWindowSurface() failed!");
 
         CreateFrameResources();
 
@@ -116,6 +118,7 @@ namespace gfx
         createInfo.oldSwapchain = m_swapChain;
 
         const auto newSwapChain = vkDevice.createSwapchainKHR(createInfo);
+        GFX_ASSERT(newSwapChain, "createSwapchainKHR() failed!");
         if (m_swapChain)
         {
             DestroySwapChainResources();

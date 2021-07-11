@@ -9,6 +9,8 @@
 
 namespace gfx
 {
+    class SwapChain;
+
     class Window
     {
     public:

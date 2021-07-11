@@ -62,11 +62,20 @@ int main(int argc, char** argv)
     }
     gfx::Shutdown();*/
 
+    gfx::SetDebugCallback([](gfx::DebugLevel level, std::string msg)
+    {
+        if (level <= gfx::DebugLevel::eWarn)
+            std::cout << "[GFX] " << msg << std::endl;
+        else
+            std::cerr << "[GFX] " << msg << std::endl;
+    });
+
     gfx::Init(gfx::BackendType::eVulkan);
+
     {
         gfx::Window window(720, 480, "Hello Window");
 
-        while(!window.IsCloseRequested())
+        while (!window.IsCloseRequested())
         {
             window.PollEvents();
             window.Present();

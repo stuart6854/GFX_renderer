@@ -1,5 +1,7 @@
 #include "VulkanPhysicalDevice.h"
 
+#include "GFX/Debug.h"
+
 namespace gfx
 {
     auto VulkanPhysicalDevice::Select(vk::Instance instance) -> OwnedPtr<VulkanPhysicalDevice>
@@ -28,13 +30,20 @@ namespace gfx
         : m_physicalDevice(physicalDevice)
     {
         m_properties = m_physicalDevice.getProperties();
+        GFX_INFO("Physical Device: {}", m_properties.deviceName);
 
         m_depthFormat = FindDepthFormat();
+        GFX_INFO("  Depth Format: {}", vk::to_string(m_depthFormat));
 
         auto requestedQueueTypes = vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer | vk::QueueFlagBits::eCompute;
         m_queueFamilyIndices = FindQueueFamilyIndices(requestedQueueTypes);
 
         static const float defaultQueuePriority = 1.0f;
+
+        GFX_TRACE("  Chosen Queue Families");
+        GFX_TRACE("    Graphics: {}", m_queueFamilyIndices.Graphics);
+        GFX_TRACE("    Transfer: {}", m_queueFamilyIndices.Transfer);
+        GFX_TRACE("    Compute: {}", m_queueFamilyIndices.Compute);
 
         // Graphics queue
         if (requestedQueueTypes & vk::QueueFlagBits::eGraphics)

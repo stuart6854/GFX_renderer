@@ -1,5 +1,7 @@
 #include "VulkanBackend.h"
 
+#include "GFX/Debug.h"
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -27,8 +29,7 @@ namespace gfx
         {
             if (messageType >= (int)vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation)
             {
-                // GFX_ERROR("*** VULKAN VALIDATION ***\n{}", pCallbackData->pMessage);
-                std::cout << "*** VULKAN VALIDATION ***\n" << pCallbackData->pMessage << std::endl;
+                GFX_ERROR("*** VULKAN VALIDATION ***\n{}", pCallbackData->pMessage);
             }
             return VK_FALSE;
         }
@@ -75,10 +76,11 @@ namespace gfx
             const char* layerName = validationLayerName.c_str();
             instanceInfo.setEnabledLayerCount(1);
             instanceInfo.setPEnabledLayerNames(layerName);
-            // GFX_WARN("Vulkan validation layer enabled.");
+            GFX_INFO("Vulkan validation layer enabled.");
         }
 
         m_instance = vk::createInstance(instanceInfo);
+        GFX_ASSERT(m_instance, "vk::createInstance() failed!");
 
         // Setup debug message callback
         vk::DebugUtilsMessengerCreateInfoEXT debugInfo{};

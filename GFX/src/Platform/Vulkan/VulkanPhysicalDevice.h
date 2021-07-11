@@ -24,6 +24,8 @@ namespace gfx
 
         auto GetHandle() const -> vk::PhysicalDevice { return m_physicalDevice; }
 
+        auto GetProperties() const -> const vk::PhysicalDeviceProperties& { return m_properties; }
+
         auto GetDepthFormat() const -> vk::Format { return m_depthFormat; }
         auto GetQueueFamilyIndices() const -> const QueueFamilyIndices& { return m_queueFamilyIndices; }
 

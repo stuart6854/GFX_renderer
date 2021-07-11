@@ -4,6 +4,8 @@ macro(Add_Example example_name source)
     add_executable(${example_name} ${source})
     target_link_libraries(${example_name} PRIVATE example_base gfx)
 
+	set_target_properties (${example_name} PROPERTIES FOLDER Examples)
+
 	add_custom_command(TARGET ${example_name} POST_BUILD
 		# Debug
 		#COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/Dependencies/VulkanSDK/Bin/shaderc_sharedd.dll ${CMAKE_CURRENT_BINARY_DIR}
