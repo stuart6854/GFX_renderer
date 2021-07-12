@@ -8,6 +8,7 @@ namespace gfx
 {
     class SwapChain;
     class Framebuffer;
+    class Buffer;
 
     class CommandBuffer
     {
@@ -21,5 +22,11 @@ namespace gfx
 
         virtual void BeginRenderPass(Framebuffer* framebuffer) = 0;
         virtual void EndRenderPass() = 0;
+
+        virtual void BindVertexBuffer(Buffer* buffer) = 0;
+        virtual void BindIndexBuffer(Buffer* buffer) = 0;
+
+        virtual void Draw(uint32_t vertexCount) = 0;
+        virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) = 0;
     };
 }

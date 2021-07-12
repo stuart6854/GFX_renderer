@@ -4,6 +4,7 @@
 #include "VulkanBackend.h"
 #include "VulkanDevice.h"
 #include "VulkanFramebuffer.h"
+#include "VulkanBuffer.h"
 
 namespace gfx
 {
@@ -84,5 +85,27 @@ namespace gfx
     void VulkanCommandBuffer::EndRenderPass()
     {
         m_currentCmdBuffer.endRenderPass();
+    }
+
+    void VulkanCommandBuffer::BindVertexBuffer(Buffer* buffer)
+    {
+        auto* vkBuffer = static_cast<VulkanBuffer*>(buffer);
+        m_currentCmdBuffer.bindVertexBuffers(0, vkBuffer->GetHandle(), { 0 });
+    }
+
+    void VulkanCommandBuffer::BindIndexBuffer(Buffer* buffer)
+    {
+        auto* vkBuffer = static_cast<VulkanBuffer*>(buffer);
+        m_currentCmdBuffer.bindIndexBuffer(vkBuffer->GetHandle(), { 0 }, vk::IndexType::eUint32);
+    }
+
+    void VulkanCommandBuffer::Draw(uint32_t vertexCount)
+    {
+        m_currentCmdBuffer.draw(vertexCount, 1, 0, 0);
+    }
+
+    void VulkanCommandBuffer::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance)
+    {
+        m_currentCmdBuffer.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 }
