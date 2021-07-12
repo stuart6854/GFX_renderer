@@ -95,6 +95,7 @@ int main(int argc, char** argv)
         gfx::Window window(720, 480, "Hello Triangle");
 
         auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(gfx::Vertex) * triVerts.size(), triVerts.data());
+        auto indexBuffer = gfx::Buffer::CreateIndex(sizeof(uint32_t) * triIndices.size(), triIndices.data());
 
         auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
         auto cmdBuffer = gfx::CommandBuffer::Create();
@@ -106,6 +107,10 @@ int main(int argc, char** argv)
 
             cmdBuffer->Begin();
             cmdBuffer->BeginRenderPass(framebuffer.get());
+
+            cmdBuffer->BindVertexBuffer(vertexBuffer.get());
+            cmdBuffer->BindIndexBuffer(indexBuffer.get());
+            cmdBuffer->DrawIndexed(triIndices.size(), 1, 0, 0, 0);
             cmdBuffer->EndRenderPass();
             cmdBuffer->End();
 
