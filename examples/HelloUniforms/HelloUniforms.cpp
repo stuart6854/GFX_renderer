@@ -2,34 +2,77 @@
 // Created by stumi on 07/06/21.
 //
 
-// #include <ExampleBase/Window.h>
-//
-// #include <GFX/GFX.h>
-// #include <GFX/Debug.h>
-// #include <GFX/Core/RenderSurface.h>
-// #include <GFX/DeviceContext.h>
-// #include <GFX/RenderContext.h>
-// #include <GFX/Resources/Vertex.h>
-// #include <GFX/Resources/Buffer.h>
-// #include <GFX/Resources/Shader.h>
-// #include <GFX/Resources/Pipeline.h>
-// #include <GFX/Resources/Framebuffer.h>
-//
-// #include <iostream>
-// #include <vector>
+#include <ExampleBase/ExampleBase.h>
 
-// const std::vector<gfx::Vertex> triVerts = {
-//     { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
-//     { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },
-//     { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
-// };
-// const std::vector<uint32_t> triIndices = { 0, 1, 2 };
+#include <GFX/GFX.h>
+
+#include <iostream>
+
+struct Vertex
+{
+    glm::vec3 Position;
+    glm::vec3 Color;
+};
+
+const std::vector<Vertex> triVerts = {
+    { { 0.0f, -0.5f, 0.0f }, { 1, 0, 0 } },
+    { { -0.5f, 0.5f, 0.0f }, { 0, 0, 1 } },
+    { { 0.5f, 0.5f, 0.0f }, { 0, 1, 0 } },
+};
+const std::vector<uint32_t> triIndices = { 0, 1, 2 };
+
+const std::string vertexSource = R"(
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec3 a_Color;
+
+layout(push_constant) uniform PushBlock
+{
+    float offset;
+} pushBlock;
+
+struct VertexOutput
+{
+    vec4 Color;
+};
+
+layout (location = 0) out VertexOutput Output;
+
+void main()
+{
+    Output.Color = vec4(a_Color, 1.0f);
+
+    vec3 pos = a_Position + vec3(pushBlock.offset, 0, 0);
+    gl_Position = vec4(pos, 1.0f);
+}
+)";
+const std::string pixelSource = R"(
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+layout (location = 0) out vec4 out_Color;
+
+struct VertexOutput
+{
+    vec4 Color;
+};
+
+layout(location = 0) in VertexOutput Input;
+
+void main()
+{
+    out_Color = Input.Color;
+    //out_Color = vec4(1, 0, 0, 1);
+}
+)";
 
 int main(int argc, char** argv)
 {
-    /*GFX_INFO("Running example \"HelloUniforms\"");
+    GFX_INFO("Running example \"HelloUniforms\"");
 
-    gfx::Init();
+    /*gfx::Init();
     {
         example::Window window("HelloUniforms", 1080, 720);
 
@@ -91,6 +134,66 @@ int main(int argc, char** argv)
         }
     }
     gfx::Shutdown();*/
+
+    gfx::SetDebugCallback([](gfx::DebugLevel level, std::string msg)
+    {
+        if (level <= gfx::DebugLevel::eWarn)
+            std::cout << "[GFX] " << msg << std::endl;
+        else
+            std::cerr << "[GFX] " << msg << std::endl;
+    });
+
+    gfx::Init(gfx::BackendType::eVulkan);
+
+    {
+        gfx::Window window(720, 480, "Hello Triangle");
+        auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
+
+        auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(Vertex) * triVerts.size(), triVerts.data());
+        auto indexBuffer = gfx::Buffer::CreateIndex(sizeof(uint32_t) * triIndices.size(), triIndices.data());
+
+        auto shader = gfx::Shader::Create(vertexSource, pixelSource);
+
+        gfx::PipelineDesc pipelineDesc{};
+        pipelineDesc.Framebuffer = framebuffer.get();
+        pipelineDesc.Shader = shader.get();
+        pipelineDesc.Layout = {
+            { gfx::ShaderDataType::Float3, "a_Position" },
+            { gfx::ShaderDataType::Float3, "a_Color" },
+        };
+        auto pipeline = gfx::Pipeline::Create(pipelineDesc);
+
+        gfx::Viewport viewport{};
+        viewport.Width = window.GetWidth();
+        viewport.Height = window.Getheight();
+        gfx::Scissor scissor{};
+        scissor.Width = window.GetWidth();
+        scissor.Height = window.Getheight();
+
+        auto cmdBuffer = gfx::CommandBuffer::Create();
+        while (!window.IsCloseRequested())
+        {
+            window.PollEvents();
+            window.GetSwapChain()->NewFrame();
+
+            cmdBuffer->Begin();
+            cmdBuffer->SetViewport(viewport);
+            cmdBuffer->SetScissor(scissor);
+
+            cmdBuffer->BeginRenderPass(framebuffer.get());
+
+            cmdBuffer->BindPipeline(pipeline.get());
+            cmdBuffer->BindVertexBuffer(vertexBuffer.get());
+            cmdBuffer->BindIndexBuffer(indexBuffer.get());
+            cmdBuffer->DrawIndexed(triIndices.size(), 1, 0, 0, 0);
+
+            cmdBuffer->EndRenderPass();
+            cmdBuffer->End();
+
+            window.GetSwapChain()->Present(cmdBuffer.get());
+        }
+    }
+    gfx::Shutdown();
 
     return 0;
 }
