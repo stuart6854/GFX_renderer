@@ -4,6 +4,7 @@
 #include "VulkanBackend.h"
 #include "VulkanDevice.h"
 #include "VulkanFramebuffer.h"
+#include "VulkanPipeline.h"
 #include "VulkanBuffer.h"
 
 namespace gfx
@@ -76,6 +77,30 @@ namespace gfx
         m_index = (m_index + 1) % m_cmdBuffers.size();
     }
 
+    void VulkanCommandBuffer::SetViewport(const Viewport& viewport)
+    {
+        vk::Viewport vp{};
+        vp.setX(viewport.X);
+        vp.setY(viewport.Y);
+        vp.setWidth(viewport.Width);
+        vp.setHeight(viewport.Height);
+        vp.setMinDepth(viewport.MinDepth);
+        vp.setMaxDepth(viewport.MaxDepth);
+
+        m_currentCmdBuffer.setViewport(0, vp);
+    }
+
+    void VulkanCommandBuffer::SetScissor(const Scissor& scissor)
+    {
+        vk::Rect2D s{};
+        s.offset.setX(scissor.X);
+        s.offset.setY(scissor.Y);
+        s.extent.setWidth(scissor.Width);
+        s.extent.setHeight(scissor.Height);
+
+        m_currentCmdBuffer.setScissor(0, s);
+    }
+
     void VulkanCommandBuffer::BeginRenderPass(Framebuffer* framebuffer)
     {
         auto* vkFramebuffer = static_cast<VulkanFramebuffer*>(framebuffer);
@@ -85,6 +110,12 @@ namespace gfx
     void VulkanCommandBuffer::EndRenderPass()
     {
         m_currentCmdBuffer.endRenderPass();
+    }
+
+    void VulkanCommandBuffer::BindPipeline(Pipeline* pipeline)
+    {
+        auto* vkPipeline = static_cast<VulkanPipeline*>(pipeline);
+        m_currentCmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, vkPipeline->GetPipelineHandle());
     }
 
     void VulkanCommandBuffer::BindVertexBuffer(Buffer* buffer)

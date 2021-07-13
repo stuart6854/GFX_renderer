@@ -27,7 +27,7 @@ namespace gfx
         auto GetWidth() const -> uint32_t { return m_width; }
         auto GetHeight() const -> uint32_t { return m_height; }
 
-        bool IsSwapChainTarget() const { return false; }
+        bool IsSwapChainTarget() const { return m_isSwapChainTarget; }
         auto GetSwapChain() const -> SwapChain* { return m_swapChain; }
 
         // auto GetDepthImage() const -> Image* { return m_depthAttachmentImage.get(); }

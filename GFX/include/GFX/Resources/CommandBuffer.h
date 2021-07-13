@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "GFX/Core/Base.h"
+#include "GFX/Resources/Viewport.h"
+#include "GFX/Resources/Scissor.h"
 
 #include <cstdint>
 
@@ -8,6 +10,7 @@ namespace gfx
 {
     class SwapChain;
     class Framebuffer;
+    class Pipeline;
     class Buffer;
 
     class CommandBuffer
@@ -20,8 +23,13 @@ namespace gfx
         virtual void Begin() = 0;
         virtual void End() = 0;
 
+        virtual void SetViewport(const Viewport& viewport) = 0;
+        virtual void SetScissor(const Scissor& scissor) = 0;
+
         virtual void BeginRenderPass(Framebuffer* framebuffer) = 0;
         virtual void EndRenderPass() = 0;
+
+        virtual void BindPipeline(Pipeline* pipeline) = 0;
 
         virtual void BindVertexBuffer(Buffer* buffer) = 0;
         virtual void BindIndexBuffer(Buffer* buffer) = 0;

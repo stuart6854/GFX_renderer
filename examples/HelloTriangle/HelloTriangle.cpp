@@ -8,10 +8,16 @@
 
 #include <iostream>
 
-const std::vector<gfx::Vertex> triVerts = {
-    { { 0.0f, -1.0f, 0.0f }, { 1, 0, 0 } },
-    { { -1.0f, 1.0f, 0.0f }, { 0, 0, 1 } },
-    { { 1.0f, 1.0f, 0.0f }, { 0, 1, 0 } },
+struct Vertex
+{
+    glm::vec3 Position;
+    glm::vec3 Color;
+};
+
+const std::vector<Vertex> triVerts = {
+    { { 0.0f, -0.5f, 0.0f }, { 1, 0, 0 } },
+    { { -0.5f, 0.5f, 0.0f }, { 0, 0, 1 } },
+    { { 0.5f, 0.5f, 0.0f }, { 0, 1, 0 } },
 };
 const std::vector<uint32_t> triIndices = { 0, 1, 2 };
 
@@ -20,10 +26,7 @@ const std::string vertexSource = R"(
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec3 a_Position;
-layout(location = 1) in vec3 a_Normal;
-layout(location = 2) in vec2 a_TexCoord;
-layout(location = 3) in vec3 a_Tangent;
-layout(location = 4) in vec3 a_Bitangent;
+layout(location = 1) in vec3 a_Color;
 
 struct VertexOutput
 {
@@ -34,7 +37,7 @@ layout (location = 0) out VertexOutput Output;
 
 void main()
 {
-    Output.Color = vec4(a_Normal, 1.0f);
+    Output.Color = vec4(a_Color, 1.0f);
 
     gl_Position = vec4(a_Position, 1.0f);
 }
@@ -43,7 +46,7 @@ const std::string pixelSource = R"(
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout (location = 0) out vec4 color;
+layout (location = 0) out vec4 out_Color;
 
 struct VertexOutput
 {
@@ -54,7 +57,8 @@ layout(location = 0) in VertexOutput Input;
 
 void main()
 {
-    color = Input.Color;
+    out_Color = Input.Color;
+    //out_Color = vec4(1, 0, 0, 1);
 }
 )";
 
@@ -136,26 +140,46 @@ int main(int argc, char** argv)
 
     {
         gfx::Window window(720, 480, "Hello Triangle");
+        auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
 
-        auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(gfx::Vertex) * triVerts.size(), triVerts.data());
+        auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(Vertex) * triVerts.size(), triVerts.data());
         auto indexBuffer = gfx::Buffer::CreateIndex(sizeof(uint32_t) * triIndices.size(), triIndices.data());
 
         auto shader = gfx::Shader::Create(vertexSource, pixelSource);
 
-        auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
-        auto cmdBuffer = gfx::CommandBuffer::Create();
+        gfx::PipelineDesc pipelineDesc{};
+        pipelineDesc.Framebuffer = framebuffer.get();
+        pipelineDesc.Shader = shader.get();
+        pipelineDesc.Layout = {
+            { gfx::ShaderDataType::Float3, "a_Position" },
+            { gfx::ShaderDataType::Float3, "a_Color" },
+        };
+        auto pipeline = gfx::Pipeline::Create(pipelineDesc);
 
+        gfx::Viewport viewport{};
+        viewport.Width = window.GetWidth();
+        viewport.Height = window.Getheight();
+        gfx::Scissor scissor{};
+        scissor.Width = window.GetWidth();
+        scissor.Height = window.Getheight();
+
+        auto cmdBuffer = gfx::CommandBuffer::Create();
         while (!window.IsCloseRequested())
         {
             window.PollEvents();
             window.GetSwapChain()->NewFrame();
 
             cmdBuffer->Begin();
+            cmdBuffer->SetViewport(viewport);
+            cmdBuffer->SetScissor(scissor);
+
             cmdBuffer->BeginRenderPass(framebuffer.get());
 
+            cmdBuffer->BindPipeline(pipeline.get());
             cmdBuffer->BindVertexBuffer(vertexBuffer.get());
             cmdBuffer->BindIndexBuffer(indexBuffer.get());
             cmdBuffer->DrawIndexed(triIndices.size(), 1, 0, 0, 0);
+
             cmdBuffer->EndRenderPass();
             cmdBuffer->End();
 

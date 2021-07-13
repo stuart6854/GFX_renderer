@@ -23,8 +23,13 @@ namespace gfx
         void Begin() override;
         void End() override;
 
+        void SetViewport(const Viewport& viewport) override;
+        void SetScissor(const Scissor& scissor) override;
+
         void BeginRenderPass(Framebuffer* framebuffer) override;
         void EndRenderPass() override;
+
+        void BindPipeline(Pipeline* pipeline) override;
 
         void BindVertexBuffer(Buffer* buffer) override;
         void BindIndexBuffer(Buffer* buffer) override;

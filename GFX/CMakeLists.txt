@@ -17,6 +17,10 @@ set(GFX_HEADERS
     "include/GFX/Resources/Buffer.h"
     "include/GFX/Resources/Mesh.h"
     "include/GFX/Resources/Shader.h"
+    "include/GFX/Resources/VertexLayout.h"
+    "include/GFX/Resources/Pipeline.h"
+    "include/GFX/Resources/Viewport.h"
+    "include/GFX/Resources/Scissor.h"
     "include/GFX/Resources/Texture.h"
     "include/GFX/Resources/MeshBuilder.h"
     "include/GFX/Resources/MeshImporter.h"
@@ -34,6 +38,7 @@ set(GFX_SOURCES
 	"src/Resources/CommandBuffer.cpp"
 	"src/Resources/Buffer.cpp"
 	"src/Resources/Shader.cpp"
+	"src/Resources/Pipeline.cpp"
 	"src/Platform/Vulkan/vk_mem_alloc.h"
 	"src/Platform/Vulkan/VulkanBackend.h"
 	"src/Platform/Vulkan/VulkanBackend.cpp"
@@ -53,6 +58,8 @@ set(GFX_SOURCES
 	"src/Platform/Vulkan/VulkanBuffer.cpp"
 	"src/Platform/Vulkan/VulkanShader.h"
 	"src/Platform/Vulkan/VulkanShader.cpp"
+	"src/Platform/Vulkan/VulkanPipeline.h"
+	"src/Platform/Vulkan/VulkanPipeline.cpp"
 )
 
 add_library(gfx ${GFX_HEADERS} ${GFX_SOURCES})
