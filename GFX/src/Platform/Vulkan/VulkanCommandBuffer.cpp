@@ -9,6 +9,21 @@
 
 namespace gfx
 {
+    namespace Utils
+    {
+        auto ToVulkanShaderStage(ShaderStage stage) -> vk::ShaderStageFlags
+        {
+            switch (stage)
+            {
+                default:
+                case ShaderStage::eNone: return {};
+                case ShaderStage::eVertex: return vk::ShaderStageFlagBits::eVertex;
+                case ShaderStage::ePixel: return vk::ShaderStageFlagBits::eFragment;
+            }
+            return {};
+        }
+    }
+
     VulkanCommandBuffer::VulkanCommandBuffer(uint32_t count)
     {
         auto* backend = VulkanBackend::Get();
@@ -116,6 +131,8 @@ namespace gfx
     {
         auto* vkPipeline = static_cast<VulkanPipeline*>(pipeline);
         m_currentCmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, vkPipeline->GetPipelineHandle());
+
+        m_boundPipeline = vkPipeline;
     }
 
     void VulkanCommandBuffer::BindVertexBuffer(Buffer* buffer)
@@ -128,6 +145,14 @@ namespace gfx
     {
         auto* vkBuffer = static_cast<VulkanBuffer*>(buffer);
         m_currentCmdBuffer.bindIndexBuffer(vkBuffer->GetHandle(), { 0 }, vk::IndexType::eUint32);
+    }
+
+    void VulkanCommandBuffer::SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data)
+    {
+        auto layout = m_boundPipeline->GetLayoutHandle();
+        auto stage = Utils::ToVulkanShaderStage(shaderStage);
+
+        m_currentCmdBuffer.pushConstants(layout, stage, offset, size, data);
     }
 
     void VulkanCommandBuffer::Draw(uint32_t vertexCount)

@@ -58,7 +58,7 @@ namespace gfx
         auto* vkFramebuffer = static_cast<VulkanFramebuffer*>(desc.Framebuffer);
         auto* vkShader = static_cast<VulkanShader*>(desc.Shader);
 
-        /*const auto& pushConstantRanges = shader->GetPushConstantRanges();
+        const auto& pushConstantRanges = vkShader->GetPushConstantRanges();
 
         std::vector<vk::PushConstantRange> vkPushConstantRanges(pushConstantRanges.size());
         for (int i = 0; i < pushConstantRanges.size(); i++)
@@ -69,13 +69,13 @@ namespace gfx
             vkPushConstantRange.stageFlags = pushConstantRange.ShaderStage;
             vkPushConstantRange.offset = pushConstantRange.Offset;
             vkPushConstantRange.size = pushConstantRange.Size;
-        }*/
+        }
 
         // auto descriptorSetLayouts = vkShader->GetAllDescriptorSetLayouts();
 
         vk::PipelineLayoutCreateInfo layoutInfo{};
         // layoutInfo.setSetLayouts(descriptorSetLayouts);
-        // layoutInfo.setPushConstantRanges(vkPushConstantRanges);
+        layoutInfo.setPushConstantRanges(vkPushConstantRanges);
 
         m_layout = vkDevice.createPipelineLayout(layoutInfo);
 

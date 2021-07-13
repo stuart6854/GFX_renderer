@@ -10,6 +10,8 @@
 namespace gfx
 {
     class SwapChain;
+    class Pipeline;
+    class VulkanPipeline;
 
     class VulkanCommandBuffer : public CommandBuffer
     {
@@ -34,6 +36,8 @@ namespace gfx
         void BindVertexBuffer(Buffer* buffer) override;
         void BindIndexBuffer(Buffer* buffer) override;
 
+        void SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data) override;
+
         void Draw(uint32_t vertexCount) override;
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) override;
 
@@ -45,5 +49,8 @@ namespace gfx
 
         vk::CommandBuffer m_currentCmdBuffer;
         vk::Fence m_currentFence;
+
+        /* State */
+        VulkanPipeline* m_boundPipeline;
     };
 }

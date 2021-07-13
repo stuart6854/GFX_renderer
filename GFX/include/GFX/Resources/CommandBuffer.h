@@ -3,6 +3,7 @@
 #include "GFX/Core/Base.h"
 #include "GFX/Resources/Viewport.h"
 #include "GFX/Resources/Scissor.h"
+#include "Shader.h"
 
 #include <cstdint>
 
@@ -33,6 +34,8 @@ namespace gfx
 
         virtual void BindVertexBuffer(Buffer* buffer) = 0;
         virtual void BindIndexBuffer(Buffer* buffer) = 0;
+
+        virtual void SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data) = 0;
 
         virtual void Draw(uint32_t vertexCount) = 0;
         virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t vertexOffset, uint32_t firstInstance) = 0;

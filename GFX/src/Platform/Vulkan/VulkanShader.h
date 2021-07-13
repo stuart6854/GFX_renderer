@@ -13,10 +13,57 @@ namespace gfx
     class VulkanShader : public Shader
     {
     public:
+        struct UniformBuffer
+        {
+            vk::DescriptorBufferInfo Descriptor = {};
+            uint32_t Size = 0;
+            uint32_t BindingPoint = 0;
+            std::string Name;
+            vk::ShaderStageFlagBits ShaderStage = {};
+        };
+
+        struct PushConstantRange
+        {
+            vk::ShaderStageFlagBits ShaderStage = {};
+            uint32_t Offset = 0;
+            uint32_t Size = 0;
+        };
+
+        struct ImageSampler
+        {
+            uint32_t BindingPoint = 0;
+            uint32_t DescriptorSet = 0;
+            uint32_t ArraySize = 0;
+            std::string Name;
+            vk::ShaderStageFlagBits ShaderStage = {};
+        };
+
+        struct ShaderDescriptorSet
+        {
+            std::unordered_map<uint32_t, UniformBuffer*> UniformBuffers;
+            std::unordered_map<uint32_t, ImageSampler> ImageSamplers;
+
+            std::unordered_map<std::string, vk::WriteDescriptorSet> WriteDescriptorSets;
+
+            operator bool() const { return !(UniformBuffers.empty()); }
+        };
+
+        struct ShaderMaterialDescriptorSet
+        {
+            vk::DescriptorPool Pool = {};
+            std::vector<vk::DescriptorSet> DescriptorSets;
+        };
+
+    public:
         VulkanShader(const std::string& vertexSource, const std::string& pixelSource);
         ~VulkanShader();
 
+        auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& override { return m_buffers; }
+        auto GetShaderResources() const -> const std::unordered_map<std::string, ShaderResourceDeclaration>& override { return {}; }
+
         auto GetShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
+
+        auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
 
     private:
         auto Compile() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>;
@@ -28,5 +75,8 @@ namespace gfx
     private:
         std::unordered_map<vk::ShaderStageFlagBits, std::string> m_shaderSources;
         std::vector<vk::PipelineShaderStageCreateInfo> m_pipelineShaderStageCreateInfos;
+
+        std::vector<PushConstantRange> m_pushConstantRanges;
+        std::unordered_map<std::string, ShaderBuffer> m_buffers;
     };
 }

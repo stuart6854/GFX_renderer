@@ -7,6 +7,7 @@
 #include <GFX/GFX.h>
 
 #include <iostream>
+#include <chrono>
 
 struct Vertex
 {
@@ -30,7 +31,7 @@ layout(location = 1) in vec3 a_Color;
 
 layout(push_constant) uniform PushBlock
 {
-    float offset;
+    float time;
 } pushBlock;
 
 struct VertexOutput
@@ -44,7 +45,8 @@ void main()
 {
     Output.Color = vec4(a_Color, 1.0f);
 
-    vec3 pos = a_Position + vec3(pushBlock.offset, 0, 0);
+    vec3 offset = vec3(cos(pushBlock.time * 0.5) * 0.5, cos(pushBlock.time * 3) * 0.5, 0);
+    vec3 pos = a_Position + offset;
     gl_Position = vec4(pos, 1.0f);
 }
 )";
@@ -171,8 +173,21 @@ int main(int argc, char** argv)
         scissor.Height = window.Getheight();
 
         auto cmdBuffer = gfx::CommandBuffer::Create();
+
+        using clock = std::chrono::high_resolution_clock;
+        auto last = clock::now();
+        auto delta = 0.0f;
+        float time = 0;
         while (!window.IsCloseRequested())
         {
+            {
+                auto now = clock::now();
+                using ms = std::chrono::duration<float, std::milli>;
+                delta = std::chrono::duration_cast<ms>(now - last).count() / 1000.0f;
+                last = now;
+                time += delta;
+            }
+
             window.PollEvents();
             window.GetSwapChain()->NewFrame();
 
@@ -185,6 +200,9 @@ int main(int argc, char** argv)
             cmdBuffer->BindPipeline(pipeline.get());
             cmdBuffer->BindVertexBuffer(vertexBuffer.get());
             cmdBuffer->BindIndexBuffer(indexBuffer.get());
+
+            cmdBuffer->SetConstants(gfx::ShaderStage::eVertex, 0, sizeof(float), &time);
+
             cmdBuffer->DrawIndexed(triIndices.size(), 1, 0, 0, 0);
 
             cmdBuffer->EndRenderPass();

@@ -21,6 +21,25 @@ namespace gfx
             }
             return (shaderc_shader_kind)0;
         }
+
+        auto ToShaderUniformType(const spirv_cross::SPIRType& type)
+        {
+            switch (type.basetype)
+            {
+                case spirv_cross::SPIRType::Boolean: return ShaderUniformType::eBool;
+                case spirv_cross::SPIRType::Int: return ShaderUniformType::eInt;
+                case spirv_cross::SPIRType::UInt: return ShaderUniformType::eUInt;
+                case spirv_cross::SPIRType::Float: if (type.vecsize == 1) return ShaderUniformType::eFloat;
+                    if (type.vecsize == 2) return ShaderUniformType::eVec2;
+                    if (type.vecsize == 3) return ShaderUniformType::eVec3;
+                    if (type.vecsize == 4) return ShaderUniformType::eVec4;
+
+                    if (type.columns == 3) return ShaderUniformType::eMat3;
+                    if (type.columns == 4) return ShaderUniformType::eMat4;
+                    break;
+            }
+            return ShaderUniformType::eNone;
+        }
     }
 
     VulkanShader::VulkanShader(const std::string& vertexSource, const std::string& pixelSource)
@@ -101,6 +120,118 @@ namespace gfx
 
     void VulkanShader::Reflect(vk::ShaderStageFlagBits stage, const std::vector<uint32_t>& data)
     {
+        GFX_TRACE("===========================");
+        GFX_TRACE(" Vulkan Shader Reflection");
+        GFX_TRACE(" Stage: {}", vk::to_string(stage));
+        GFX_TRACE("===========================");
+
+        spirv_cross::Compiler compiler(data);
+        auto resources = compiler.get_shader_resources();
+
+        /*GFX_TRACE("Uniform Buffers");
+        for (const auto& resource : resources.uniform_buffers)
+        {
+            const auto& bufferName = resource.name;
+            auto& bufferType = compiler.get_type(resource.base_type_id);
+            auto bufferSize = compiler.get_declared_struct_size(bufferType);
+            auto memberCount = bufferType.member_types.size();
+            uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32_t descriptorSet = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+
+            if (descriptorSet >= m_shaderDescriptorSets.size()) m_shaderDescriptorSets.resize(descriptorSet + 1);
+
+            ShaderDescriptorSet& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
+            if (s_UniformBuffers[descriptorSet].find(binding) == s_UniformBuffers[descriptorSet].end())
+            {
+                auto* uniformBuffer = new UniformBuffer;
+                uniformBuffer->BindingPoint = binding;
+                uniformBuffer->Size = bufferSize;
+                uniformBuffer->Name = bufferName;
+                uniformBuffer->ShaderStage = stage;
+                s_UniformBuffers.at(descriptorSet)[binding] = uniformBuffer;
+            }
+            else
+            {
+                auto* uniformBuffer = s_UniformBuffers.at(descriptorSet).at(binding);
+                if (bufferSize > uniformBuffer->Size) uniformBuffer->Size = bufferSize;
+            }
+
+            shaderDescriptorSet.UniformBuffers[binding] = s_UniformBuffers.at(descriptorSet).at(binding);
+
+            GFX_TRACE("  {} ({}, {})", bufferName, descriptorSet, binding);
+            GFX_TRACE("  Member Count: {}", memberCount);
+            GFX_TRACE("  Size: {}", bufferSize);
+            GFX_TRACE("-------------------");
+        }*/
+
+        GFX_TRACE("Push Constant Buffers: ");
+        for (const auto& resource : resources.push_constant_buffers)
+        {
+            const auto& bufferName = resource.name;
+            auto& bufferType = compiler.get_type(resource.base_type_id);
+            auto bufferSize = compiler.get_declared_struct_size(bufferType);
+            auto memberCount = bufferType.member_types.size();
+            uint32_t bufferOffset = 0;
+            if (!m_pushConstantRanges.empty())
+            {
+                bufferOffset = m_pushConstantRanges.back().Offset + m_pushConstantRanges.back().Size;
+            }
+
+            auto& pushConstantRange = m_pushConstantRanges.emplace_back();
+            pushConstantRange.ShaderStage = stage;
+            pushConstantRange.Offset = bufferOffset;
+            pushConstantRange.Size = bufferSize;
+
+            //  Skip empty push constant buffers - these are for the renderer only
+            if (bufferName.empty() || bufferName == "u_Renderer") continue;
+
+            ShaderBuffer& buffer = m_buffers[bufferName];
+            buffer.Name = bufferName;
+            buffer.Size = bufferSize - bufferOffset;
+
+            GFX_TRACE("  Name: {}", bufferName);
+            GFX_TRACE("  Member Count: {}", memberCount);
+            GFX_TRACE("  Size: {}", bufferSize);
+
+            for (int i = 0; i < memberCount; i++)
+            {
+                auto& type = compiler.get_type(bufferType.member_types[i]);
+                const auto& memberName = compiler.get_member_name(bufferType.self, i);
+                auto size = compiler.get_declared_struct_member_size(bufferType, i);
+                auto offset = compiler.type_struct_member_offset(bufferType, i) - bufferOffset;
+
+                std::string uniformName = bufferName + "." + memberName;
+                buffer.Uniforms[uniformName] = ShaderUniform(uniformName, Utils::ToShaderUniformType(type), size, offset);
+            }
+        }
+
+        /*GFX_TRACE("Sampled Images: ");
+        for (const auto& resource : resources.sampled_images)
+        {
+            const auto& name = resource.name;
+            auto& baseType = compiler.get_type(resource.base_type_id);
+            auto& type = compiler.get_type(resource.type_id);
+            uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+            uint32_t descriptorSet = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+            uint32_t dimension = baseType.image.dim;
+            uint32_t arraySize = type.array[0];
+            if (arraySize == 0) arraySize = 1;
+            if (descriptorSet >= m_shaderDescriptorSets.size()) m_shaderDescriptorSets.resize(descriptorSet + 1);
+
+            auto& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
+            auto& imageSampler = shaderDescriptorSet.ImageSamplers[binding];
+            imageSampler.BindingPoint = binding;
+            imageSampler.DescriptorSet = descriptorSet;
+            imageSampler.Name = name;
+            imageSampler.ArraySize = arraySize;
+            imageSampler.ShaderStage = stage;
+
+            m_resources[name] = ShaderResourceDeclaration(name, binding, 1);
+
+            GFX_TRACE("  {} (set={}, binding={})", name, descriptorSet, binding);
+        }*/
+
+        GFX_TRACE("===========================");
     }
 
     void VulkanShader::ReflectAllStages(const std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>& shaderData)
