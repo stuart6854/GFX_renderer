@@ -36,6 +36,13 @@ namespace gfx
 
     VulkanShader::~VulkanShader()
     {
+        auto* backend = VulkanBackend::Get();
+        auto vkDevice = backend->GetDevice().GetHandle();
+
+        for (auto& createInfo : m_pipelineShaderStageCreateInfos)
+        {
+            vkDevice.destroy(createInfo.module);
+        }
     }
 
     auto VulkanShader::Compile() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>
