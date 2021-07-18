@@ -165,6 +165,11 @@ int main(int argc, char** argv)
         };
         auto pipeline = gfx::Pipeline::Create(pipelineDesc);
 
+        auto resourceSetLayout = gfx::ResourceSetLayout::Create();
+        resourceSetLayout->AddBinding(0, gfx::ResourceType::eUniformBuffer);
+        resourceSetLayout->Build();
+
+        auto resourceSet = gfx::ResourceSet::Create(resourceSetLayout.get());
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();
         viewport.Height = window.Getheight();
@@ -202,6 +207,7 @@ int main(int argc, char** argv)
             cmdBuffer->BindIndexBuffer(indexBuffer.get());
 
             cmdBuffer->SetConstants(gfx::ShaderStage::eVertex, 0, sizeof(float), &time);
+            cmdBuffer->BindResourceSets(0, { resourceSet.get() });
 
             cmdBuffer->DrawIndexed(triIndices.size(), 1, 0, 0, 0);
 

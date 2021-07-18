@@ -6,6 +6,9 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanBuffer.h"
+#include "VulkanResourceSet.h"
+
+#include <vector>
 
 namespace gfx
 {
@@ -153,6 +156,20 @@ namespace gfx
         auto stage = Utils::ToVulkanShaderStage(shaderStage);
 
         m_currentCmdBuffer.pushConstants(layout, stage, offset, size, data);
+    }
+
+    void VulkanCommandBuffer::BindResourceSets(uint32_t firstSet, const std::vector<ResourceSet*> sets)
+    {
+        auto layout = m_boundPipeline->GetLayoutHandle();
+
+        std::vector<vk::DescriptorSet> vkSets;
+        vkSets.resize(sets.size());
+        for (int i = 0; i < sets.size(); i++)
+        {
+            vkSets[i] = static_cast<VulkanResourceSet*>(sets[i])->GetHandle();
+        }
+
+        m_currentCmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, firstSet, vkSets, {});
     }
 
     void VulkanCommandBuffer::Draw(uint32_t vertexCount)

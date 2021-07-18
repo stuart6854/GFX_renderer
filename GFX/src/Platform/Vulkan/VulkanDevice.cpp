@@ -31,7 +31,30 @@ namespace gfx
         poolInfo.setQueueFamilyIndex(queueFamilyIndices.Graphics);
         poolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-        m_commandPool = m_device.createCommandPool(poolInfo);
+        {
+            m_commandPool = m_device.createCommandPool(poolInfo);
+
+            std::vector<vk::DescriptorPoolSize> poolSizes = {
+                { vk::DescriptorType::eSampler, 1000 },
+                { vk::DescriptorType::eCombinedImageSampler, 1000 },
+                { vk::DescriptorType::eSampledImage, 1000 },
+                { vk::DescriptorType::eStorageImage, 1000 },
+                { vk::DescriptorType::eUniformTexelBuffer, 1000 },
+                { vk::DescriptorType::eStorageTexelBuffer, 1000 },
+                { vk::DescriptorType::eUniformBuffer, 1000 },
+                { vk::DescriptorType::eStorageBuffer, 1000 },
+                { vk::DescriptorType::eUniformBufferDynamic, 1000 },
+                { vk::DescriptorType::eStorageBufferDynamic, 1000 },
+                { vk::DescriptorType::eInputAttachment, 1000 },
+            };
+
+            vk::DescriptorPoolCreateInfo poolInfo{};
+            poolInfo.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet);
+            poolInfo.setPoolSizes(poolSizes);
+            poolInfo.setMaxSets(1000);
+
+            m_descriptorPool = m_device.createDescriptorPool(poolInfo);
+        }
     }
 
     VulkanDevice::~VulkanDevice()
@@ -101,5 +124,15 @@ namespace gfx
 
         m_device.destroy(fence);
         m_device.free(m_commandPool, cmdBuffer);
+    }
+
+    auto VulkanDevice::AllocateDescriptorSet(vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet
+    {
+        vk::DescriptorSetAllocateInfo allocInfo{};
+        allocInfo.setDescriptorPool(m_descriptorPool);
+        allocInfo.setDescriptorSetCount(1);
+        allocInfo.setSetLayouts(setLayout);
+
+        return m_device.allocateDescriptorSets(allocInfo)[0];
     }
 }

@@ -15,6 +15,8 @@
 #include "GFX/Resources/Buffer.h"
 #include "GFX/Resources/Shader.h"
 #include "GFX/Resources/Pipeline.h"
+#include "GFX/Resources/ResourceSetLayout.h"
+#include "GFX/Resources/ResourceSet.h"
 
 #include "GFX/Resources/MeshBuilder.h"
 #include "GFX/Resources/MeshImporter.h"

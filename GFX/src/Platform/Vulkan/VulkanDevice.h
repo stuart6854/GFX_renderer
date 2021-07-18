@@ -26,6 +26,8 @@ namespace gfx
         void FlushCommandBuffer(vk::CommandBuffer cmdBuffer);
         void FlushCommandBuffer(vk::CommandBuffer cmdBuffer, vk::Queue queue);
 
+        auto AllocateDescriptorSet(vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet;
+
     private:
         VulkanPhysicalDevice& m_physicalDevice;
         vk::Device m_device;
@@ -33,5 +35,6 @@ namespace gfx
         vk::Queue m_graphicsQueue;
 
         vk::CommandPool m_commandPool;
+        vk::DescriptorPool m_descriptorPool;
     };
 }
