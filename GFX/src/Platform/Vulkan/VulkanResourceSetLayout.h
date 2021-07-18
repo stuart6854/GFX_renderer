@@ -17,9 +17,11 @@ namespace gfx
 
         auto GetHandle() const -> vk::DescriptorSetLayout { return m_layout; }
 
-        void AddBinding(uint32_t binding, ResourceType type) override;
+        void AddBinding(uint32_t binding, ResourceType type, ShaderStage shaderStage) override;
 
         void Build() override;
+
+        auto GetBindings() const -> const std::vector<vk::DescriptorSetLayoutBinding>& { return m_bindings; }
 
     private:
         vk::DescriptorSetLayout m_layout;

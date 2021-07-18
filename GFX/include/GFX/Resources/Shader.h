@@ -8,6 +8,9 @@
 
 namespace gfx
 {
+    class ResourceSetLayout;
+    class ResourceSet;
+
     enum class ShaderUniformType
     {
         eNone = 0,
@@ -94,5 +97,10 @@ namespace gfx
 
         virtual auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& = 0;
         virtual auto GetShaderResources() const -> const std::unordered_map<std::string, ShaderResourceDeclaration>& = 0;
+
+        auto CreateResourceSet(uint32_t set) -> OwnedPtr<ResourceSet>;
+
+    protected:
+        std::vector<OwnedPtr<ResourceSetLayout>> m_resourceSetLayouts;
     };
 }

@@ -1,6 +1,7 @@
 ﻿#include "GFX/Resources/Shader.h"
 
 #include "GFX/Core/GFXCore.h"
+#include "GFX/Resources/ResourceSet.h"
 #include "Platform/Vulkan/VulkanShader.h"
 
 namespace gfx
@@ -15,5 +16,10 @@ namespace gfx
             default: break;
         }
         return nullptr;
+    }
+
+    auto Shader::CreateResourceSet(uint32_t set) -> OwnedPtr<ResourceSet>
+    {
+        return ResourceSet::Create(set, m_resourceSetLayouts[set].get());
     }
 }

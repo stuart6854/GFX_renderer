@@ -6,6 +6,8 @@
 
 #include <GFX/GFX.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 #include <chrono>
 
@@ -34,6 +36,11 @@ layout(push_constant) uniform PushBlock
     float time;
 } pushBlock;
 
+layout(std140, binding = 0) uniform Camera
+{
+    mat4 ViewProj;
+};
+
 struct VertexOutput
 {
     vec4 Color;
@@ -47,7 +54,7 @@ void main()
 
     vec3 offset = vec3(cos(pushBlock.time * 0.5) * 0.5, cos(pushBlock.time * 3) * 0.5, 0);
     vec3 pos = a_Position + offset;
-    gl_Position = vec4(pos, 1.0f);
+    gl_Position = ViewProj * vec4(pos, 1.0f);
 }
 )";
 const std::string pixelSource = R"(
@@ -69,6 +76,11 @@ void main()
     //out_Color = vec4(1, 0, 0, 1);
 }
 )";
+
+struct Camera
+{
+    glm::mat4 ViewProj = glm::mat4(1.0f);
+};
 
 int main(int argc, char** argv)
 {
@@ -165,11 +177,20 @@ int main(int argc, char** argv)
         };
         auto pipeline = gfx::Pipeline::Create(pipelineDesc);
 
-        auto resourceSetLayout = gfx::ResourceSetLayout::Create();
-        resourceSetLayout->AddBinding(0, gfx::ResourceType::eUniformBuffer);
-        resourceSetLayout->Build();
+        glm::mat4 view = glm::lookAtLH(glm::vec3(-2, 0, -3), { 0, 0, 0 }, { 0, 1, 0 });
+        glm::mat4 proj = glm::perspectiveFovLH_ZO(glm::radians(60.0f), 720.0f, 480.0f, 0.01f, 100.0f);
 
-        auto resourceSet = gfx::ResourceSet::Create(resourceSetLayout.get());
+        Camera camera{};
+        camera.ViewProj = proj * view;
+
+        auto uniformBufferSet = gfx::UniformBufferSet::Create(gfx::Config::FramesInFlight);
+        uniformBufferSet->Create(sizeof(Camera), 0);
+
+        // auto resourceSet = gfx::ResourceSet::Create(resourceSetLayout.get());
+        auto resourceSet = shader->CreateResourceSet(0);
+        resourceSet->SetUniformBuffer(0, uniformBufferSet->Get(0));
+        resourceSet->UpdateBindings();
+
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();
         viewport.Height = window.Getheight();
@@ -195,6 +216,8 @@ int main(int argc, char** argv)
 
             window.PollEvents();
             window.GetSwapChain()->NewFrame();
+
+            uniformBufferSet->Get(0, 0, window.GetSwapChain()->GetFrameIndex())->SetData(0, sizeof(Camera), &camera);
 
             cmdBuffer->Begin();
             cmdBuffer->SetViewport(viewport);

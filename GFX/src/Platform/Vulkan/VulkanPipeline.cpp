@@ -71,10 +71,10 @@ namespace gfx
             vkPushConstantRange.size = pushConstantRange.Size;
         }
 
-        // auto descriptorSetLayouts = vkShader->GetAllDescriptorSetLayouts();
+        auto descriptorSetLayouts = vkShader->GetDescriptorSetLayouts();
 
         vk::PipelineLayoutCreateInfo layoutInfo{};
-        // layoutInfo.setSetLayouts(descriptorSetLayouts);
+        layoutInfo.setSetLayouts(descriptorSetLayouts);
         layoutInfo.setPushConstantRanges(vkPushConstantRanges);
 
         m_layout = vkDevice.createPipelineLayout(layoutInfo);

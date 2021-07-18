@@ -20,6 +20,8 @@ namespace gfx
         auto GetWidth() const -> uint32_t override { return m_width; }
         auto GetHeight() const -> uint32_t override { return m_height; }
 
+        auto GetFrameIndex() const -> uint32_t override { return m_frameIndex; }
+
         auto GetRenderPass() const -> vk::RenderPass { return m_renderPass; }
 
         auto GetCurrentFramebuffer() const -> vk::Framebuffer { return m_framebuffers.at(m_imageIndex); }

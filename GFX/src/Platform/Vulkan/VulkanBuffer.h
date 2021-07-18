@@ -19,7 +19,10 @@ namespace gfx
 
         auto GetHandle() const -> vk::Buffer { return m_buffer; }
 
+        void SetData(uint32_t offset, uint32_t size, const void* data) override;
+
     private:
+        BufferUsage m_usage;
         uint64_t m_size;
 
         vk::Buffer m_buffer;

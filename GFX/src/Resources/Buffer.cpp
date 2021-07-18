@@ -31,4 +31,9 @@ namespace gfx
     {
         return Create(BufferUsage::eIndex, size, data);
     }
+
+    auto Buffer::CreateUniform(uint64_t size, const void* data) -> OwnedPtr<Buffer>
+    {
+        return Create(BufferUsage::eUniform, size, data);
+    }
 }

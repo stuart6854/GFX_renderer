@@ -5,11 +5,14 @@
 #include <vulkan/vulkan.hpp>
 
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <unordered_map>
 
 namespace gfx
 {
+    class ResourceSetLayout;
+
     class VulkanShader : public Shader
     {
     public:
@@ -41,7 +44,7 @@ namespace gfx
         struct ShaderDescriptorSet
         {
             std::unordered_map<uint32_t, UniformBuffer*> UniformBuffers;
-            std::unordered_map<uint32_t, ImageSampler> ImageSamplers;
+            std::unordered_map<uint32_t, ImageSampler*> ImageSamplers;
 
             std::unordered_map<std::string, vk::WriteDescriptorSet> WriteDescriptorSets;
 
@@ -64,6 +67,7 @@ namespace gfx
         auto GetShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 
         auto GetPushConstantRanges() const -> const std::vector<PushConstantRange>& { return m_pushConstantRanges; }
+        auto GetDescriptorSetLayouts() const -> std::vector<vk::DescriptorSetLayout>;
 
     private:
         auto Compile() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>;
@@ -76,7 +80,15 @@ namespace gfx
         std::unordered_map<vk::ShaderStageFlagBits, std::string> m_shaderSources;
         std::vector<vk::PipelineShaderStageCreateInfo> m_pipelineShaderStageCreateInfos;
 
+        std::vector<ShaderDescriptorSet> m_shaderDescriptorSets;
+        std::unordered_map<std::string, ShaderResourceDeclaration> m_resources;
+
         std::vector<PushConstantRange> m_pushConstantRanges;
         std::unordered_map<std::string, ShaderBuffer> m_buffers;
+
+        /* Descriptors */
+        std::unordered_map<uint32_t, std::vector<vk::DescriptorPoolSize>> m_typeCounts;
+        // std::vector<OwnedPtr<ResourceSetLayout>> m_descriptorSetLayouts;
+        vk::DescriptorSet m_descriptorSet;
     };
 }

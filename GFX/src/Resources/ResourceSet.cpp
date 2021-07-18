@@ -7,12 +7,13 @@
 
 namespace gfx
 {
-    auto ResourceSet::Create(ResourceSetLayout* setLayout) -> OwnedPtr<ResourceSet>
+    auto ResourceSet::Create(uint32_t set,
+                             ResourceSetLayout* setLayout) -> OwnedPtr<ResourceSet>
     {
         auto backendType = gfx::GetBackendType();
         switch (backendType)
         {
-            case BackendType::eVulkan: return CreateOwned<VulkanResourceSet>(setLayout);
+            case BackendType::eVulkan: return CreateOwned<VulkanResourceSet>(set, setLayout);
             case BackendType::eNone:
             default: break;
         }

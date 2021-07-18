@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "GFX/Core/Base.h"
+#include "Shader.h"
 
 #include <cstdint>
 
@@ -20,7 +21,7 @@ namespace gfx
 
         virtual ~ResourceSetLayout() = default;
 
-        virtual void AddBinding(uint32_t binding, ResourceType type) = 0;
+        virtual void AddBinding(uint32_t binding, ResourceType type, ShaderStage stage) = 0;
 
         virtual void Build() = 0;
     };

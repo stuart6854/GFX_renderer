@@ -17,6 +17,8 @@ namespace gfx
         virtual auto GetWidth() const -> uint32_t = 0;
         virtual auto GetHeight() const -> uint32_t = 0;
 
+        virtual auto GetFrameIndex() const -> uint32_t = 0;
+
         virtual void Recreate(uint32_t width, uint32_t height) = 0;
 
         virtual void NewFrame() = 0;

@@ -1,6 +1,7 @@
 ﻿#include "VulkanResourceSetLayout.h"
 
 #include "VulkanBackend.h"
+#include "VulkanUtils.h"
 
 namespace gfx
 {
@@ -21,8 +22,6 @@ namespace gfx
 
     VulkanResourceSetLayout::VulkanResourceSetLayout()
     {
-        // vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-        // layoutInfo.set
     }
 
     VulkanResourceSetLayout::~VulkanResourceSetLayout()
@@ -34,16 +33,17 @@ namespace gfx
         vkDevice.destroy(m_layout);
     }
 
-    void VulkanResourceSetLayout::AddBinding(uint32_t binding, ResourceType type)
+    void VulkanResourceSetLayout::AddBinding(uint32_t binding, ResourceType type, ShaderStage shaderStage)
     {
         // Resize vector for binding
-        if(m_bindings.size() <= binding)
+        if (m_bindings.size() <= binding)
             m_bindings.resize(binding + 1);
 
         vk::DescriptorSetLayoutBinding resBinding{};
         resBinding.setBinding(binding);
         resBinding.setDescriptorCount(1);
         resBinding.setDescriptorType(Utils::ToVulkanDescriptorType(type));
+        resBinding.setStageFlags(VkUtils::ToVkShaderStage(shaderStage));
 
         m_bindings[binding] = resBinding;
     }

@@ -61,6 +61,7 @@ namespace gfx
     {
         m_device.waitIdle();
 
+        m_device.destroy(m_descriptorPool);
         m_device.destroy(m_commandPool);
         m_device.destroy();
     }

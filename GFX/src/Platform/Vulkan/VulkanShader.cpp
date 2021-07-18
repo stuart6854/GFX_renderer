@@ -1,8 +1,11 @@
 ﻿#include "VulkanShader.h"
 
 #include "GFX/Debug.h"
+#include "GFX/Resources/ResourceSetLayout.h"
 #include "VulkanBackend.h"
 #include "VulkanDevice.h"
+#include "VulkanResourceSetLayout.h"
+#include "VulkanUtils.h"
 
 #include <shaderc/shaderc.hpp>
 #include <spirv_cross/spirv_glsl.hpp>
@@ -42,6 +45,9 @@ namespace gfx
         }
     }
 
+    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, VulkanShader::UniformBuffer*>> s_UniformBuffers; // set -> binding point -> buffer
+    //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, VulkanShader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
+
     VulkanShader::VulkanShader(const std::string& vertexSource, const std::string& pixelSource)
     {
         m_shaderSources[vk::ShaderStageFlagBits::eVertex] = vertexSource;
@@ -62,6 +68,19 @@ namespace gfx
         {
             vkDevice.destroy(createInfo.module);
         }
+    }
+
+    auto VulkanShader::GetDescriptorSetLayouts() const -> std::vector<vk::DescriptorSetLayout>
+    {
+        std::vector<vk::DescriptorSetLayout> layouts;
+
+        for (auto& set : m_resourceSetLayouts)
+        {
+            auto* vkSet = static_cast<VulkanResourceSetLayout*>(set.get());
+            layouts.emplace_back(vkSet->GetHandle());
+        }
+
+        return layouts;
     }
 
     auto VulkanShader::Compile() -> std::unordered_map<vk::ShaderStageFlagBits, std::vector<uint32_t>>
@@ -128,7 +147,7 @@ namespace gfx
         spirv_cross::Compiler compiler(data);
         auto resources = compiler.get_shader_resources();
 
-        /*GFX_TRACE("Uniform Buffers");
+        GFX_TRACE("Uniform Buffers");
         for (const auto& resource : resources.uniform_buffers)
         {
             const auto& bufferName = resource.name;
@@ -159,10 +178,9 @@ namespace gfx
             shaderDescriptorSet.UniformBuffers[binding] = s_UniformBuffers.at(descriptorSet).at(binding);
 
             GFX_TRACE("  {} ({}, {})", bufferName, descriptorSet, binding);
-            GFX_TRACE("  Member Count: {}", memberCount);
-            GFX_TRACE("  Size: {}", bufferSize);
-            GFX_TRACE("-------------------");
-        }*/
+            GFX_TRACE("    Member Count: {}", memberCount);
+            GFX_TRACE("    Size: {}", bufferSize);
+        }
 
         GFX_TRACE("Push Constant Buffers: ");
         for (const auto& resource : resources.push_constant_buffers)
@@ -190,8 +208,8 @@ namespace gfx
             buffer.Size = bufferSize - bufferOffset;
 
             GFX_TRACE("  Name: {}", bufferName);
-            GFX_TRACE("  Member Count: {}", memberCount);
-            GFX_TRACE("  Size: {}", bufferSize);
+            GFX_TRACE("    Member Count: {}", memberCount);
+            GFX_TRACE("    Size: {}", bufferSize);
 
             for (int i = 0; i < memberCount; i++)
             {
@@ -205,7 +223,7 @@ namespace gfx
             }
         }
 
-        /*GFX_TRACE("Sampled Images: ");
+        GFX_TRACE("Sampled Images: ");
         for (const auto& resource : resources.sampled_images)
         {
             const auto& name = resource.name;
@@ -220,16 +238,16 @@ namespace gfx
 
             auto& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
             auto& imageSampler = shaderDescriptorSet.ImageSamplers[binding];
-            imageSampler.BindingPoint = binding;
-            imageSampler.DescriptorSet = descriptorSet;
-            imageSampler.Name = name;
-            imageSampler.ArraySize = arraySize;
-            imageSampler.ShaderStage = stage;
+            imageSampler->BindingPoint = binding;
+            imageSampler->DescriptorSet = descriptorSet;
+            imageSampler->Name = name;
+            imageSampler->ArraySize = arraySize;
+            imageSampler->ShaderStage = stage;
 
             m_resources[name] = ShaderResourceDeclaration(name, binding, 1);
 
             GFX_TRACE("  {} (set={}, binding={})", name, descriptorSet, binding);
-        }*/
+        }
 
         GFX_TRACE("===========================");
     }
@@ -246,5 +264,76 @@ namespace gfx
 
     void VulkanShader::CreateDescriptors()
     {
+        auto* backend = VulkanBackend::Get();
+        auto vkDevice = backend->GetDevice().GetHandle();
+
+        m_typeCounts.clear();
+        m_resourceSetLayouts.resize(m_shaderDescriptorSets.size());
+        for (uint32_t set = 0; set < m_shaderDescriptorSets.size(); set++)
+        {
+            auto& shaderSet = m_shaderDescriptorSets[set];
+            auto& layout = m_resourceSetLayouts[set] = gfx::ResourceSetLayout::Create();
+
+            if (!shaderSet.UniformBuffers.empty())
+            {
+                auto& typeCount = m_typeCounts[set].emplace_back();
+                typeCount.setType(vk::DescriptorType::eUniformBuffer);
+                typeCount.setDescriptorCount(shaderSet.UniformBuffers.size());
+            }
+            if (!shaderSet.ImageSamplers.empty())
+            {
+                auto& typeCount = m_typeCounts[set].emplace_back();
+                typeCount.setType(vk::DescriptorType::eCombinedImageSampler);
+                typeCount.setDescriptorCount(shaderSet.ImageSamplers.size());
+            }
+
+            /* Descriptor Set Layout */
+            std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
+            for (auto& [binding, uniformBuffer] : shaderSet.UniformBuffers)
+            {
+                auto& layoutBinding = layoutBindings.emplace_back();
+                layoutBinding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                layoutBinding.setDescriptorCount(1);
+                layoutBinding.setStageFlags(uniformBuffer->ShaderStage);
+                layoutBinding.setBinding(binding);
+
+                layout->AddBinding(binding, ResourceType::eUniformBuffer, VkUtils::ToShaderStage(uniformBuffer->ShaderStage));
+
+                auto& writeSet = shaderSet.WriteDescriptorSets[uniformBuffer->Name];
+                writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
+                writeSet.setDescriptorCount(1);
+                writeSet.setDstBinding(layoutBinding.binding);
+            }
+            for (auto& [binding, imageSampler] : shaderSet.ImageSamplers)
+            {
+                auto& layoutBinding = layoutBindings.emplace_back();
+                layoutBinding.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+                layoutBinding.setDescriptorCount(imageSampler->ArraySize);
+                layoutBinding.setStageFlags(imageSampler->ShaderStage);
+                layoutBinding.setBinding(binding);
+
+                layout->AddBinding(binding, ResourceType::eTextureSampler, VkUtils::ToShaderStage(imageSampler->ShaderStage));
+
+                GFX_ASSERT(shaderSet.UniformBuffers.find(binding) == shaderSet.UniformBuffers.end(), "Binding is already in use!");
+
+                auto& writeSet = shaderSet.WriteDescriptorSets[imageSampler->Name];
+                writeSet.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
+                writeSet.setDescriptorCount(imageSampler->ArraySize);
+                writeSet.setDstBinding(layoutBinding.binding);
+            }
+
+            layout->Build();
+
+            vk::DescriptorSetLayoutCreateInfo layoutInfo{};
+            layoutInfo.setBindings(layoutBindings);
+
+            GFX_INFO("Creating descriptor set {} with {} ubo's and {} samplers",
+                     set,
+                     shaderSet.UniformBuffers.size(),
+                     shaderSet.ImageSamplers.size());
+
+            // if (set >= m_descriptorSetLayouts.size()) m_descriptorSetLayouts.resize(set + 1);
+            // m_descriptorSetLayouts[set] = vkDevice.createDescriptorSetLayout(layoutInfo);
+        }
     }
 }
