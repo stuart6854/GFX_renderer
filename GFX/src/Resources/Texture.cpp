@@ -29,4 +29,17 @@ namespace gfx
         }
         return nullptr;
     }
+
+
+    auto Texture::Create(const TextureDesc& desc) -> OwnedPtr<Texture>
+    {
+        auto backendType = gfx::GetBackendType();
+        switch (backendType)
+        {
+            case BackendType::eVulkan: return CreateOwned<VulkanTexture>(desc);
+            case BackendType::eNone:
+            default: break;
+        }
+        return nullptr;
+    }
 }

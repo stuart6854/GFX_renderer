@@ -12,6 +12,7 @@ namespace gfx
     public:
         VulkanTexture(const TextureImporter& importer);
         VulkanTexture(const TextureBuilder& builder);
+        VulkanTexture(const TextureDesc& desc);
         ~VulkanTexture() override;
 
         auto GetWidth() const -> uint32_t override { return m_width; }

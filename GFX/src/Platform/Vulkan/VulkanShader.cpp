@@ -104,7 +104,7 @@ namespace gfx
                 auto module = compiler.CompileGlslToSpv(shaderSource, Utils::VkShaderStageToShaderC(stage), "", options);
                 if (module.GetCompilationStatus() != shaderc_compilation_status_success)
                 {
-                    GFX_ERROR("{}", module.GetErrorMessage());
+                    GFX_ERROR("Shader Error | Stage = {} \n{}", vk::to_string(stage), module.GetErrorMessage());
                 }
 
                 const auto* begin = (const uint8_t*)module.cbegin();

@@ -98,8 +98,9 @@ namespace gfx
         rasterizationState.setDepthBiasSlopeFactor(m_desc.DepthBiasSlopeFactor);
         rasterizationState.setLineWidth(m_desc.LineWidth); // Dynamic
 
-        // TODO: Setup PipelineColorBlendAttachmentState
-        auto colorAttachmentCount = /*framebuffer->IsSwapchainTarget() ?*/ 1 /*: framebuffer->GetAttachmentCount()*/;
+        // Color blend state describes how blend factors are calculated (if used)
+        // We need one blend attachment state per color attachment (even if blending is not used)
+        auto colorAttachmentCount = desc.Framebuffer->IsSwapChainTarget() ? 1 : desc.Framebuffer->GetColorAttachmentCount();
         std::vector<vk::PipelineColorBlendAttachmentState> blendAttachmentStates(colorAttachmentCount);
         if (m_desc.Framebuffer->IsSwapChainTarget())
         {
@@ -115,6 +116,18 @@ namespace gfx
         }
         else
         {
+            for (size_t i = 0; i < colorAttachmentCount; i++)
+            {
+                blendAttachmentStates[i].setColorWriteMask(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB |
+                    vk::ColorComponentFlagBits::eA);
+                blendAttachmentStates[i].setBlendEnable(true);
+                blendAttachmentStates[i].setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha);
+                blendAttachmentStates[i].setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
+                blendAttachmentStates[i].setColorBlendOp(vk::BlendOp::eAdd);
+                blendAttachmentStates[i].setAlphaBlendOp(vk::BlendOp::eAdd);
+                blendAttachmentStates[i].setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+                blendAttachmentStates[i].setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+            }
         }
 
         vk::PipelineColorBlendStateCreateInfo colorBlendState{};

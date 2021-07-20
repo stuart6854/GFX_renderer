@@ -1,6 +1,9 @@
 ﻿#pragma once
 
 #include "GFX/Core/Base.h"
+#include "Texture.h"
+
+#include <glm/vec3.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -11,16 +14,28 @@ namespace gfx
     class Image;
     class RenderPass;
 
+    struct FramebufferAttachmentDesc
+    {
+        TextureFormat Format;
+    };
+
+    struct FramebufferDesc
+    {
+        uint32_t Width = 0;
+        uint32_t Height = 0;
+
+        glm::vec3 ClearColor = { 0, 0, 0 };
+        bool ClearOnLoad = true;
+
+        std::vector<FramebufferAttachmentDesc> Attachments;
+        uint32_t Samples = 1; // Multisampling
+    };
+
     class Framebuffer
     {
     public:
         static auto Create(SwapChain* swapChain) -> OwnedPtr<Framebuffer>;
-
-        Framebuffer(SwapChain* swapChain)
-            : m_swapChain(swapChain),
-              m_isSwapChainTarget(true)
-        {
-        }
+        static auto Create(const FramebufferDesc& desc) -> OwnedPtr<Framebuffer>;
 
         virtual ~Framebuffer() = default;
 
@@ -30,9 +45,12 @@ namespace gfx
         bool IsSwapChainTarget() const { return m_isSwapChainTarget; }
         auto GetSwapChain() const -> SwapChain* { return m_swapChain; }
 
-        // auto GetDepthImage() const -> Image* { return m_depthAttachmentImage.get(); }
+        virtual auto GetColorAttachmentCount() const -> uint32_t = 0;
 
-        virtual void Resize(uint32_t width, uint32_t height) = 0;
+        virtual auto GetColorTexture(uint32_t index) const -> Texture* = 0;
+        virtual auto GetDepthTexture() const -> Texture* = 0;
+
+        virtual void Resize(uint32_t width, uint32_t height, bool forceRecreate = false) = 0;
 
     private:
         virtual void Invalidate() = 0;

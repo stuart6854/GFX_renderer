@@ -13,8 +13,11 @@ namespace gfx
         auto ToWrapMode(vk::SamplerAddressMode mode) -> WrapMode;
         auto ToVkWrapMode(WrapMode mode) -> vk::SamplerAddressMode;
 
-        auto ToFormat(vk::Format format) -> Format;
-        auto ToVkFormat(Format format) -> vk::Format;
+        auto ToTextureFormat(vk::Format format) -> TextureFormat;
+        auto ToVkTextureFormat(TextureFormat format) -> vk::Format;
+
+        auto ToTextureUsage(vk::ImageUsageFlags usage) -> TextureUsage;
+        auto ToVkTextureUsage(TextureUsage usage, bool isDepthFormat) -> vk::ImageUsageFlags;
 
         auto ToShaderStage(vk::ShaderStageFlagBits stage) -> ShaderStage;
         auto ToVkShaderStage(ShaderStage stage) -> vk::ShaderStageFlagBits;

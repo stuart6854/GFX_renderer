@@ -5,7 +5,7 @@
 
 namespace gfx
 {
-    enum class Format;
+    enum class TextureFormat;
 
     class TextureImporter
     {
@@ -16,7 +16,7 @@ namespace gfx
 
         auto GetWidth() const -> uint32_t { return m_width; }
         auto GetHeight() const -> uint32_t { return m_height; }
-        auto GetFormat() const -> Format { return m_format; }
+        auto GetFormat() const -> TextureFormat { return m_format; }
         auto IsHDR() const -> bool { return m_isHDR; }
 
         auto GetData() const -> const std::vector<uint8_t>& { return m_data; }
@@ -29,7 +29,7 @@ namespace gfx
 
         uint32_t m_width = 0;
         uint32_t m_height = 0;
-        Format m_format;
+        TextureFormat m_format;
         bool m_isHDR = false;
 
         std::vector<uint8_t> m_data = {};

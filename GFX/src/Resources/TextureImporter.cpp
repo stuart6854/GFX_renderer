@@ -39,7 +39,7 @@ namespace gfx
 
             stbi_image_free(data);
 
-            m_format = Format::eRGBA;
+            m_format = TextureFormat::eRGBA;
         }
 
         m_width = textureWidth;

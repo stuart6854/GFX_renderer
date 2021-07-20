@@ -18,4 +18,16 @@ namespace gfx
         }
         return nullptr;
     }
+
+    auto Framebuffer::Create(const FramebufferDesc& desc) -> OwnedPtr<Framebuffer>
+    {
+        auto backendType = gfx::GetBackendType();
+        switch (backendType)
+        {
+            case BackendType::eVulkan: return CreateOwned<VulkanFramebuffer>(desc);
+            case BackendType::eNone:
+            default: break;
+        }
+        return nullptr;
+    }
 }
