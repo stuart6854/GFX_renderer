@@ -158,10 +158,10 @@ int main(int argc, char** argv)
 
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();
-        viewport.Height = window.Getheight();
+        viewport.Height = window.GetHeight();
         gfx::Scissor scissor{};
         scissor.Width = window.GetWidth();
-        scissor.Height = window.Getheight();
+        scissor.Height = window.GetHeight();
 
         auto cmdBuffer = gfx::CommandBuffer::Create();
         while (!window.IsCloseRequested())

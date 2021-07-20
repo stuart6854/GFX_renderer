@@ -18,7 +18,7 @@ namespace gfx
         ~Window();
 
         auto GetWidth() const -> uint32_t { return m_width; }
-        auto Getheight() const -> uint32_t { return m_height; }
+        auto GetHeight() const -> uint32_t { return m_height; }
 
         auto GetTitle() const -> const std::string&
         {

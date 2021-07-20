@@ -80,7 +80,7 @@ namespace gfx
 
         CreateFrameResources();
 
-        Recreate(m_window->GetWidth(), m_window->Getheight());
+        Recreate(m_window->GetWidth(), m_window->GetHeight());
     }
 
     VulkanSwapChain::~VulkanSwapChain()

@@ -166,7 +166,7 @@ int main(int argc, char** argv)
     gfx::Init(gfx::BackendType::eVulkan);
 
     {
-        gfx::Window window(720, 480, "Hello Triangle");
+        gfx::Window window(1080, 720, "Hello Triangle");
         auto framebuffer = gfx::Framebuffer::Create(window.GetSwapChain());
 
         auto vertexBuffer = gfx::Buffer::CreateVertex(sizeof(Vertex) * triVerts.size(), triVerts.data());
@@ -185,7 +185,7 @@ int main(int argc, char** argv)
         auto pipeline = gfx::Pipeline::Create(pipelineDesc);
 
         glm::mat4 view = glm::lookAt(glm::vec3(-2, 0, -3), { 0, 0, 0 }, { 0, 1, 0 });
-        glm::mat4 proj = glm::perspectiveFov(glm::radians(60.0f), 720.0f, 480.0f, 0.01f, 100.0f);
+        glm::mat4 proj = glm::perspectiveFov(glm::radians(60.0f), float(window.GetWidth()), float(window.GetHeight()), 0.01f, 100.0f);
         proj[1][1] *= -1.0f;
 
         Camera camera{};
@@ -205,10 +205,10 @@ int main(int argc, char** argv)
 
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();
-        viewport.Height = window.Getheight();
+        viewport.Height = window.GetHeight();
         gfx::Scissor scissor{};
         scissor.Width = window.GetWidth();
-        scissor.Height = window.Getheight();
+        scissor.Height = window.GetHeight();
 
         auto cmdBuffer = gfx::CommandBuffer::Create();
 
