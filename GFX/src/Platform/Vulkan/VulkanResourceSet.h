@@ -18,6 +18,7 @@ namespace gfx
         auto GetHandle() const -> vk::DescriptorSet { return m_descriptorSet; }
 
         void SetUniformBuffer(uint32_t binding, UniformBuffer* buffer) override;
+        void SetTextureSampler(uint32_t binding, Texture* texture) override;
 
         void UpdateBindings() override;
 
@@ -26,6 +27,7 @@ namespace gfx
         vk::DescriptorSet m_descriptorSet;
 
         std::unordered_map<uint32_t, vk::DescriptorBufferInfo> m_bufferInfos;
+        std::unordered_map<uint32_t, vk::DescriptorImageInfo> m_imageInfos;
         std::vector<vk::WriteDescriptorSet> m_descriptorWrites;
     };
 }

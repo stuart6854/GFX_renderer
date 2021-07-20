@@ -5,6 +5,7 @@
 #include "VulkanBackend.h"
 #include "VulkanResourceSetLayout.h"
 #include "VulkanBuffer.h"
+#include "VulkanTexture.h"
 
 namespace gfx
 {
@@ -46,6 +47,20 @@ namespace gfx
         bufferInfo.setRange(vkBuffer->GetSize());
 
         write.setBufferInfo(bufferInfo);
+    }
+
+    void VulkanResourceSet::SetTextureSampler(uint32_t binding, Texture* texture)
+    {
+        auto& write = m_descriptorWrites[binding];
+
+        auto* vkTexture = static_cast<VulkanTexture*>(texture);
+
+        auto& imageInfo = m_imageInfos[binding];
+        imageInfo.setImageView(vkTexture->GetView());
+        imageInfo.setSampler(vkTexture->GetSampler());
+        imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        write.setImageInfo(imageInfo);
     }
 
     void VulkanResourceSet::UpdateBindings()

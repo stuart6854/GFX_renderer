@@ -2,6 +2,9 @@
 // Created by stumi on 07/06/21.
 //
 
+#define GLM_FORCE_LEFT_HANDED
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include <ExampleBase/ExampleBase.h>
 
 #include <GFX/GFX.h>
@@ -14,22 +17,23 @@
 struct Vertex
 {
     glm::vec3 Position;
-    glm::vec3 Color;
+    glm::vec2 TexCoord;
 };
 
 const std::vector<Vertex> triVerts = {
-    { { 0.0f, -0.5f, 0.0f }, { 1, 0, 0 } },
-    { { -0.5f, 0.5f, 0.0f }, { 0, 0, 1 } },
-    { { 0.5f, 0.5f, 0.0f }, { 0, 1, 0 } },
+    { { -0.5f, 0.5f, 0.0f }, { 0, 0 } },
+    { { -0.5f, -0.5f, 0.0f }, { 0, 1 } },
+    { { 0.5f, -0.5f, 0.0f }, { 1, 1 } },
+    { { 0.5f, 0.5f, 0.0f }, { 1, 0 } },
 };
-const std::vector<uint32_t> triIndices = { 0, 1, 2 };
+const std::vector<uint32_t> triIndices = { 0, 1, 2, 2, 3, 0 };
 
 const std::string vertexSource = R"(
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec3 a_Position;
-layout(location = 1) in vec3 a_Color;
+layout(location = 1) in vec2 a_TexCoord;
 
 layout(push_constant) uniform PushBlock
 {
@@ -43,14 +47,14 @@ layout(std140, binding = 0) uniform Camera
 
 struct VertexOutput
 {
-    vec4 Color;
+    vec2 TexCoord;
 };
 
 layout (location = 0) out VertexOutput Output;
 
 void main()
 {
-    Output.Color = vec4(a_Color, 1.0f);
+    Output.TexCoord = a_TexCoord;
 
     vec3 offset = vec3(cos(pushBlock.time * 0.5) * 0.5, cos(pushBlock.time * 3) * 0.5, 0);
     vec3 pos = a_Position + offset;
@@ -61,18 +65,20 @@ const std::string pixelSource = R"(
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
+layout(binding = 1) uniform sampler2D u_Texture;
+
 layout (location = 0) out vec4 out_Color;
 
 struct VertexOutput
 {
-    vec4 Color;
+    vec2 TexCoord;
 };
 
 layout(location = 0) in VertexOutput Input;
 
 void main()
 {
-    out_Color = Input.Color;
+    out_Color = texture(u_Texture, Input.TexCoord);
     //out_Color = vec4(1, 0, 0, 1);
 }
 )";
@@ -173,12 +179,14 @@ int main(int argc, char** argv)
         pipelineDesc.Shader = shader.get();
         pipelineDesc.Layout = {
             { gfx::ShaderDataType::Float3, "a_Position" },
-            { gfx::ShaderDataType::Float3, "a_Color" },
+            { gfx::ShaderDataType::Float2, "a_TexCoord" },
         };
+        pipelineDesc.CullMode = gfx::FaceCullMode::eBack;
         auto pipeline = gfx::Pipeline::Create(pipelineDesc);
 
-        glm::mat4 view = glm::lookAtLH(glm::vec3(-2, 0, -3), { 0, 0, 0 }, { 0, 1, 0 });
-        glm::mat4 proj = glm::perspectiveFovLH_ZO(glm::radians(60.0f), 720.0f, 480.0f, 0.01f, 100.0f);
+        glm::mat4 view = glm::lookAt(glm::vec3(-2, 0, -3), { 0, 0, 0 }, { 0, 1, 0 });
+        glm::mat4 proj = glm::perspectiveFov(glm::radians(60.0f), 720.0f, 480.0f, 0.01f, 100.0f);
+        proj[1][1] *= -1.0f;
 
         Camera camera{};
         camera.ViewProj = proj * view;
@@ -186,14 +194,14 @@ int main(int argc, char** argv)
         auto uniformBufferSet = gfx::UniformBufferSet::Create(gfx::Config::FramesInFlight);
         uniformBufferSet->Create(sizeof(Camera), 0);
 
+        gfx::TextureImporter textureImporter("resources/texture.jpg");
+        auto texture = gfx::Texture::Create(textureImporter);
+
         // auto resourceSet = gfx::ResourceSet::Create(resourceSetLayout.get());
         auto resourceSet = shader->CreateResourceSet(0);
         resourceSet->SetUniformBuffer(0, uniformBufferSet->Get(0));
+        resourceSet->SetTextureSampler(1, texture.get());
         resourceSet->UpdateBindings();
-
-        gfx::TextureImporter textureImporter("resources/texture.jpg");
-
-        auto texture = gfx::Texture::Create(textureImporter);
 
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();

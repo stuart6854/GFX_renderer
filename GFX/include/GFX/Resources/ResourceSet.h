@@ -6,6 +6,7 @@
 namespace gfx
 {
     class UniformBuffer;
+    class Texture;
 
     class ResourceSet
     {
@@ -15,6 +16,7 @@ namespace gfx
         virtual ~ResourceSet() = default;
 
         virtual void SetUniformBuffer(uint32_t binding, UniformBuffer* buffer) = 0;
+        virtual void SetTextureSampler(uint32_t binding, Texture* texture) = 0;
 
         virtual void UpdateBindings() = 0;
     };

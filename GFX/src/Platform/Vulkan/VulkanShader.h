@@ -43,8 +43,8 @@ namespace gfx
 
         struct ShaderDescriptorSet
         {
-            std::unordered_map<uint32_t, UniformBuffer*> UniformBuffers;
-            std::unordered_map<uint32_t, ImageSampler*> ImageSamplers;
+            std::unordered_map<uint32_t, UniformBuffer> UniformBuffers;
+            std::unordered_map<uint32_t, ImageSampler> ImageSamplers;
 
             std::unordered_map<std::string, vk::WriteDescriptorSet> WriteDescriptorSets;
 

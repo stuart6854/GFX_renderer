@@ -45,7 +45,7 @@ namespace gfx
         }
     }
 
-    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, VulkanShader::UniformBuffer*>> s_UniformBuffers; // set -> binding point -> buffer
+    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, VulkanShader::UniformBuffer>> s_UniformBuffers; // set -> binding point -> buffer
     //    static std::unordered_map<uint32_t, std::unordered_map<uint32_t, VulkanShader::StorageBuffer*>> s_StorageBuffers;  // set -> binding point -> buffer
 
     VulkanShader::VulkanShader(const std::string& vertexSource, const std::string& pixelSource)
@@ -162,17 +162,16 @@ namespace gfx
             ShaderDescriptorSet& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
             if (s_UniformBuffers[descriptorSet].find(binding) == s_UniformBuffers[descriptorSet].end())
             {
-                auto* uniformBuffer = new UniformBuffer;
-                uniformBuffer->BindingPoint = binding;
-                uniformBuffer->Size = bufferSize;
-                uniformBuffer->Name = bufferName;
-                uniformBuffer->ShaderStage = stage;
-                s_UniformBuffers.at(descriptorSet)[binding] = uniformBuffer;
+                auto& uniformBuffer = s_UniformBuffers.at(descriptorSet)[binding];
+                uniformBuffer.BindingPoint = binding;
+                uniformBuffer.Size = bufferSize;
+                uniformBuffer.Name = bufferName;
+                uniformBuffer.ShaderStage = stage;
             }
             else
             {
-                auto* uniformBuffer = s_UniformBuffers.at(descriptorSet).at(binding);
-                if (bufferSize > uniformBuffer->Size) uniformBuffer->Size = bufferSize;
+                auto& uniformBuffer = s_UniformBuffers.at(descriptorSet).at(binding);
+                if (bufferSize > uniformBuffer.Size) uniformBuffer.Size = bufferSize;
             }
 
             shaderDescriptorSet.UniformBuffers[binding] = s_UniformBuffers.at(descriptorSet).at(binding);
@@ -238,11 +237,11 @@ namespace gfx
 
             auto& shaderDescriptorSet = m_shaderDescriptorSets[descriptorSet];
             auto& imageSampler = shaderDescriptorSet.ImageSamplers[binding];
-            imageSampler->BindingPoint = binding;
-            imageSampler->DescriptorSet = descriptorSet;
-            imageSampler->Name = name;
-            imageSampler->ArraySize = arraySize;
-            imageSampler->ShaderStage = stage;
+            imageSampler.BindingPoint = binding;
+            imageSampler.DescriptorSet = descriptorSet;
+            imageSampler.Name = name;
+            imageSampler.ArraySize = arraySize;
+            imageSampler.ShaderStage = stage;
 
             m_resources[name] = ShaderResourceDeclaration(name, binding, 1);
 
@@ -294,12 +293,12 @@ namespace gfx
                 auto& layoutBinding = layoutBindings.emplace_back();
                 layoutBinding.setDescriptorType(vk::DescriptorType::eUniformBuffer);
                 layoutBinding.setDescriptorCount(1);
-                layoutBinding.setStageFlags(uniformBuffer->ShaderStage);
+                layoutBinding.setStageFlags(uniformBuffer.ShaderStage);
                 layoutBinding.setBinding(binding);
 
-                layout->AddBinding(binding, ResourceType::eUniformBuffer, VkUtils::ToShaderStage(uniformBuffer->ShaderStage));
+                layout->AddBinding(binding, ResourceType::eUniformBuffer, VkUtils::ToShaderStage(uniformBuffer.ShaderStage));
 
-                auto& writeSet = shaderSet.WriteDescriptorSets[uniformBuffer->Name];
+                auto& writeSet = shaderSet.WriteDescriptorSets[uniformBuffer.Name];
                 writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
                 writeSet.setDescriptorCount(1);
                 writeSet.setDstBinding(layoutBinding.binding);
@@ -308,17 +307,17 @@ namespace gfx
             {
                 auto& layoutBinding = layoutBindings.emplace_back();
                 layoutBinding.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-                layoutBinding.setDescriptorCount(imageSampler->ArraySize);
-                layoutBinding.setStageFlags(imageSampler->ShaderStage);
+                layoutBinding.setDescriptorCount(imageSampler.ArraySize);
+                layoutBinding.setStageFlags(imageSampler.ShaderStage);
                 layoutBinding.setBinding(binding);
 
-                layout->AddBinding(binding, ResourceType::eTextureSampler, VkUtils::ToShaderStage(imageSampler->ShaderStage));
+                layout->AddBinding(binding, ResourceType::eTextureSampler, VkUtils::ToShaderStage(imageSampler.ShaderStage));
 
                 GFX_ASSERT(shaderSet.UniformBuffers.find(binding) == shaderSet.UniformBuffers.end(), "Binding is already in use!");
 
-                auto& writeSet = shaderSet.WriteDescriptorSets[imageSampler->Name];
+                auto& writeSet = shaderSet.WriteDescriptorSets[imageSampler.Name];
                 writeSet.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-                writeSet.setDescriptorCount(imageSampler->ArraySize);
+                writeSet.setDescriptorCount(imageSampler.ArraySize);
                 writeSet.setDstBinding(layoutBinding.binding);
             }
 
