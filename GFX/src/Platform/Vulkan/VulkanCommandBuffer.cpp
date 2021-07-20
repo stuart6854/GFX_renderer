@@ -1,5 +1,7 @@
 ﻿#include "VulkanCommandBuffer.h"
 
+#include "GFX/Debug.h"
+
 #include "GFX/Config.h"
 #include "VulkanBackend.h"
 #include "VulkanDevice.h"
@@ -7,26 +9,12 @@
 #include "VulkanPipeline.h"
 #include "VulkanBuffer.h"
 #include "VulkanResourceSet.h"
+#include "VulkanUtils.h"
 
 #include <vector>
 
 namespace gfx
 {
-    namespace Utils
-    {
-        auto ToVulkanShaderStage(ShaderStage stage) -> vk::ShaderStageFlags
-        {
-            switch (stage)
-            {
-                default:
-                case ShaderStage::eNone: return {};
-                case ShaderStage::eVertex: return vk::ShaderStageFlagBits::eVertex;
-                case ShaderStage::ePixel: return vk::ShaderStageFlagBits::eFragment;
-            }
-            return {};
-        }
-    }
-
     VulkanCommandBuffer::VulkanCommandBuffer(uint32_t count)
     {
         auto* backend = VulkanBackend::Get();
@@ -153,7 +141,7 @@ namespace gfx
     void VulkanCommandBuffer::SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data)
     {
         auto layout = m_boundPipeline->GetLayoutHandle();
-        auto stage = Utils::ToVulkanShaderStage(shaderStage);
+        auto stage = VkUtils::ToVkShaderStage(shaderStage);
 
         m_currentCmdBuffer.pushConstants(layout, stage, offset, size, data);
     }
