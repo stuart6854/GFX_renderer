@@ -7,6 +7,9 @@ macro(Add_Example example_name source)
 	set_target_properties (${example_name} PROPERTIES FOLDER Examples)
 
 	add_custom_command(TARGET ${example_name} POST_BUILD
+		# Copy Resources
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/${example_name}/resources/ ${CMAKE_CURRENT_BINARY_DIR}/resources/
+
 		# Debug
 		#COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/Dependencies/VulkanSDK/Bin/shaderc_sharedd.dll ${CMAKE_CURRENT_BINARY_DIR}
 		#COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/Dependencies/assimp/bin/Debug/assimp-vc141-mtd.dll ${CMAKE_CURRENT_BINARY_DIR}

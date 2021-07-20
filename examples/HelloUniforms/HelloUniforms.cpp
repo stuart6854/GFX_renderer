@@ -191,6 +191,10 @@ int main(int argc, char** argv)
         resourceSet->SetUniformBuffer(0, uniformBufferSet->Get(0));
         resourceSet->UpdateBindings();
 
+        gfx::TextureImporter textureImporter("resources/texture.jpg");
+
+        auto texture = gfx::Texture::Create(textureImporter);
+
         gfx::Viewport viewport{};
         viewport.Width = window.GetWidth();
         viewport.Height = window.Getheight();

@@ -13,6 +13,7 @@
 #include "GFX/Resources/CommandBuffer.h"
 
 #include "GFX/Resources/Buffer.h"
+#include "GFX/Resources/Texture.h"
 #include "GFX/Resources/Shader.h"
 #include "GFX/Resources/Pipeline.h"
 #include "GFX/Resources/ResourceSetLayout.h"

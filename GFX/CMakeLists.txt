@@ -24,11 +24,11 @@ set(GFX_HEADERS
     "include/GFX/Resources/ResourceSetLayout.h"
     "include/GFX/Resources/ResourceSet.h"
     "include/GFX/Resources/UniformBuffer.h"
-    "include/GFX/Resources/Texture.h"
     "include/GFX/Resources/MeshBuilder.h"
     "include/GFX/Resources/MeshImporter.h"
     "include/GFX/Resources/TextureBuilder.h"
     "include/GFX/Resources/TextureImporter.h"
+    "include/GFX/Resources/Texture.h"
 )
 
 set(GFX_SOURCES
@@ -45,6 +45,8 @@ set(GFX_SOURCES
 	"src/Resources/ResourceSetLayout.cpp"
 	"src/Resources/ResourceSet.cpp"
 	"src/Resources/UniformBuffer.cpp"
+	"src/Resources/TextureImporter.cpp"
+	"src/Resources/Texture.cpp"
 	"src/Platform/Vulkan/vk_mem_alloc.h"
 	"src/Platform/Vulkan/VulkanBackend.h"
 	"src/Platform/Vulkan/VulkanBackend.cpp"
@@ -56,6 +58,8 @@ set(GFX_SOURCES
 	"src/Platform/Vulkan/VulkanSwapChain.cpp"
 	"src/Platform/Vulkan/VulkanAllocator.h"
 	"src/Platform/Vulkan/VulkanAllocator.cpp"
+	"src/Platform/Vulkan/VulkanUtils.h"
+	"src/Platform/Vulkan/VulkanUtils.cpp"
 	"src/Platform/Vulkan/VulkanFramebuffer.h"
 	"src/Platform/Vulkan/VulkanFramebuffer.cpp"
 	"src/Platform/Vulkan/VulkanCommandBuffer.h"
@@ -70,6 +74,8 @@ set(GFX_SOURCES
 	"src/Platform/Vulkan/VulkanResourceSetLayout.cpp"
 	"src/Platform/Vulkan/VulkanResourceSet.h"
 	"src/Platform/Vulkan/VulkanResourceSet.cpp"
+	"src/Platform/Vulkan/VulkanTexture.h"
+	"src/Platform/Vulkan/VulkanTexture.cpp"
 )
 
 add_library(gfx ${GFX_HEADERS} ${GFX_SOURCES})
