@@ -44,6 +44,7 @@ set(GFX_SOURCES
 	"src/Resources/UniformBuffer.cpp"
 	"src/Resources/TextureImporter.cpp"
 	"src/Resources/Texture.cpp"
+	"src/Resources/MeshImporter.cpp"
 	"src/Platform/Vulkan/vk_mem_alloc.h"
 	"src/Platform/Vulkan/VulkanBackend.h"
 	"src/Platform/Vulkan/VulkanBackend.cpp"
