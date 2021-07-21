@@ -1,6 +1,3 @@
-
-message(STATUS "GFX Graphics API=${GFX_GRAPHICS_API}")
-
 set(GFX_HEADERS 
     "include/GFX/GFX.h"
     "include/GFX/Config.h"

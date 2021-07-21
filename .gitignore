@@ -513,3 +513,4 @@ FodyWeavers.xsd
 
 _tmp/
 !vendor/premake5.exe
+!dependencies/assimp/**
