@@ -2,6 +2,10 @@
 
 #include <fmt/format.h>
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 #include <iostream>
 #include <string>
 #include <functional>
@@ -25,6 +29,48 @@ namespace gfx
     void Info(const std::string& msg);
     void Warn(const std::string& msg);
     void Error(const std::string& msg);
+}
+
+namespace fmt
+{
+    template <>
+    struct formatter<glm::vec2>
+    {
+        template <typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+
+        template <typename FormatContext>
+        auto format(const glm::vec2& r, FormatContext& ctx)
+        {
+            return format_to(ctx.out(), "{}, {}", r.x, r.y);
+        }
+    };
+
+    template <>
+    struct formatter<glm::vec3>
+    {
+        template <typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+
+        template <typename FormatContext>
+        auto format(const glm::vec3& r, FormatContext& ctx)
+        {
+            return format_to(ctx.out(), "{}, {}, {}", r.x, r.y, r.z);
+        }
+    };
+
+    template <>
+    struct formatter<glm::vec4>
+    {
+        template <typename ParseContext>
+        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+
+        template <typename FormatContext>
+        auto format(const glm::vec4& r, FormatContext& ctx)
+        {
+            return format_to(ctx.out(), "{}, {}, {}, {}", r.x, r.y, r.z, r.w);
+        }
+    };
 }
 
 #define GFX_TRACE(x, ...)                        \
