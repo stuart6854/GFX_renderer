@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VulkanPhysicalDevice.h"
+#include "GFX/Config.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -26,7 +27,8 @@ namespace gfx
         void FlushCommandBuffer(vk::CommandBuffer cmdBuffer);
         void FlushCommandBuffer(vk::CommandBuffer cmdBuffer, vk::Queue queue);
 
-        auto AllocateDescriptorSet(vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet;
+        auto AllocateDescriptorSet(uint32_t frameIndex, vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet;
+        void ResetDescriptorPool(uint32_t frameIndex) const;
 
     private:
         VulkanPhysicalDevice& m_physicalDevice;
@@ -35,6 +37,6 @@ namespace gfx
         vk::Queue m_graphicsQueue;
 
         vk::CommandPool m_commandPool;
-        vk::DescriptorPool m_descriptorPool;
+        std::array<vk::DescriptorPool, gfx::Config::FramesInFlight> m_descriptorPools;
     };
 }

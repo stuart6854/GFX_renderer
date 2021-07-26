@@ -53,7 +53,10 @@ namespace gfx
             poolInfo.setPoolSizes(poolSizes);
             poolInfo.setMaxSets(1000);
 
-            m_descriptorPool = m_device.createDescriptorPool(poolInfo);
+            for (auto& pool : m_descriptorPools)
+            {
+                pool = m_device.createDescriptorPool(poolInfo);
+            }
         }
     }
 
@@ -61,7 +64,9 @@ namespace gfx
     {
         m_device.waitIdle();
 
-        m_device.destroy(m_descriptorPool);
+        for (const auto& pool : m_descriptorPools)
+            m_device.destroy(pool);
+
         m_device.destroy(m_commandPool);
         m_device.destroy();
     }
@@ -127,13 +132,19 @@ namespace gfx
         m_device.free(m_commandPool, cmdBuffer);
     }
 
-    auto VulkanDevice::AllocateDescriptorSet(vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet
+    auto VulkanDevice::AllocateDescriptorSet(const uint32_t frameIndex,
+                                             vk::DescriptorSetLayout setLayout) -> vk::DescriptorSet
     {
         vk::DescriptorSetAllocateInfo allocInfo{};
-        allocInfo.setDescriptorPool(m_descriptorPool);
+        allocInfo.setDescriptorPool(m_descriptorPools[frameIndex]);
         allocInfo.setDescriptorSetCount(1);
         allocInfo.setSetLayouts(setLayout);
 
         return m_device.allocateDescriptorSets(allocInfo)[0];
+    }
+
+    void VulkanDevice::ResetDescriptorPool(const uint32_t frameIndex) const
+    {
+        m_device.resetDescriptorPool(m_descriptorPools[frameIndex]);
     }
 }
