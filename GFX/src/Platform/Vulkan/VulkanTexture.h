@@ -23,16 +23,19 @@ namespace gfx
         auto GetSampler() const -> vk::Sampler { return m_sampler; }
 
     private:
-        void TransitionImageLayout(vk::CommandBuffer& cmdBuffer, vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+        void Init(const TextureDesc& desc);
+        void SetData(const std::vector<uint8_t>& data);
+
+        void TransitionImageLayout(vk::CommandBuffer& cmdBuffer, vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) const;
 
     private:
-        vk::Image m_image;
-        VmaAllocation m_allocation;
-        vk::ImageView m_view;
+        vk::Image m_image{};
+        VmaAllocation m_allocation{};
+        vk::ImageView m_view{};
 
-        vk::Sampler m_sampler;
+        vk::Sampler m_sampler{};
 
-        uint32_t m_width;
-        uint32_t m_height;
+        uint32_t m_width = 0;
+        uint32_t m_height = 0;
     };
 }
