@@ -154,7 +154,7 @@ namespace gfx
         vkSets.resize(sets.size());
         for (int i = 0; i < sets.size(); i++)
         {
-            vkSets[i] = static_cast<const VulkanResourceSet*>(sets[i])->GetHandle();
+            vkSets[i] = static_cast<VulkanResourceSet*>(sets[i])->GetHandle();
         }
 
         m_currentCmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, firstSet, vkSets, {});

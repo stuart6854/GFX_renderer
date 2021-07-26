@@ -205,11 +205,11 @@ int main(int argc, char** argv)
         gfx::TextureImporter textureImporter("resources/texture.jpg");
         auto texture = gfx::Texture::Create(textureImporter);
 
-        auto offscreenResSet = offscreenShader->CreateResourceSet(0, 0);
+        auto offscreenResSet = offscreenShader->AllocateResourceSet(0, 0);
         offscreenResSet->SetTextureSampler(0, texture.get());
         offscreenResSet->UpdateBindings();
 
-        auto blurResSet = offscreenShader->CreateResourceSet(0, 0);
+        auto blurResSet = offscreenShader->AllocateResourceSet(0, 0);
         blurResSet->SetTextureSampler(0, offscreenPass.framebuffer->GetColorTexture(0));
         blurResSet->UpdateBindings();
 
