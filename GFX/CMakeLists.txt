@@ -82,7 +82,7 @@ add_library(gfx ${GFX_HEADERS} ${GFX_SOURCES})
 
 target_include_directories(gfx PUBLIC "include" "src")
 
-target_link_libraries(gfx PUBLIC Vulkan::Vulkan glfw glm fmt stb assimp shaderc spirv-cross-core spirv-cross-glsl)
+target_link_libraries(gfx PUBLIC Vulkan::Vulkan glfw glm stb assimp shaderc spirv-cross-core spirv-cross-glsl)
 
 target_compile_definitions(gfx 
     PUBLIC 

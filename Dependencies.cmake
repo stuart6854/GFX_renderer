@@ -4,8 +4,6 @@ add_subdirectory(Dependencies/glfw)
 set_target_properties (glfw PROPERTIES FOLDER "Dependencies/GLFW3")
 set_target_properties (uninstall PROPERTIES FOLDER "Dependencies/GLFW3")
 add_subdirectory(Dependencies/glm)
-add_subdirectory(Dependencies/fmt)
-set_target_properties (fmt PROPERTIES FOLDER Dependencies)
 add_subdirectory(Dependencies/stb)
 
 #find_library(assimp_Debug NAMES assimp-vc141-mtd PATHS "Dependencies/assimp/bin/Debug" REQUIRED)
