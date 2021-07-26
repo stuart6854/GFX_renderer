@@ -20,25 +20,8 @@ namespace gfx
         }
     }
 
-    VulkanResourceSetLayout::VulkanResourceSetLayout()
-    {
-    }
-
-    VulkanResourceSetLayout::~VulkanResourceSetLayout()
-    {
-        auto* backend = VulkanBackend::Get();
-        auto& device = backend->GetDevice();
-        auto vkDevice = device.GetHandle();
-
-        vkDevice.destroy(m_layout);
-    }
-
     void VulkanResourceSetLayout::AddBinding(uint32_t binding, ResourceType type, ShaderStage shaderStage)
     {
-        // Resize vector for binding
-        if (m_bindings.size() <= binding)
-            m_bindings.resize(binding + 1);
-
         vk::DescriptorSetLayoutBinding resBinding{};
         resBinding.setBinding(binding);
         resBinding.setDescriptorCount(1);
@@ -54,9 +37,21 @@ namespace gfx
         auto& device = backend->GetDevice();
         auto vkDevice = device.GetHandle();
 
+        auto bindings = GetBindings();
+
         vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-        layoutInfo.setBindings(m_bindings);
+        layoutInfo.setBindings(bindings);
 
         m_layout = vkDevice.createDescriptorSetLayout(layoutInfo);
+    }
+
+    auto VulkanResourceSetLayout::GetBindings() const -> std::vector<vk::DescriptorSetLayoutBinding>
+    {
+        std::vector<vk::DescriptorSetLayoutBinding> bindings;
+
+        for (const auto& [b, binding] : m_bindings)
+            bindings.push_back(binding);
+
+        return bindings;
     }
 }

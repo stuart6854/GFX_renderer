@@ -5,15 +5,15 @@
 #include <vulkan/vulkan.hpp>
 
 #include <cstdint>
-#include <vector>
+#include <unordered_map>
 
 namespace gfx
 {
     class VulkanResourceSetLayout : public ResourceSetLayout
     {
     public:
-        VulkanResourceSetLayout();
-        ~VulkanResourceSetLayout();
+        VulkanResourceSetLayout() = default;
+        ~VulkanResourceSetLayout() override = default;
 
         auto GetHandle() const -> vk::DescriptorSetLayout { return m_layout; }
 
@@ -21,11 +21,11 @@ namespace gfx
 
         void Build() override;
 
-        auto GetBindings() const -> const std::vector<vk::DescriptorSetLayoutBinding>& { return m_bindings; }
+        auto GetBindings() const -> std::vector<vk::DescriptorSetLayoutBinding>;
 
     private:
         vk::DescriptorSetLayout m_layout;
 
-        std::vector<vk::DescriptorSetLayoutBinding> m_bindings;
+        std::unordered_map<uint32_t, vk::DescriptorSetLayoutBinding> m_bindings;
     };
 }
