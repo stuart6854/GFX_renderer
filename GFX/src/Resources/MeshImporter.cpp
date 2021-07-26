@@ -113,19 +113,28 @@ namespace gfx
             aiColor3D color;
             // Ambient Color
             {
-                aiMat->Get(AI_MATKEY_COLOR_AMBIENT, color);
+                if (aiMat->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS)
+                {
+                    color = { 1.0f, 1.0f, 1.0f };
+                }
                 materialDef.AmbientColor = { color.r, color.g, color.b };
                 GFX_TRACE("  Ambient Color = {}", materialDef.AmbientColor);
             }
             // Diffuse Color
             {
-                aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+                if (aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS)
+                {
+                    color = { 1.0f, 1.0f, 1.0f };
+                }
                 materialDef.DiffuseColor = { color.r, color.g, color.b };
                 GFX_TRACE("  Diffuse Color = {}", materialDef.DiffuseColor);
             }
             // Specular Color
             {
-                aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color);
+                if (aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS)
+                {
+                    color = { 1.0f, 1.0f, 1.0f };
+                }
                 materialDef.SpecularColor = { color.r, color.g, color.b };
                 GFX_TRACE("  Specular Color = {}", materialDef.SpecularColor);
             }
