@@ -198,7 +198,7 @@ int main(int argc, char** argv)
         auto texture = gfx::Texture::Create(textureImporter);
 
         // auto resourceSet = gfx::ResourceSet::Create(resourceSetLayout.get());
-        auto resourceSet = shader->CreateResourceSet(0);
+        auto resourceSet = shader->CreateResourceSet(0, 0);
         resourceSet->SetUniformBuffer(0, uniformBufferSet->Get(0));
         resourceSet->SetTextureSampler(1, texture.get());
         resourceSet->UpdateBindings();
