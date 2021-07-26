@@ -7,10 +7,10 @@ namespace gfx
 {
     struct Vertex
     {
-        glm::vec3 Position;
-        glm::vec3 Normal;
-        glm::vec2 TexCoord;
-        glm::vec3 Tangent;
-        glm::vec3 Bitangent;
+        glm::vec3 Position = { 0, 0, 0 };
+        glm::vec3 Normal = { 0, 0, 0 };
+        glm::vec2 TexCoord = { 0, 0 };
+        glm::vec3 Tangent = { 0, 0, 0 };
+        glm::vec3 BiTangent = { 0, 0, 0 };
     };
 }
