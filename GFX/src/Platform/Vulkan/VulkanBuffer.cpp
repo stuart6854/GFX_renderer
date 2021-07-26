@@ -68,7 +68,7 @@ namespace gfx
         allocator.Free(m_buffer, m_allocation);
     }
 
-    void VulkanBuffer::SetData(uint32_t offset, uint32_t size, const void* data)
+    void VulkanBuffer::SetData(uint32_t offset, const uint32_t size, const void* data)
     {
         auto* backend = VulkanBackend::Get();
         auto& allocator = backend->GetAllocator();
@@ -77,20 +77,20 @@ namespace gfx
         {
             // Direct copy
             auto* mapped = allocator.Map(m_allocation);
-            std::memcpy(mapped, data, m_size);
+            std::memcpy(mapped, data, size);
             allocator.Unmap(m_allocation);
         }
         else
         {
             // Staging buffer
-            auto stagingBuffer = Buffer::CreateStaging(m_size, data);
+            const auto stagingBuffer = CreateStaging(size, data);
             auto* vkStagingBuffer = static_cast<VulkanBuffer*>(stagingBuffer.get());
 
             vk::BufferCopy copyRegion{};
             copyRegion.setSize(size);
 
             auto& device = backend->GetDevice();
-            auto cmdBuffer = device.GetCommandBuffer(true);
+            const auto cmdBuffer = device.GetCommandBuffer(true);
             cmdBuffer.copyBuffer(vkStagingBuffer->GetHandle(), m_buffer, copyRegion);
             device.FlushCommandBuffer(cmdBuffer);
         }

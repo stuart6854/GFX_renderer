@@ -21,7 +21,7 @@ namespace gfx
 
         auto AddVertex(const Vertex& position) -> uint32_t;
 
-        void AddLine(uint32_t a, uint32_t b, uint32_t c);
+        // void AddLine(uint32_t a, uint32_t b);
         void AddTriangle(uint32_t a, uint32_t b, uint32_t c);
 
         auto GetVertex(uint32_t index) const -> const Vertex& { return m_vertices.at(index); }

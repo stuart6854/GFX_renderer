@@ -20,6 +20,6 @@ namespace gfx
         auto ToVkTextureUsage(TextureUsage usage, bool isDepthFormat) -> vk::ImageUsageFlags;
 
         auto ToShaderStage(vk::ShaderStageFlagBits stage) -> ShaderStage;
-        auto ToVkShaderStage(ShaderStage stage) -> vk::ShaderStageFlagBits;
+        auto ToVkShaderStage(ShaderStage stage) -> vk::ShaderStageFlags;
     }
 }

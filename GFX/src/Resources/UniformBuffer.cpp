@@ -6,13 +6,13 @@ namespace gfx
 {
     /* Uniform Buffer */
 
-    UniformBuffer::UniformBuffer(uint32_t size, uint32_t binding)
+    UniformBuffer::UniformBuffer(const uint32_t size, const uint32_t binding)
         : m_binding(binding)
     {
         m_buffer = Buffer::CreateUniform(size);
     }
 
-    void UniformBuffer::SetData(uint32_t offset, uint32_t size, const void* data)
+    void UniformBuffer::SetData(const uint32_t offset, const uint32_t size, const void* data)
     {
         m_buffer->SetData(offset, size, data);
     }

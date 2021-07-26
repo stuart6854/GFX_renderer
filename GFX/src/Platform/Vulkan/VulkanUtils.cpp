@@ -4,7 +4,7 @@
 
 namespace gfx
 {
-    auto VkUtils::ToWrapMode(vk::SamplerAddressMode mode) -> WrapMode
+    auto VkUtils::ToWrapMode(const vk::SamplerAddressMode mode) -> WrapMode
     {
         switch (mode)
         {
@@ -17,7 +17,7 @@ namespace gfx
         return {};
     }
 
-    auto VkUtils::ToVkWrapMode(WrapMode mode) -> vk::SamplerAddressMode
+    auto VkUtils::ToVkWrapMode(const WrapMode mode) -> vk::SamplerAddressMode
     {
         switch (mode)
         {
@@ -30,7 +30,7 @@ namespace gfx
         return {};
     }
 
-    auto VkUtils::ToTextureFormat(vk::Format format) -> TextureFormat
+    auto VkUtils::ToTextureFormat(const vk::Format format) -> TextureFormat
     {
         switch (format)
         {
@@ -40,7 +40,7 @@ namespace gfx
         return {};
     }
 
-    auto VkUtils::ToVkTextureFormat(TextureFormat format) -> vk::Format
+    auto VkUtils::ToVkTextureFormat(const TextureFormat format) -> vk::Format
     {
         switch (format)
         {
@@ -58,8 +58,8 @@ namespace gfx
         return {};
     }
 
-    auto VkUtils::ToVkTextureUsage(TextureUsage usage,
-                                   bool isDepthFormat) -> vk::ImageUsageFlags
+    auto VkUtils::ToVkTextureUsage(const TextureUsage usage,
+                                   const bool isDepthFormat) -> vk::ImageUsageFlags
     {
         vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eSampled;
         if (usage == TextureUsage::eAttachment)
@@ -76,25 +76,24 @@ namespace gfx
         return imageUsage;
     }
 
-    auto VkUtils::ToShaderStage(vk::ShaderStageFlagBits stage) -> ShaderStage
+    auto VkUtils::ToShaderStage(const vk::ShaderStageFlagBits stage) -> ShaderStage
     {
-        switch (stage)
-        {
-            default:
-            case vk::ShaderStageFlagBits::eVertex: return ShaderStage::eVertex;
-            case vk::ShaderStageFlagBits::eFragment: return ShaderStage::ePixel;
-        }
+        if (stage == vk::ShaderStageFlagBits::eVertex)
+            return ShaderStage::eVertex;
+        if (stage == vk::ShaderStageFlagBits::eFragment)
+            return ShaderStage::ePixel;
+
         return ShaderStage::eNone;
     }
 
-    auto VkUtils::ToVkShaderStage(ShaderStage stage) -> vk::ShaderStageFlagBits
+    auto VkUtils::ToVkShaderStage(const ShaderStage stage) -> vk::ShaderStageFlags
     {
         switch (stage)
         {
-            default:
-            case ShaderStage::eNone: break;
             case ShaderStage::eVertex: return vk::ShaderStageFlagBits::eVertex;
             case ShaderStage::ePixel: return vk::ShaderStageFlagBits::eFragment;
+            case ShaderStage::eNone:
+            default: break;
         }
         return {};
     }
