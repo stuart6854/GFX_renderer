@@ -62,7 +62,7 @@ namespace gfx
         ~VulkanShader();
 
         auto GetShaderBuffers() const -> const std::unordered_map<std::string, ShaderBuffer>& override { return m_buffers; }
-        auto GetShaderResources() const -> const std::unordered_map<std::string, ShaderResourceDeclaration>& override { return {}; }
+        auto GetShaderResources() const -> const std::unordered_map<std::string, ShaderResourceDeclaration>& override { return m_resources; }
 
         auto GetShaderStageCreateInfos() const -> const std::vector<vk::PipelineShaderStageCreateInfo>& { return m_pipelineShaderStageCreateInfos; }
 

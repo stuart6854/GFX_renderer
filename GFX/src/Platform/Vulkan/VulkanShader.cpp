@@ -271,7 +271,7 @@ namespace gfx
         for (uint32_t set = 0; set < m_shaderDescriptorSets.size(); set++)
         {
             auto& shaderSet = m_shaderDescriptorSets[set];
-            auto& layout = m_resourceSetLayouts[set] = gfx::ResourceSetLayout::Create();
+            auto& layout = m_resourceSetLayouts[set] = ResourceSetLayout::Create();
 
             if (!shaderSet.UniformBuffers.empty())
             {
@@ -330,9 +330,6 @@ namespace gfx
                      set,
                      shaderSet.UniformBuffers.size(),
                      shaderSet.ImageSamplers.size());
-
-            // if (set >= m_descriptorSetLayouts.size()) m_descriptorSetLayouts.resize(set + 1);
-            // m_descriptorSetLayouts[set] = vkDevice.createDescriptorSetLayout(layoutInfo);
         }
     }
 }
