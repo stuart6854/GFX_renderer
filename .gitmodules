@@ -4,6 +4,3 @@ url = https://github.com/stuart6854/glfw.git
 [submodule "dependencies/glm"]
 path = dependencies/glm
 url = https://github.com/g-truc/glm.git
-[submodule "dependencies/fmt"]
-path = dependencies/fmt
-url = https://github.com/fmtlib/fmt.git
