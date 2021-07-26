@@ -5,6 +5,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include <filesystem>
+
 namespace gfx
 {
     const uint32_t MeshImportFlags = aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_MakeLeftHanded;
@@ -77,7 +79,7 @@ namespace gfx
                 if (mesh->HasTangentsAndBitangents())
                 {
                     vertex.Tangent = { mesh->mTangents[vertIndex].x, mesh->mTangents[vertIndex].y, mesh->mTangents[vertIndex].z };
-                    vertex.Bitangent = { mesh->mBitangents[vertIndex].x, mesh->mBitangents[vertIndex].y, mesh->mBitangents[vertIndex].z };
+                    vertex.BiTangent = { mesh->mBitangents[vertIndex].x, mesh->mBitangents[vertIndex].y, mesh->mBitangents[vertIndex].z };
                 }
             }
 
@@ -133,30 +135,36 @@ namespace gfx
                 GFX_TRACE("  Shininess = {}", materialDef.Shininess);
             }
 
+            const auto modelDir = std::filesystem::path(m_filename).parent_path();
+
             aiString aiTexturePath;
             // Ambient texture
             if (aiMat->GetTexture(aiTextureType_AMBIENT, 0, &aiTexturePath) == AI_SUCCESS)
             {
-                materialDef.AmbientTexture = aiTexturePath.C_Str();
+                std::string texPath = modelDir.string().append("/").append(aiTexturePath.C_Str());
+                materialDef.AmbientTexture = texPath;
                 GFX_TRACE("  Ambient Texture = {}", materialDef.AmbientTexture);
             }
             // Diffuse texture
             if (aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &aiTexturePath) == AI_SUCCESS)
             {
-                materialDef.DiffuseTexture = aiTexturePath.C_Str();
+                std::string texPath = modelDir.string().append("/").append(aiTexturePath.C_Str());
+                materialDef.DiffuseTexture = texPath;
                 GFX_TRACE("  Diffuse Texture = {}", materialDef.DiffuseTexture);
             }
             // Specular texture
             if (aiMat->GetTexture(aiTextureType_SPECULAR, 0, &aiTexturePath) == AI_SUCCESS)
             {
-                materialDef.SpecularTexture = aiTexturePath.C_Str();
+                std::string texPath = modelDir.string().append("/").append(aiTexturePath.C_Str());
+                materialDef.SpecularTexture = texPath;
                 GFX_TRACE("  Specular Texture = {}", materialDef.SpecularTexture);
             }
 
             // Normal Map texture
             if (aiMat->GetTexture(aiTextureType_NORMALS, 0, &aiTexturePath) == AI_SUCCESS)
             {
-                materialDef.NormalMap = aiTexturePath.C_Str();
+                std::string texPath = modelDir.string().append("/").append(aiTexturePath.C_Str());
+                materialDef.NormalMap = texPath;
                 GFX_TRACE("  Normal Map = {}", materialDef.NormalMap);
             }
         }
