@@ -150,9 +150,11 @@ namespace gfx
 
         auto& frame = GetCurrentFrame();
         // Wait until GPU has finished rendering the last frame
-        // if (frame.RenderFence) device.WaitForFence(frame.RenderFence);
+        if (frame.RenderFence)
+            device.WaitForFence(frame.RenderFence);
 
         // Vulkan::ResetDescriptorPool(GetFrameIndex());
+        device.ResetDescriptorPool(m_frameIndex);
 
         // Request image from swapchain
         m_imageIndex = device.AcquireNextImage(m_swapChain, frame.PresentComplete);
@@ -173,7 +175,8 @@ namespace gfx
         submitInfo.setSignalSemaphores(GetCurrentFrame().RenderComplete);
         submitInfo.setWaitDstStageMask(waitStages);
 
-        device.GetGraphicsQueue().submit(submitInfo, vkCmdBuffer->GetFence());
+        GetCurrentFrame().RenderFence = vkCmdBuffer->GetFence();
+        device.GetGraphicsQueue().submit(submitInfo, GetCurrentFrame().RenderFence);
 
         vk::PresentInfoKHR presentInfo{};
         presentInfo.setSwapchains(m_swapChain);
