@@ -323,9 +323,6 @@ namespace gfx
 
             layout->Build();
 
-            vk::DescriptorSetLayoutCreateInfo layoutInfo{};
-            layoutInfo.setBindings(layoutBindings);
-
             GFX_INFO("Creating descriptor set {} with {} ubo's and {} samplers",
                      set,
                      shaderSet.UniformBuffers.size(),

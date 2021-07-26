@@ -28,8 +28,52 @@ namespace gfx
         }
     }
 
+    VulkanResourceSet::VulkanResourceSet(uint32_t set, ResourceSetLayout* setLayout)
+        : m_set(set)
+    {
+        auto& device = VulkanBackend::Get()->GetDevice();
+        const auto vkDevice = device.GetHandle();
+
+        std::vector<vk::DescriptorPoolSize> poolSizes = {
+            { vk::DescriptorType::eUniformBuffer, 25 },
+            { vk::DescriptorType::eCombinedImageSampler, 25 },
+        };
+
+        vk::DescriptorPoolCreateInfo poolInfo{};
+        poolInfo.setPoolSizes(poolSizes);
+        poolInfo.setMaxSets(1);
+        m_descriptorPool = vkDevice.createDescriptorPool(poolInfo);
+
+        auto* vkSetLayout = static_cast<VulkanResourceSetLayout*>(setLayout);
+        const auto setHandle = vkSetLayout->GetHandle();
+
+        vk::DescriptorSetAllocateInfo allocInfo{};
+        allocInfo.setDescriptorPool(m_descriptorPool);
+        allocInfo.setDescriptorSetCount(1);
+        allocInfo.setSetLayouts(setHandle);
+
+        m_descriptorSet = vkDevice.allocateDescriptorSets(allocInfo)[0];
+
+        auto bindings = vkSetLayout->GetBindings();
+        for (auto& binding : bindings)
+        {
+            auto& write = m_descriptorWrites[binding.binding];
+            write.setDstSet(m_descriptorSet);
+            write.setDstBinding(binding.binding);
+            write.setDescriptorCount(binding.descriptorCount);
+            write.setDescriptorType(binding.descriptorType);
+        }
+    }
+
     VulkanResourceSet::~VulkanResourceSet()
     {
+        if (m_descriptorPool)
+        {
+            auto* backend = VulkanBackend::Get();
+            const auto vkDevice = backend->GetDevice().GetHandle();
+
+            vkDevice.destroy(m_descriptorPool);
+        }
     }
 
     void VulkanResourceSet::CopyBindings(const ResourceSet& other)
@@ -52,6 +96,10 @@ namespace gfx
 
     void VulkanResourceSet::SetUniformBuffer(uint32_t binding, UniformBuffer* buffer)
     {
+        // Check if this set has this binding
+        if (m_descriptorWrites.find(binding) == m_descriptorWrites.end())
+            return;
+
         auto& write = m_descriptorWrites[binding];
 
         auto* vkBuffer = static_cast<VulkanBuffer*>(buffer->GetBuffer());
@@ -73,7 +121,10 @@ namespace gfx
         auto& imageInfo = m_imageInfos[binding];
         imageInfo.setImageView(vkTexture->GetView());
         imageInfo.setSampler(vkTexture->GetSampler());
-        imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+        if (texture->GetFormat() == TextureFormat::eDepth24Stencil8 || texture->GetFormat() == TextureFormat::eDepth32f)
+            imageInfo.setImageLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+        else
+            imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
         write.setImageInfo(imageInfo);
     }

@@ -18,9 +18,14 @@ namespace gfx
         return nullptr;
     }
 
-    auto Shader::CreateResourceSet(uint32_t frameIndex,
-                                   uint32_t set) -> OwnedPtr<ResourceSet>
+    auto Shader::AllocateResourceSet(uint32_t frameIndex,
+                                     uint32_t set) -> OwnedPtr<ResourceSet>
     {
-        return ResourceSet::Create(frameIndex, set, m_resourceSetLayouts[set].get());
+        return ResourceSet::Allocate(frameIndex, set, m_resourceSetLayouts[set].get());
+    }
+
+    auto Shader::CreateResourceSet(const uint32_t set) -> OwnedPtr<ResourceSet>
+    {
+        return ResourceSet::Create(set, m_resourceSetLayouts[set].get());
     }
 }

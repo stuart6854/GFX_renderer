@@ -13,6 +13,7 @@ namespace gfx
     {
     public:
         VulkanResourceSet(uint32_t frameIndex, uint32_t set, ResourceSetLayout* setLayout);
+        VulkanResourceSet(uint32_t set, ResourceSetLayout* setLayout);
         ~VulkanResourceSet();
 
         auto GetHandle() const -> vk::DescriptorSet { return m_descriptorSet; }
@@ -26,6 +27,8 @@ namespace gfx
 
     private:
         uint32_t m_set;
+
+        vk::DescriptorPool m_descriptorPool;
         vk::DescriptorSet m_descriptorSet;
 
         std::unordered_map<uint32_t, vk::DescriptorBufferInfo> m_bufferInfos;

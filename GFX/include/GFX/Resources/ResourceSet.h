@@ -11,7 +11,8 @@ namespace gfx
     class ResourceSet
     {
     public:
-        static auto Create(uint32_t frameIndex, uint32_t set, ResourceSetLayout* setLayout) -> OwnedPtr<ResourceSet>;
+        static auto Allocate(uint32_t frameIndex, uint32_t set, ResourceSetLayout* setLayout) -> OwnedPtr<ResourceSet>;
+        static auto Create(uint32_t set, ResourceSetLayout* setLayout) -> OwnedPtr<ResourceSet>;
 
         virtual ~ResourceSet() = default;
 
