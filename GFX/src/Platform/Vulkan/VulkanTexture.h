@@ -17,6 +17,7 @@ namespace gfx
 
         auto GetWidth() const -> uint32_t override { return m_width; }
         auto GetHeight() const -> uint32_t override { return m_height; }
+        auto GetFormat() const -> TextureFormat override { return m_format; }
 
         auto GetHandle() const -> vk::Image { return m_image; }
         auto GetView() const -> vk::ImageView { return m_view; }
@@ -24,7 +25,7 @@ namespace gfx
 
     private:
         void Init(const TextureDesc& desc);
-        void SetData(const std::vector<uint8_t>& data);
+        void SetData(const std::vector<uint8_t>& data) const;
 
         void TransitionImageLayout(vk::CommandBuffer& cmdBuffer, vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout) const;
 
@@ -37,5 +38,6 @@ namespace gfx
 
         uint32_t m_width = 0;
         uint32_t m_height = 0;
+        TextureFormat m_format{};
     };
 }

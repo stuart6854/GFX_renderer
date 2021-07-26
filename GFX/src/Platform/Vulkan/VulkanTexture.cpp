@@ -19,81 +19,6 @@ namespace gfx
         Init(desc);
 
         SetData(importer.GetData());
-
-        /*m_width = importer.GetWidth();
-        m_height = importer.GetHeight();
-
-        auto* backend = VulkanBackend::Get();
-        auto& allocator = backend->GetAllocator();
-        auto vkDevice = backend->GetDevice().GetHandle();
-
-        vk::ImageCreateInfo imageInfo{};
-        imageInfo.setImageType(vk::ImageType::e2D);
-        imageInfo.setFormat(VkUtils::ToVkTextureFormat(importer.GetFormat()));
-        imageInfo.extent.setWidth(m_width);
-        imageInfo.extent.setHeight(m_height);
-        imageInfo.extent.setDepth(1);
-        imageInfo.setMipLevels(1);
-        imageInfo.setArrayLayers(1);
-        imageInfo.setUsage(vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst);
-        imageInfo.setInitialLayout(vk::ImageLayout::eUndefined);
-        imageInfo.setTiling(vk::ImageTiling::eOptimal);
-        imageInfo.setSamples(vk::SampleCountFlagBits::e1);
-
-        allocator.Allocate(imageInfo, VMA_MEMORY_USAGE_GPU_ONLY, &m_image, &m_allocation);
-
-        vk::ImageViewCreateInfo viewInfo{};
-        viewInfo.setFormat(VkUtils::ToVkTextureFormat(importer.GetFormat()));
-        viewInfo.setImage(m_image);
-        viewInfo.setViewType(vk::ImageViewType::e2D);
-        viewInfo.subresourceRange.setAspectMask(vk::ImageAspectFlagBits::eColor);
-        viewInfo.subresourceRange.setBaseMipLevel(0);
-        viewInfo.subresourceRange.setLevelCount(1);
-        viewInfo.subresourceRange.setLayerCount(1);
-        viewInfo.subresourceRange.setBaseArrayLayer(0);
-
-        m_view = vkDevice.createImageView(viewInfo);
-
-        vk::SamplerCreateInfo samplerInfo{};
-        samplerInfo.setAddressModeU(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
-        samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
-        // samplerInfo.borderColor = vk::BorderColor::
-        samplerInfo.setMagFilter(vk::Filter::eNearest);
-        samplerInfo.setMinFilter(vk::Filter::eNearest);
-
-        m_sampler = vkDevice.createSampler(samplerInfo);*/
-
-        /*{
-            auto* backend = VulkanBackend::Get();
-
-            const auto& textureData = importer.GetData();
-
-            const auto stagingBuffer = Buffer::CreateStaging(textureData.size(), textureData.data());
-            auto* vkStagingBuffer = static_cast<VulkanBuffer*>(stagingBuffer.get());
-
-            auto& device = backend->GetDevice();
-            auto cmdBuffer = device.GetCommandBuffer(true);
-
-            TransitionImageLayout(cmdBuffer, m_image, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-
-            vk::BufferImageCopy copyRegion{};
-            copyRegion.setBufferOffset(0);
-            copyRegion.setBufferRowLength(0);
-            copyRegion.setBufferImageHeight(0);
-            copyRegion.imageSubresource.setAspectMask(vk::ImageAspectFlagBits::eColor);
-            copyRegion.imageSubresource.setMipLevel(0);
-            copyRegion.imageSubresource.setBaseArrayLayer(0);
-            copyRegion.imageSubresource.setLayerCount(1);
-            copyRegion.imageOffset = vk::Offset3D(0, 0, 0);
-            copyRegion.imageExtent = vk::Extent3D(m_width, m_height, 1);
-
-            cmdBuffer.copyBufferToImage(vkStagingBuffer->GetHandle(), m_image, vk::ImageLayout::eTransferDstOptimal, copyRegion);
-
-            TransitionImageLayout(cmdBuffer, m_image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
-
-            device.FlushCommandBuffer(cmdBuffer);
-        }*/
     }
 
     VulkanTexture::VulkanTexture(const TextureBuilder& builder)
@@ -129,6 +54,7 @@ namespace gfx
     {
         m_width = desc.Width;
         m_height = desc.Height;
+        m_format = desc.Format;
 
         auto* backend = VulkanBackend::Get();
         auto& allocator = backend->GetAllocator();
@@ -177,7 +103,7 @@ namespace gfx
         m_sampler = vkDevice.createSampler(samplerInfo);
     }
 
-    void VulkanTexture::SetData(const std::vector<uint8_t>& data)
+    void VulkanTexture::SetData(const std::vector<uint8_t>& data) const
     {
         auto* backend = VulkanBackend::Get();
 

@@ -61,6 +61,7 @@ namespace gfx
 
         virtual auto GetWidth() const -> uint32_t = 0;
         virtual auto GetHeight() const -> uint32_t = 0;
+        virtual auto GetFormat() const -> TextureFormat = 0;
     };
 
     inline bool IsDepthFormat(TextureFormat format)
