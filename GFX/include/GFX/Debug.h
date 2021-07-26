@@ -1,12 +1,11 @@
 #pragma once
 
-#include <fmt/format.h>
+#include <format>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
-#include <iostream>
 #include <string>
 #include <functional>
 
@@ -31,73 +30,64 @@ namespace gfx
     void Error(const std::string& msg);
 }
 
-namespace fmt
+template <>
+struct std::formatter<glm::vec2> : std::formatter<std::string>
 {
-    template <>
-    struct formatter<glm::vec2>
+    auto format(const glm::vec2 v, format_context& ctx)
     {
-        template <typename ParseContext>
-        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+        return formatter<string>::format(
+            std::format("({}, {})", v.x, v.y),
+            ctx);
+    }
+};
 
-        template <typename FormatContext>
-        auto format(const glm::vec2& r, FormatContext& ctx)
-        {
-            return format_to(ctx.out(), "{}, {}", r.x, r.y);
-        }
-    };
-
-    template <>
-    struct formatter<glm::vec3>
+template <>
+struct std::formatter<glm::vec3> : std::formatter<std::string>
+{
+    auto format(const glm::vec3 v, format_context& ctx)
     {
-        template <typename ParseContext>
-        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+        return formatter<string>::format(
+            std::format("({}, {}, {})", v.x, v.y, v.z),
+            ctx);
+    }
+};
 
-        template <typename FormatContext>
-        auto format(const glm::vec3& r, FormatContext& ctx)
-        {
-            return format_to(ctx.out(), "{}, {}, {}", r.x, r.y, r.z);
-        }
-    };
-
-    template <>
-    struct formatter<glm::vec4>
+template <>
+struct std::formatter<glm::vec4> : std::formatter<std::string>
+{
+    auto format(const glm::vec4 v, format_context& ctx)
     {
-        template <typename ParseContext>
-        constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
-
-        template <typename FormatContext>
-        auto format(const glm::vec4& r, FormatContext& ctx)
-        {
-            return format_to(ctx.out(), "{}, {}, {}, {}", r.x, r.y, r.z, r.w);
-        }
-    };
-}
+        return formatter<string>::format(
+            std::format("({}, {}, {}, {})", v.x, v.y, v.z, v.w),
+            ctx);
+    }
+};
 
 #define GFX_TRACE(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = fmt::format(x, __VA_ARGS__); \
+        auto msg = std::format(x, __VA_ARGS__); \
         ::gfx::Trace(msg);                       \
     } while (0)
 
 #define GFX_INFO(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = fmt::format(x, __VA_ARGS__); \
+        auto msg = std::format(x, __VA_ARGS__); \
         ::gfx::Info(msg);                       \
     } while (0)
 
 #define GFX_WARN(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = fmt::format(x, __VA_ARGS__); \
+        auto msg = std::format(x, __VA_ARGS__); \
         ::gfx::Warn(msg);                       \
     } while (0)
 
 #define GFX_ERROR(x, ...)                       \
     do                                          \
     {                                           \
-        auto msg = fmt::format(x, __VA_ARGS__); \
+        auto msg = std::format(x, __VA_ARGS__); \
         ::gfx::Error(msg);                      \
     } while (0)
 
