@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <string>
+#include <functional>
 
 namespace gfx
 {
@@ -34,6 +35,13 @@ namespace gfx
         void PollEvents();
         void Present();
 
+        void SetKeyCallback(const std::function<void(int, int, int, int)> callback) { m_keyCallback = callback; }
+        void SetMouseBtnCallback(const std::function<void(int, int, int)> callback) { m_mouseBtnCallback = callback; }
+        void SetCursorPosCallback(const std::function<void(double, double)> callback) { m_cursorPosCallback = callback; }
+
+    private:
+        void SetupCallbacks() const;
+
     private:
         uint32_t m_width;
         uint32_t m_height;
@@ -42,5 +50,9 @@ namespace gfx
         GLFWwindow* m_handle;
 
         OwnedPtr<SwapChain> m_swapChain;
+
+        std::function<void(int, int, int, int)> m_keyCallback;
+        std::function<void(int, int, int)> m_mouseBtnCallback;
+        std::function<void(double, double)> m_cursorPosCallback;
     };
 }
