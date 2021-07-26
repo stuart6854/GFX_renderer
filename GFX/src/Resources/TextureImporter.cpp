@@ -21,10 +21,12 @@ namespace gfx
         int textureHeight = 0;
         int textureChannels = 0;
 
-        m_isHDR = stbi_is_hdr(filename.c_str());
+        m_isHdr = stbi_is_hdr(filename.c_str());
 
-        if (!m_isHDR)
+        if (!m_isHdr)
         {
+            // Flip texture on load
+            stbi_set_flip_vertically_on_load(true);
             // Read texture from file
             uint8_t* data = stbi_load(filename.c_str(), &textureWidth, &textureHeight, &textureChannels, 4);
             if (data == nullptr)
@@ -33,7 +35,7 @@ namespace gfx
                 return;
             }
 
-            uint32_t textureSize = textureWidth * textureHeight * 4; // RGBA
+            const uint32_t textureSize = textureWidth * textureHeight * 4; // RGBA
             m_data.resize(textureSize);
             std::memcpy(m_data.data(), data, textureSize);
 
