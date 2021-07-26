@@ -9,21 +9,18 @@
 
 namespace gfx
 {
-    VulkanResourceSet::VulkanResourceSet(uint32_t set, ResourceSetLayout* setLayout)
+    VulkanResourceSet::VulkanResourceSet(const uint32_t frameIndex, const uint32_t set, ResourceSetLayout* setLayout)
         : m_set(set)
     {
         auto& device = VulkanBackend::Get()->GetDevice();
 
         auto* vkSetLayout = static_cast<VulkanResourceSetLayout*>(setLayout);
-        m_descriptorSet = device.AllocateDescriptorSet(vkSetLayout->GetHandle());
+        m_descriptorSet = device.AllocateDescriptorSet(frameIndex, vkSetLayout->GetHandle());
 
-        auto& bindings = vkSetLayout->GetBindings();
-        m_descriptorWrites.resize(bindings.size());
-        for (int i = 0; i < m_descriptorWrites.size(); i++)
+        auto bindings = vkSetLayout->GetBindings();
+        for (auto& binding : bindings)
         {
-            auto& binding = bindings[i];
-
-            auto& write = m_descriptorWrites[i];
+            auto& write = m_descriptorWrites[binding.binding];
             write.setDstSet(m_descriptorSet);
             write.setDstBinding(binding.binding);
             write.setDescriptorCount(binding.descriptorCount);
@@ -35,6 +32,24 @@ namespace gfx
     {
     }
 
+    void VulkanResourceSet::CopyBindings(const ResourceSet& other)
+    {
+        const auto& vkOther = static_cast<const VulkanResourceSet&>(other);
+
+        m_bufferInfos = vkOther.m_bufferInfos;
+        m_imageInfos = vkOther.m_imageInfos;
+        m_descriptorWrites = vkOther.m_descriptorWrites;
+        for (auto& [binding, write] : m_descriptorWrites)
+        {
+            write.setDstSet(m_descriptorSet);
+
+            if (write.descriptorType == vk::DescriptorType::eUniformBuffer)
+                write.setBufferInfo(m_bufferInfos[write.dstBinding]);
+            else if (write.descriptorType == vk::DescriptorType::eCombinedImageSampler)
+                write.setImageInfo(m_imageInfos[write.dstBinding]);
+        }
+    }
+
     void VulkanResourceSet::SetUniformBuffer(uint32_t binding, UniformBuffer* buffer)
     {
         auto& write = m_descriptorWrites[binding];
@@ -43,7 +58,7 @@ namespace gfx
 
         auto& bufferInfo = m_bufferInfos[binding];
         bufferInfo.setBuffer(vkBuffer->GetHandle());
-        // bufferInfo.setOffset(0);
+        bufferInfo.setOffset(0);
         bufferInfo.setRange(vkBuffer->GetSize());
 
         write.setBufferInfo(bufferInfo);
@@ -68,6 +83,10 @@ namespace gfx
         auto& device = VulkanBackend::Get()->GetDevice();
         auto vkDevice = device.GetHandle();
 
-        vkDevice.updateDescriptorSets(m_descriptorWrites, {});
+        std::vector<vk::WriteDescriptorSet> writes;
+        for (const auto& [binding, write] : m_descriptorWrites)
+            writes.push_back(write);
+
+        vkDevice.updateDescriptorSets(writes, {});
     }
 }
