@@ -54,6 +54,8 @@ namespace gfx
                               const int action,
                               const int mods)
                            {
+                                if(key == GLFW_KEY_UNKNOWN) return;
+
                                auto* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
                                window->m_keyCallback(key, scanCode, action, mods);
                            });
