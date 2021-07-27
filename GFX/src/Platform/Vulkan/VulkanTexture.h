@@ -23,6 +23,8 @@ namespace gfx
         auto GetView() const -> vk::ImageView { return m_view; }
         auto GetSampler() const -> vk::Sampler { return m_sampler; }
 
+        auto GetImageInfo() const -> vk::DescriptorImageInfo;
+
     private:
         void Init(const TextureDesc& desc);
         void SetData(const std::vector<uint8_t>& data) const;

@@ -95,4 +95,13 @@ namespace gfx
             device.FlushCommandBuffer(cmdBuffer);
         }
     }
+
+    auto VulkanBuffer::GetBufferInfo() const -> vk::DescriptorBufferInfo
+    {
+        vk::DescriptorBufferInfo info{};
+        info.setBuffer(m_buffer);
+        info.setOffset(0);
+        info.setRange(m_size);
+        return info;
+    }
 }

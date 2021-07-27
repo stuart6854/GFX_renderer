@@ -21,6 +21,8 @@ namespace gfx
 
         void SetData(uint32_t offset, uint32_t size, const void* data) override;
 
+        auto GetBufferInfo() const -> vk::DescriptorBufferInfo;
+
     private:
         BufferUsage m_usage;
         uint64_t m_size;

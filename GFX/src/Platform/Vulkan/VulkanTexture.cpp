@@ -50,6 +50,19 @@ namespace gfx
         allocator.Free(m_image, m_allocation);
     }
 
+    auto VulkanTexture::GetImageInfo() const -> vk::DescriptorImageInfo
+    {
+        vk::DescriptorImageInfo info{};
+        info.setImageView(m_view);
+        info.setSampler(m_sampler);
+        if (GetFormat() == TextureFormat::eDepth24Stencil8 || GetFormat() == TextureFormat::eDepth32f)
+            info.setImageLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+        else
+            info.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        return info;
+    }
+
     void VulkanTexture::Init(const TextureDesc& desc)
     {
         m_width = desc.Width;
