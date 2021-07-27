@@ -18,6 +18,8 @@ namespace gfx
         deviceInfo.setQueueCreateInfos(queueCreateInfos);
 
         vk::PhysicalDeviceFeatures features{};
+        features.fillModeNonSolid = true;
+        features.samplerAnisotropy = true;
 
         deviceInfo.setPEnabledFeatures(&features);
 
