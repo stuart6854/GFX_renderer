@@ -20,11 +20,13 @@ namespace gfx
         auto bindings = vkSetLayout->GetBindings();
         for (auto& binding : bindings)
         {
-            auto& write = m_descriptorWrites[binding.binding];
-            write.setDstSet(m_descriptorSet);
-            write.setDstBinding(binding.binding);
-            write.setDescriptorCount(binding.descriptorCount);
-            write.setDescriptorType(binding.descriptorType);
+            //     auto& write = m_descriptorWrites[binding.binding];
+            //     write.setDstSet(m_descriptorSet);
+            //     write.setDstBinding(binding.binding);
+            //     write.setDescriptorCount(binding.descriptorCount);
+            //     write.setDescriptorType(binding.descriptorType);
+
+            m_validBindings.emplace(binding.binding);
         }
     }
 
@@ -57,11 +59,12 @@ namespace gfx
         auto bindings = vkSetLayout->GetBindings();
         for (auto& binding : bindings)
         {
-            auto& write = m_descriptorWrites[binding.binding];
-            write.setDstSet(m_descriptorSet);
-            write.setDstBinding(binding.binding);
-            write.setDescriptorCount(binding.descriptorCount);
-            write.setDescriptorType(binding.descriptorType);
+            //     auto& write = m_descriptorWrites[binding.binding];
+            //     write.setDstSet(m_descriptorSet);
+            //     write.setDstBinding(binding.binding);
+            //     write.setDescriptorCount(binding.descriptorCount);
+            //     write.setDescriptorType(binding.descriptorType);
+            m_validBindings.emplace(binding.binding);
         }
     }
 
@@ -80,53 +83,38 @@ namespace gfx
     {
         const auto& vkOther = static_cast<const VulkanResourceSet&>(other);
 
-        m_bufferInfos = vkOther.m_bufferInfos;
-        m_imageInfos = vkOther.m_imageInfos;
-        m_descriptorWrites = vkOther.m_descriptorWrites;
-        for (auto& [binding, write] : m_descriptorWrites)
-        {
-            write.setDstSet(m_descriptorSet);
-
-            if (write.descriptorType == vk::DescriptorType::eUniformBuffer)
-                write.setBufferInfo(m_bufferInfos[write.dstBinding]);
-            else if (write.descriptorType == vk::DescriptorType::eCombinedImageSampler)
-                write.setImageInfo(m_imageInfos[write.dstBinding]);
-        }
+        m_validBindings = vkOther.m_validBindings;
+        m_resources = vkOther.m_resources;
     }
 
     void VulkanResourceSet::SetUniformBuffer(uint32_t binding, UniformBuffer* buffer)
     {
-        // Check if this set has this binding
-        if (m_descriptorWrites.find(binding) == m_descriptorWrites.end())
+        // Check if this binding is valid for this set
+        if (m_validBindings.find(binding) == m_validBindings.end())
             return;
-
-        auto& write = m_descriptorWrites[binding];
 
         auto* vkBuffer = static_cast<VulkanBuffer*>(buffer->GetBuffer());
 
-        auto& bufferInfo = m_bufferInfos[binding];
-        bufferInfo.setBuffer(vkBuffer->GetHandle());
-        bufferInfo.setOffset(0);
-        bufferInfo.setRange(vkBuffer->GetSize());
-
-        write.setBufferInfo(bufferInfo);
+        auto& resource = m_resources[binding];
+        resource.Binding = binding;
+        resource.Type = vk::DescriptorType::eUniformBuffer;
+        resource.Buffer = buffer;
+        resource.BufferInfo = vkBuffer->GetBufferInfo();
     }
 
     void VulkanResourceSet::SetTextureSampler(uint32_t binding, Texture* texture)
     {
-        auto& write = m_descriptorWrites[binding];
+        // Check if this binding is valid for this set
+        if (m_validBindings.find(binding) == m_validBindings.end())
+            return;
 
         auto* vkTexture = static_cast<VulkanTexture*>(texture);
 
-        auto& imageInfo = m_imageInfos[binding];
-        imageInfo.setImageView(vkTexture->GetView());
-        imageInfo.setSampler(vkTexture->GetSampler());
-        if (texture->GetFormat() == TextureFormat::eDepth24Stencil8 || texture->GetFormat() == TextureFormat::eDepth32f)
-            imageInfo.setImageLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
-        else
-            imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-
-        write.setImageInfo(imageInfo);
+        auto& resource = m_resources[binding];
+        resource.Binding = binding;
+        resource.Type = vk::DescriptorType::eCombinedImageSampler;
+        resource.Texture = texture;
+        resource.ImageInfo = vkTexture->GetImageInfo();
     }
 
     void VulkanResourceSet::UpdateBindings()
@@ -134,9 +122,34 @@ namespace gfx
         auto& device = VulkanBackend::Get()->GetDevice();
         auto vkDevice = device.GetHandle();
 
+        // for (const auto& [binding, write] : m_descriptorWrites)
+        // {
+        //     if (!write.dstSet)
+        //         continue;
+        //     if (write.pImageInfo == nullptr && write.pBufferInfo == nullptr)
+        //         continue;
+        //
+        //     writes.push_back(write);
+        // }
+
         std::vector<vk::WriteDescriptorSet> writes;
-        for (const auto& [binding, write] : m_descriptorWrites)
-            writes.push_back(write);
+        for (const auto& [binding, resource] : m_resources)
+        {
+            auto& write = writes.emplace_back();
+            write.setDstSet(m_descriptorSet);
+            write.setDstBinding(binding);
+            write.setDescriptorType(resource.Type);
+            write.setDescriptorCount(1);
+
+            if (resource.Type == vk::DescriptorType::eUniformBuffer)
+            {
+                write.setBufferInfo(resource.BufferInfo);
+            }
+            else if (resource.Type == vk::DescriptorType::eCombinedImageSampler)
+            {
+                write.setImageInfo(resource.ImageInfo);
+            }
+        }
 
         vkDevice.updateDescriptorSets(writes, {});
     }

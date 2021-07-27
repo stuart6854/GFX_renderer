@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include <cstdint>
-#include <vector>
+#include <set>
 
 namespace gfx
 {
@@ -26,13 +26,25 @@ namespace gfx
         void UpdateBindings() override;
 
     private:
-        uint32_t m_set;
+        struct ResourceDecl
+        {
+            uint32_t Binding = 0;
+            vk::DescriptorType Type{};
+            gfx::UniformBuffer* Buffer = nullptr;
+            gfx::Texture* Texture = nullptr;
+
+            vk::DescriptorBufferInfo BufferInfo{};
+            vk::DescriptorImageInfo ImageInfo{};
+        };
+
+    private:
+        std::set<uint32_t> m_validBindings;
+
+        uint32_t m_set = 0;
 
         vk::DescriptorPool m_descriptorPool;
         vk::DescriptorSet m_descriptorSet;
 
-        std::unordered_map<uint32_t, vk::DescriptorBufferInfo> m_bufferInfos;
-        std::unordered_map<uint32_t, vk::DescriptorImageInfo> m_imageInfos;
-        std::unordered_map<uint32_t, vk::WriteDescriptorSet> m_descriptorWrites;
+        std::unordered_map<uint32_t, ResourceDecl> m_resources;
     };
 }
