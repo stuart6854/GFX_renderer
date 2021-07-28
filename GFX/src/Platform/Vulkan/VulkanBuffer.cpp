@@ -36,8 +36,9 @@ namespace gfx
         }
     }
 
-    VulkanBuffer::VulkanBuffer(BufferUsage usage, uint64_t size, const void* data)
-        : m_usage(usage),
+    VulkanBuffer::VulkanBuffer(BufferUsage usage, uint64_t size, const void* data, bool forceLocalMemory)
+        : m_forceLocalMemory(forceLocalMemory),
+          m_usage(usage),
           m_size(size)
     {
         auto* backend = VulkanBackend::Get();
@@ -47,6 +48,8 @@ namespace gfx
         if (usage != BufferUsage::eStaging) vkUsage |= vk::BufferUsageFlagBits::eTransferDst;
 
         auto memUsage = Utils::ToMemUsage(usage);
+        if (m_forceLocalMemory && (usage == BufferUsage::eVertex || usage == BufferUsage::eIndex))
+            memUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
         vk::BufferCreateInfo bufferInfo{};
         bufferInfo.setSize(m_size);
@@ -56,7 +59,7 @@ namespace gfx
 
         if (data != nullptr)
         {
-            SetData(0, size, data);
+            VulkanBuffer::SetData(0, m_size, data);
         }
     }
 
@@ -73,7 +76,7 @@ namespace gfx
         auto* backend = VulkanBackend::Get();
         auto& allocator = backend->GetAllocator();
 
-        if (m_usage == BufferUsage::eStaging || m_usage == BufferUsage::eUniform)
+        if (m_forceLocalMemory || m_usage == BufferUsage::eStaging || m_usage == BufferUsage::eUniform)
         {
             // Direct copy
             auto* mapped = allocator.Map(m_allocation);

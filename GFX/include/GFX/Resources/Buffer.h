@@ -16,10 +16,10 @@ namespace gfx
     class Buffer
     {
     public:
-        static auto Create(BufferUsage usage, uint64_t size, const void* data = nullptr) -> OwnedPtr<Buffer>;
+        static auto Create(BufferUsage usage, uint64_t size, const void* data = nullptr, bool forceLocalMemory = false) -> OwnedPtr<Buffer>;
         static auto CreateStaging(uint64_t size, const void* data = nullptr) -> OwnedPtr<Buffer>;
-        static auto CreateVertex(uint64_t size, const void* data = nullptr) -> OwnedPtr<Buffer>;
-        static auto CreateIndex(uint64_t size, const void* data = nullptr) -> OwnedPtr<Buffer>;
+        static auto CreateVertex(uint64_t size, const void* data = nullptr, bool forceLocalMemory = false) -> OwnedPtr<Buffer>;
+        static auto CreateIndex(uint64_t size, const void* data = nullptr, bool forceLocalMemory = false) -> OwnedPtr<Buffer>;
         static auto CreateUniform(uint64_t size, const void* data = nullptr) -> OwnedPtr<Buffer>;
 
         virtual ~Buffer() = default;

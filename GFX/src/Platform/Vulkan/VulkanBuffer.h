@@ -12,7 +12,7 @@ namespace gfx
     class VulkanBuffer : public Buffer
     {
     public:
-        VulkanBuffer(BufferUsage usage, uint64_t size, const void* data = nullptr);
+        VulkanBuffer(BufferUsage usage, uint64_t size, const void* data = nullptr, bool forceLocalMemory = false);
         ~VulkanBuffer() override;
 
         auto GetSize() const -> uint64_t { return m_size; }
@@ -24,6 +24,7 @@ namespace gfx
         auto GetBufferInfo() const -> vk::DescriptorBufferInfo;
 
     private:
+        bool m_forceLocalMemory = false;
         BufferUsage m_usage;
         uint64_t m_size;
 
