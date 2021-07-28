@@ -38,7 +38,7 @@ namespace gfx
 
         bool DepthBias = false;
         float DepthBiasConstantFactor = 4.0f;
-        bool DepthBiasSlopeFactor = 1.5f;
+        float DepthBiasSlopeFactor = 1.5f;
     };
 
     class Pipeline
