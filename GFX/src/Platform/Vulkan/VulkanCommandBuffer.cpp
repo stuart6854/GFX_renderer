@@ -107,6 +107,11 @@ namespace gfx
         m_currentCmdBuffer.setScissor(0, s);
     }
 
+    void VulkanCommandBuffer::SetLineWidth(const float width)
+    {
+        m_currentCmdBuffer.setLineWidth(width);
+    }
+
     void VulkanCommandBuffer::BeginRenderPass(Framebuffer* framebuffer)
     {
         auto* vkFramebuffer = static_cast<VulkanFramebuffer*>(framebuffer);

@@ -27,6 +27,7 @@ namespace gfx
 
         virtual void SetViewport(const Viewport& viewport) = 0;
         virtual void SetScissor(const Scissor& scissor) = 0;
+        virtual void SetLineWidth(float width) = 0;
 
         virtual void BeginRenderPass(Framebuffer* framebuffer) = 0;
         virtual void EndRenderPass() = 0;

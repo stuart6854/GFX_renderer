@@ -19,6 +19,7 @@ namespace gfx
 
         vk::PhysicalDeviceFeatures features{};
         features.fillModeNonSolid = true;
+        features.wideLines = true;
         features.samplerAnisotropy = true;
 
         deviceInfo.setPEnabledFeatures(&features);

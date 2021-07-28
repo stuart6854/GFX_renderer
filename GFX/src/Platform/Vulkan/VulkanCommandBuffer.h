@@ -27,6 +27,7 @@ namespace gfx
 
         void SetViewport(const Viewport& viewport) override;
         void SetScissor(const Scissor& scissor) override;
+        void SetLineWidth(float width) override;
 
         void BeginRenderPass(Framebuffer* framebuffer) override;
         void EndRenderPass() override;
