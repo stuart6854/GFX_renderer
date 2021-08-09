@@ -47,6 +47,15 @@ namespace gfx
 
     void Window::SetupCallbacks() const
     {
+        glfwSetWindowSizeCallback(m_handle,
+                                  [](GLFWwindow* handle, int width, int height)
+                                  {
+                                      auto* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
+                                      window->Resize(width, height);
+                                      if (window->m_sizeCallback != nullptr)
+                                          window->m_sizeCallback(width, height);
+                                  });
+
         glfwSetKeyCallback(m_handle,
                            [](GLFWwindow* handle,
                               const int key,
@@ -54,24 +63,35 @@ namespace gfx
                               const int action,
                               const int mods)
                            {
-                                if(key == GLFW_KEY_UNKNOWN) return;
+                               if (key == GLFW_KEY_UNKNOWN) return;
 
                                auto* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-                               window->m_keyCallback(key, scanCode, action, mods);
+                               if (window->m_keyCallback != nullptr)
+                                   window->m_keyCallback(key, scanCode, action, mods);
                            });
 
         glfwSetMouseButtonCallback(m_handle,
                                    [](GLFWwindow* handle, const int button, const int action, const int mods)
                                    {
                                        auto* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-                                       window->m_mouseBtnCallback(button, action, mods);
+                                       if (window->m_mouseBtnCallback != nullptr)
+                                           window->m_mouseBtnCallback(button, action, mods);
                                    });
 
         glfwSetCursorPosCallback(m_handle,
                                  [](GLFWwindow* handle, const double xPos, const double yPos)
                                  {
                                      auto* window = static_cast<Window*>(glfwGetWindowUserPointer(handle));
-                                     window->m_cursorPosCallback(xPos, yPos);
+                                     if (window->m_cursorPosCallback != nullptr)
+                                         window->m_cursorPosCallback(xPos, yPos);
                                  });
+    }
+
+    void Window::Resize(int width, int height)
+    {
+        GFX_TRACE("Window Resize: {}, {}", width, height);
+        m_width = width;
+        m_height = height;
+        m_swapChain->Recreate(width, height);
     }
 }

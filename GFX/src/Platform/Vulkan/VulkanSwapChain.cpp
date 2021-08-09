@@ -96,6 +96,8 @@ namespace gfx
         auto& physicalDevice = backend->GetPhysicalDevice();
         auto vkPhysicalDevice = physicalDevice.GetHandle();
 
+        backend->WaitIdle();
+
         const auto capabilities = vkPhysicalDevice.getSurfaceCapabilitiesKHR(m_surface);
         const auto surfaceFormat = Utils::ChooseSurfaceFormat(vkPhysicalDevice, m_surface);
         const auto presentMode = Utils::ChoosePresentMode(vkPhysicalDevice, m_surface);

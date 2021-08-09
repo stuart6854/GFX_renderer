@@ -67,8 +67,8 @@ namespace gfx
     {
         if (!forceRecreate && (m_width == width && m_height == height)) return;
 
-        m_width = width;
-        m_height = height;
+        m_desc.Width = m_width = width;
+        m_desc.Height = m_height = height;
 
         if (!m_isSwapChainTarget)
         {
@@ -101,12 +101,12 @@ namespace gfx
 
             for (auto& image : m_attachmentTextures)
             {
-                image.release();
+                image.reset();
             }
 
             if (m_depthAttachentTexture)
             {
-                m_depthAttachentTexture.release();
+                m_depthAttachentTexture.reset();
             }
         }
 

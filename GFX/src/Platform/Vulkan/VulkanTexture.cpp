@@ -48,6 +48,7 @@ namespace gfx
         vkDevice.destroy(m_view);
 
         allocator.Free(m_image, m_allocation);
+        GFX_TRACE("Vulkan texture released.");
     }
 
     auto VulkanTexture::GetImageInfo() const -> vk::DescriptorImageInfo

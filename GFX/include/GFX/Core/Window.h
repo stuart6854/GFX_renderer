@@ -35,12 +35,15 @@ namespace gfx
         void PollEvents();
         void Present();
 
-        void SetKeyCallback(const std::function<void(int, int, int, int)> callback) { m_keyCallback = callback; }
-        void SetMouseBtnCallback(const std::function<void(int, int, int)> callback) { m_mouseBtnCallback = callback; }
-        void SetCursorPosCallback(const std::function<void(double, double)> callback) { m_cursorPosCallback = callback; }
+        void SetSizeCallback(const std::function<void(int, int)>& callback) { m_sizeCallback = callback; }
+        void SetKeyCallback(const std::function<void(int, int, int, int)>& callback) { m_keyCallback = callback; }
+        void SetMouseBtnCallback(const std::function<void(int, int, int)>& callback) { m_mouseBtnCallback = callback; }
+        void SetCursorPosCallback(const std::function<void(double, double)>& callback) { m_cursorPosCallback = callback; }
 
     private:
         void SetupCallbacks() const;
+
+        void Resize(int width, int height);
 
     private:
         uint32_t m_width;
@@ -51,6 +54,7 @@ namespace gfx
 
         OwnedPtr<SwapChain> m_swapChain;
 
+        std::function<void(int, int)> m_sizeCallback;
         std::function<void(int, int, int, int)> m_keyCallback;
         std::function<void(int, int, int)> m_mouseBtnCallback;
         std::function<void(double, double)> m_cursorPosCallback;
