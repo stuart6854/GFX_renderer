@@ -25,3 +25,8 @@
 
 #include "GFX/Resources/TextureBuilder.h"
 #include "GFX/Resources/TextureImporter.h"
+
+#include "GFX/Resources/Font.h"
+
+// Utility
+#include "GFX/Utility/TexturePacker.h"
