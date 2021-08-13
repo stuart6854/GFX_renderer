@@ -42,9 +42,11 @@ namespace gfx
 
     auto VkUtils::ToVkTextureFormat(const TextureFormat format) -> vk::Format
     {
+        // https://stackoverflow.com/questions/59628956/what-is-the-difference-between-normalized-scaled-and-integer-vkformats
         switch (format)
         {
             default: break;
+            case TextureFormat::eR: return vk::Format::eR8Unorm;
             case TextureFormat::eRGBA: return vk::Format::eR8G8B8A8Srgb;
             case TextureFormat::eDepth32f: return vk::Format::eD32Sfloat;
             case TextureFormat::eDepth24Stencil8: return vk::Format::eD24UnormS8Uint;

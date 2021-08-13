@@ -23,6 +23,7 @@ namespace gfx
     enum class TextureFormat
     {
         eNone,
+        eR,
         eRGBA,
 
         eDepth32f,
