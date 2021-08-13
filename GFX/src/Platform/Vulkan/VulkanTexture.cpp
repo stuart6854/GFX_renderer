@@ -33,9 +33,14 @@ namespace gfx
         SetData(builder.GetData());
     }
 
-    VulkanTexture::VulkanTexture(const TextureDesc& desc)
+    VulkanTexture::VulkanTexture(const TextureDesc& desc, const std::vector<uint8_t>& data)
     {
         Init(desc);
+
+        if(!data.empty())
+        {
+            SetData(data);
+        }
     }
 
     VulkanTexture::~VulkanTexture()

@@ -30,13 +30,12 @@ namespace gfx
         return nullptr;
     }
 
-
-    auto Texture::Create(const TextureDesc& desc) -> OwnedPtr<Texture>
+    auto Texture::Create(const TextureDesc& desc, const std::vector<uint8_t>& data) -> OwnedPtr<Texture>
     {
         auto backendType = gfx::GetBackendType();
         switch (backendType)
         {
-            case BackendType::eVulkan: return CreateOwned<VulkanTexture>(desc);
+            case BackendType::eVulkan: return CreateOwned<VulkanTexture>(desc, data);
             case BackendType::eNone:
             default: break;
         }

@@ -55,7 +55,7 @@ namespace gfx
     public:
         static auto Create(const TextureBuilder& builder) -> OwnedPtr<Texture>;
         static auto Create(const TextureImporter& importer) -> OwnedPtr<Texture>;
-        static auto Create(const TextureDesc& desc) -> OwnedPtr<Texture>;
+        static auto Create(const TextureDesc& desc, const std::vector<uint8_t>& data = {}) -> OwnedPtr<Texture>;
 
         virtual ~Texture() = default;
 
