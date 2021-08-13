@@ -116,8 +116,8 @@ namespace gfx
         samplerInfo.setAddressModeV(vk::SamplerAddressMode::eRepeat);
         samplerInfo.setAddressModeW(vk::SamplerAddressMode::eRepeat);
         // samplerInfo.borderColor = vk::BorderColor::
-        samplerInfo.setMagFilter(vk::Filter::eNearest);
-        samplerInfo.setMinFilter(vk::Filter::eNearest);
+        samplerInfo.setMagFilter(vk::Filter::eLinear);
+        samplerInfo.setMinFilter(vk::Filter::eLinear);
 
         m_sampler = vkDevice.createSampler(samplerInfo);
     }
