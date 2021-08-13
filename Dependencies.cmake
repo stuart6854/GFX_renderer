@@ -44,3 +44,5 @@ set_target_properties(spirv-cross-glsl PROPERTIES
 	IMPORTED_LOCATION_DEBUG "${spirv-cross-glsl_Debug}"
 	IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
 )
+
+add_subdirectory(Dependencies/freetype)
