@@ -16,16 +16,19 @@ namespace gfx
 
     struct FontGlyph
     {
-        glm::vec2 Size;    // Size of glyph
-        glm::vec2 Bearing; // Offset from baseline to left/top of glyph
-        glm::vec2 Origin;  // Origin of the texture atlas
-        uint32_t Advance;  // Horizontal offset to advance to next glyph
+        glm::vec2 Size;     // Size of glyph
+        glm::vec2 Bearing;  // Offset from baseline to left/top of glyph
+        glm::vec2 UVOrigin; // Origin of the texture glyph
+        glm::vec2 UVSize;   // Size of the texture glyph
+        uint32_t Advance;   // Horizontal offset to advance to next glyph
     };
 
     class Font
     {
     public:
         Font(const std::string& filename);
+
+        auto GetLineHeight() const -> uint32_t { return m_lineHeight; }
 
         auto GetGlyph(char character) -> const FontGlyph&;
 

@@ -71,12 +71,12 @@ namespace gfx
 
         FT_GlyphSlot glyph = face->glyph;
 
-        // m_lineHeight = fontMetrics.lineHeight;
+        m_lineHeight = face->size->metrics.height >> 6;
 
         std::vector<GlyphTexture> glyphTextures(128);
 
         // for (int i = 65; i < 68; i++)
-        for (int i = 33; i < 128; i++)
+        for (int i = 0; i < 128; i++)
         {
             auto error = FT_Load_Char(face, i, FT_LOAD_DEFAULT);
             if (error)
@@ -108,7 +108,7 @@ namespace gfx
             auto& glyphData = m_glyphs[i];
             glyphData.Size = { glyphWidth, glyphHeight };
             glyphData.Bearing = { glyph->bitmap_left, glyph->bitmap_top };
-            glyphData.Origin = {};
+            glyphData.UVOrigin = {};
             glyphData.Advance = glyph->advance.x;
             // }
         }
@@ -127,13 +127,11 @@ namespace gfx
 
             // TexturePacker packer(128, 1);
             TexturePacker packer(512, 1);
-            for (int i = 0; i < 128; i++)
+            for (const auto& glyphTexture : glyphTextures)
             {
-                auto& glyphTexture = glyphTextures[i];
-
                 // We can break if a texture is null,
                 // because null textures should all be last after sort
-                if (glyphTexture.Data.empty()) break;
+                if (glyphTexture.Data.empty()) continue;
 
                 glm::vec2 origin;
                 if (!packer.AddToPack(glyphTexture.Data, glyphTexture.Width, glyphTexture.Height, origin))
@@ -143,7 +141,8 @@ namespace gfx
                 }
 
                 auto& glyph = m_glyphs[glyphTexture.Character];
-                glyph.Origin = origin;
+                glyph.UVOrigin = origin / 512.0f;
+                glyph.UVSize = { glyphTexture.Width / 512.0f, glyphTexture.Height / 512.0f };
 
                 // GFX_TRACE("Packed texture: size=({}, {}), pos=({}, {})",
                 //           glyphTexture.Width,
