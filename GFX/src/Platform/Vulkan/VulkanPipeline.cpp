@@ -125,8 +125,8 @@ namespace gfx
                 blendAttachmentStates[i].setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
                 blendAttachmentStates[i].setColorBlendOp(vk::BlendOp::eAdd);
                 blendAttachmentStates[i].setAlphaBlendOp(vk::BlendOp::eAdd);
-                blendAttachmentStates[i].setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
-                blendAttachmentStates[i].setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+                blendAttachmentStates[i].setSrcAlphaBlendFactor(vk::BlendFactor::eSrcAlpha);
+                blendAttachmentStates[i].setDstAlphaBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
             }
         }
 
