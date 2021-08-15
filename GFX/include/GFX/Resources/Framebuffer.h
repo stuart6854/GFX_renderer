@@ -24,7 +24,7 @@ namespace gfx
         uint32_t Width = 0;
         uint32_t Height = 0;
 
-        glm::vec3 ClearColor = { 0, 0, 0 };
+        glm::vec4 ClearColor = { 0, 0, 0, 0 };
         bool ClearOnLoad = true;
 
         std::vector<FramebufferAttachmentDesc> Attachments;

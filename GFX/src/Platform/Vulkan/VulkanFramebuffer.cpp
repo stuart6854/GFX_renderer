@@ -82,7 +82,7 @@ namespace gfx
 
             m_clearValues.clear();
 
-            const std::array clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+            const std::array clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
             m_clearValues.emplace_back().setColor(clearColor);
             m_clearValues.emplace_back().setDepthStencil({ 1.0f, 0 });
         }
@@ -119,7 +119,7 @@ namespace gfx
         m_clearValues.resize(m_desc.Attachments.size());
 
         const auto& clearColor = m_desc.ClearColor;
-        const std::array clearColorArray = { clearColor.r, clearColor.g, clearColor.b, 1.0f };
+        const std::array clearColorArray = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
 
         uint32_t attachmentIndex = 0;
         for (const auto& attachmentDesc : m_desc.Attachments)
