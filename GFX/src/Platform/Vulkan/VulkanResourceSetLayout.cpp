@@ -20,11 +20,11 @@ namespace gfx
         }
     }
 
-    void VulkanResourceSetLayout::AddBinding(uint32_t binding, ResourceType type, ShaderStage shaderStage)
+    void VulkanResourceSetLayout::AddBinding(uint32_t binding, ResourceType type, uint32_t arraySize, ShaderStage shaderStage)
     {
         vk::DescriptorSetLayoutBinding resBinding{};
         resBinding.setBinding(binding);
-        resBinding.setDescriptorCount(1);
+        resBinding.setDescriptorCount(arraySize);
         resBinding.setDescriptorType(Utils::ToVulkanDescriptorType(type));
         resBinding.setStageFlags(VkUtils::ToVkShaderStage(shaderStage));
 

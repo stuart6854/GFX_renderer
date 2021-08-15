@@ -17,8 +17,8 @@ namespace gfx
         auto* vkSetLayout = static_cast<VulkanResourceSetLayout*>(setLayout);
         m_descriptorSet = device.AllocateDescriptorSet(frameIndex, vkSetLayout->GetHandle());
 
-        auto bindings = vkSetLayout->GetBindings();
-        for (auto& binding : bindings)
+        m_bindings = vkSetLayout->GetBindings();
+        for (auto& binding : m_bindings)
         {
             //     auto& write = m_descriptorWrites[binding.binding];
             //     write.setDstSet(m_descriptorSet);
@@ -56,8 +56,8 @@ namespace gfx
 
         m_descriptorSet = vkDevice.allocateDescriptorSets(allocInfo)[0];
 
-        auto bindings = vkSetLayout->GetBindings();
-        for (auto& binding : bindings)
+        m_bindings = vkSetLayout->GetBindings();
+        for (auto& binding : m_bindings)
         {
             //     auto& write = m_descriptorWrites[binding.binding];
             //     write.setDstSet(m_descriptorSet);
@@ -102,7 +102,7 @@ namespace gfx
         resource.BufferInfo = vkBuffer->GetBufferInfo();
     }
 
-    void VulkanResourceSet::SetTextureSampler(uint32_t binding, Texture* texture)
+    void VulkanResourceSet::SetTextureSampler(uint32_t binding, uint32_t index, Texture* texture)
     {
         // Check if this binding is valid for this set
         if (m_validBindings.find(binding) == m_validBindings.end())
@@ -113,8 +113,15 @@ namespace gfx
         auto& resource = m_resources[binding];
         resource.Binding = binding;
         resource.Type = vk::DescriptorType::eCombinedImageSampler;
-        resource.Texture = texture;
-        resource.ImageInfo = vkTexture->GetImageInfo();
+        resource.Count = index + 1;
+
+        if (resource.Textures.size() < index + 1)
+            resource.Textures.resize(index + 1);
+        if (resource.ImageInfos.size() < index + 1)
+            resource.ImageInfos.resize(index + 1);
+
+        resource.Textures[index] = texture;
+        resource.ImageInfos[index] = vkTexture->GetImageInfo();
     }
 
     void VulkanResourceSet::UpdateBindings()
@@ -139,7 +146,7 @@ namespace gfx
             write.setDstSet(m_descriptorSet);
             write.setDstBinding(binding);
             write.setDescriptorType(resource.Type);
-            write.setDescriptorCount(1);
+            write.setDescriptorCount(resource.Count);
 
             if (resource.Type == vk::DescriptorType::eUniformBuffer)
             {
@@ -147,10 +154,21 @@ namespace gfx
             }
             else if (resource.Type == vk::DescriptorType::eCombinedImageSampler)
             {
-                write.setImageInfo(resource.ImageInfo);
+                write.setImageInfo(resource.ImageInfos);
             }
         }
 
         vkDevice.updateDescriptorSets(writes, {});
+    }
+
+    auto VulkanResourceSet::GetLayoutBinding(uint32_t binding) -> vk::DescriptorSetLayoutBinding*
+    {
+        for (auto& layoutBinding : m_bindings)
+        {
+            if (layoutBinding.binding == binding)
+                return &layoutBinding;
+        }
+
+        return nullptr;
     }
 }

@@ -21,6 +21,7 @@ namespace gfx
         features.fillModeNonSolid = true;
         features.wideLines = true;
         features.samplerAnisotropy = true;
+        features.shaderSampledImageArrayDynamicIndexing = true;
 
         deviceInfo.setPEnabledFeatures(&features);
 

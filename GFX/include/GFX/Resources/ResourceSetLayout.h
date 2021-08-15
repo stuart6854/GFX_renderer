@@ -21,7 +21,7 @@ namespace gfx
 
         virtual ~ResourceSetLayout() = default;
 
-        virtual void AddBinding(uint32_t binding, ResourceType type, ShaderStage stage) = 0;
+        virtual void AddBinding(uint32_t binding, ResourceType type, uint32_t arraySize, ShaderStage stage) = 0;
 
         virtual void Build() = 0;
     };

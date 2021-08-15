@@ -21,7 +21,7 @@ namespace gfx
         void CopyBindings(const ResourceSet& other) override;
 
         void SetUniformBuffer(uint32_t binding, UniformBuffer* buffer) override;
-        void SetTextureSampler(uint32_t binding, Texture* texture) override;
+        void SetTextureSampler(uint32_t binding, uint32_t index, Texture* texture) override;
 
         void UpdateBindings() override;
 
@@ -30,15 +30,19 @@ namespace gfx
         {
             uint32_t Binding = 0;
             vk::DescriptorType Type{};
+            uint32_t Count = 1;
             gfx::UniformBuffer* Buffer = nullptr;
-            gfx::Texture* Texture = nullptr;
+            std::vector<gfx::Texture*> Textures;
 
             vk::DescriptorBufferInfo BufferInfo{};
-            vk::DescriptorImageInfo ImageInfo{};
+            std::vector<vk::DescriptorImageInfo> ImageInfos{};
         };
+
+        auto GetLayoutBinding(uint32_t binding) -> vk::DescriptorSetLayoutBinding*;
 
     private:
         std::set<uint32_t> m_validBindings;
+        std::vector<vk::DescriptorSetLayoutBinding> m_bindings;
 
         uint32_t m_set = 0;
 

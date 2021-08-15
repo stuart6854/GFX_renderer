@@ -245,7 +245,7 @@ namespace gfx
 
             m_resources[name] = ShaderResourceDeclaration(name, binding, 1);
 
-            GFX_TRACE("  {} (set={}, binding={})", name, descriptorSet, binding);
+            GFX_TRACE("  {}[{}] (set={}, binding={})", name, arraySize,descriptorSet, binding);
         }
 
         GFX_TRACE("===========================");
@@ -296,7 +296,7 @@ namespace gfx
                 layoutBinding.setStageFlags(uniformBuffer.ShaderStage);
                 layoutBinding.setBinding(binding);
 
-                layout->AddBinding(binding, ResourceType::eUniformBuffer, VkUtils::ToShaderStage(uniformBuffer.ShaderStage));
+                layout->AddBinding(binding, ResourceType::eUniformBuffer, 1, VkUtils::ToShaderStage(uniformBuffer.ShaderStage));
 
                 auto& writeSet = shaderSet.WriteDescriptorSets[uniformBuffer.Name];
                 writeSet.setDescriptorType(vk::DescriptorType::eUniformBuffer);
@@ -311,7 +311,7 @@ namespace gfx
                 layoutBinding.setStageFlags(imageSampler.ShaderStage);
                 layoutBinding.setBinding(binding);
 
-                layout->AddBinding(binding, ResourceType::eTextureSampler, VkUtils::ToShaderStage(imageSampler.ShaderStage));
+                layout->AddBinding(binding, ResourceType::eTextureSampler, imageSampler.ArraySize, VkUtils::ToShaderStage(imageSampler.ShaderStage));
 
                 GFX_ASSERT(shaderSet.UniformBuffers.find(binding) == shaderSet.UniformBuffers.end(), "Binding is already in use!");
 
