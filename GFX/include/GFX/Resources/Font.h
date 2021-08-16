@@ -28,6 +28,8 @@ namespace gfx
     public:
         Font(const std::string& filename);
 
+        auto GetFontSize() const -> uint32_t { return m_fontSize; }
+
         auto GetLineHeight() const -> uint32_t { return m_lineHeight; }
 
         auto GetGlyph(char character) -> const FontGlyph&;
@@ -49,6 +51,7 @@ namespace gfx
     private:
         std::string m_filename;
 
+        uint32_t m_fontSize = 0;
         uint32_t m_lineHeight = 0;
         uint32_t m_maxHeight = 0;
         std::array<FontGlyph, 128> m_glyphs;

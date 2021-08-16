@@ -64,7 +64,8 @@ namespace gfx
             return;
         }
 
-        if (FT_Set_Pixel_Sizes(face, 0, 48))
+        m_fontSize = 48;
+        if (FT_Set_Pixel_Sizes(face, 0, m_fontSize))
         {
             GFX_ERROR("Failed to set font pixel size!");
         }
