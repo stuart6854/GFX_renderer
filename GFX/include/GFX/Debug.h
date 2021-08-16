@@ -1,6 +1,6 @@
 #pragma once
 
-#include <format>
+#include <fmt/format.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -31,34 +31,37 @@ namespace gfx
 }
 
 template <>
-struct std::formatter<glm::vec2> : std::formatter<std::string>
+struct fmt::formatter<glm::vec2> : fmt::formatter<std::string>
 {
-    auto format(const glm::vec2 v, format_context& ctx)
+    template<typename FormatContext>
+    auto format(const glm::vec2 v, FormatContext& ctx)
     {
-        return formatter<string>::format(
-            std::format("({}, {})", v.x, v.y),
+        return formatter<std::string>::format(
+            fmt::format("({}, {})", v.x, v.y),
             ctx);
     }
 };
 
 template <>
-struct std::formatter<glm::vec3> : std::formatter<std::string>
+struct fmt::formatter<glm::vec3> : fmt::formatter<std::string>
 {
-    auto format(const glm::vec3 v, format_context& ctx)
+    template<typename FormatContext>
+    auto format(const glm::vec3 v, FormatContext& ctx)
     {
-        return formatter<string>::format(
-            std::format("({}, {}, {})", v.x, v.y, v.z),
+        return formatter<std::string>::format(
+            fmt::format("({}, {}, {})", v.x, v.y, v.z),
             ctx);
     }
 };
 
 template <>
-struct std::formatter<glm::vec4> : std::formatter<std::string>
+struct fmt::formatter<glm::vec4> : fmt::formatter<std::string>
 {
-    auto format(const glm::vec4 v, format_context& ctx)
+    template<typename FormatContext>
+    auto format(const glm::vec4 v, FormatContext& ctx)
     {
-        return formatter<string>::format(
-            std::format("({}, {}, {}, {})", v.x, v.y, v.z, v.w),
+        return formatter<std::string>::format(
+            fmt::format("({}, {}, {}, {})", v.x, v.y, v.z, v.w),
             ctx);
     }
 };
@@ -66,28 +69,28 @@ struct std::formatter<glm::vec4> : std::formatter<std::string>
 #define GFX_TRACE(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = std::format(x, __VA_ARGS__); \
+        auto msg = fmt::format(x, __VA_ARGS__); \
         ::gfx::Trace(msg);                       \
     } while (0)
 
 #define GFX_INFO(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = std::format(x, __VA_ARGS__); \
+        auto msg = fmt::format(x, __VA_ARGS__); \
         ::gfx::Info(msg);                       \
     } while (0)
 
 #define GFX_WARN(x, ...)                        \
     do                                          \
     {                                           \
-        auto msg = std::format(x, __VA_ARGS__); \
+        auto msg = fmt::format(x, __VA_ARGS__); \
         ::gfx::Warn(msg);                       \
     } while (0)
 
 #define GFX_ERROR(x, ...)                       \
     do                                          \
     {                                           \
-        auto msg = std::format(x, __VA_ARGS__); \
+        auto msg = fmt::format(x, __VA_ARGS__); \
         ::gfx::Error(msg);                      \
     } while (0)
 

@@ -46,3 +46,5 @@ set_target_properties(spirv-cross-glsl PROPERTIES
 )
 
 add_subdirectory(Dependencies/freetype)
+
+add_subdirectory(dependencies/fmt)
