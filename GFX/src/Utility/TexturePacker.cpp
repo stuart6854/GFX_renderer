@@ -90,9 +90,33 @@ namespace gfx
 
     bool TexturePacker::IsPosValidForPendingTexture()
     {
-        for (uint32_t y = 0; y < m_pendingTextureHeight + m_spacing; y++)
+        const int maxWidth = m_pendingTextureWidth + m_spacing;
+        const int maxHeight = m_pendingTextureHeight + m_spacing;
+        // Early outs
         {
-            for (uint32_t x = 0; x < m_pendingTextureWidth + m_spacing; x++)
+            const auto packedIndex = GetPackedIndex(m_x, m_y);
+            if (m_packed[packedIndex] == true)
+                return false;
+        }
+        {
+            const auto packedIndex = GetPackedIndex(m_x + maxWidth - 1, m_y);
+            if (m_packed[packedIndex] == true)
+                return false;
+        }
+        {
+            const auto packedIndex = GetPackedIndex(m_x + maxWidth - 1, m_y + maxHeight - 1);
+            if (m_packed[packedIndex] == true)
+                return false;
+        }
+        {
+            const auto packedIndex = GetPackedIndex(m_x, m_y + maxHeight - 1);
+            if (m_packed[packedIndex] == true)
+                return false;
+        }
+
+        for (uint32_t y = 0; y < maxHeight; y++)
+        {
+            for (uint32_t x = 0; x < maxWidth; x++)
             {
                 if (m_x + x >= m_textureSize || m_y + y >= m_textureSize)
                     return false;
