@@ -53,6 +53,8 @@ set(GFX_SOURCES
 	"src/Resources/MeshImporter.cpp"
 	"src/Utility/TexturePacker.cpp"
 	"src/Utility/IO.cpp"
+	"src/Utility/Timer.h"
+	"src/Utility/Timer.cpp"
 	"src/Platform/Vulkan/vk_mem_alloc.h"
 	"src/Platform/Vulkan/VulkanBackend.h"
 	"src/Platform/Vulkan/VulkanBackend.cpp"

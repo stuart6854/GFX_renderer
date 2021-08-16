@@ -4,6 +4,7 @@
 #include "GFX/Resources/TextureBuilder.h"
 #include "GFX/Resources/Texture.h"
 #include "GFX/Utility/TexturePacker.h"
+#include "Utility/Timer.h"
 
 #include <algorithm>
 #include <ft2build.h>
@@ -35,11 +36,7 @@ namespace gfx
         }*/
     }
 
-    Font::Font(const std::string& filename)
-        : m_filename(filename)
-    {
-        LoadCharData();
-    }
+    Font::Font(const std::string& filename) : m_filename(filename) { LoadCharData(); }
 
     auto Font::GetGlyph(const char character) -> const FontGlyph&
     {
@@ -76,45 +73,52 @@ namespace gfx
 
         std::vector<GlyphTexture> glyphTextures(128);
 
-        // for (int i = 65; i < 68; i++)
-        for (int i = 0; i < 128; i++)
         {
-            auto error = FT_Load_Char(face, i, FT_LOAD_DEFAULT);
-            if (error)
+            GFX_SCOPED_TIMER("Generate Font Glyphs");
+
+            // for (int i = 65; i < 68; i++)
+            for (int i = 0; i < 128; i++)
             {
-                GFX_ERROR("Error loading glyph! ('{}')", char(i));
-                continue;
+                auto error = FT_Load_Char(face, i, FT_LOAD_DEFAULT);
+                if (error)
+                {
+                    GFX_ERROR("Error loading glyph! ('{}')", char(i));
+                    continue;
+                }
+
+                error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF);
+                if (error)
+                {
+                    GFX_ERROR("Failed to render glyph! ('{}')", char(i));
+                    continue;
+                }
+
+                uint8_t* data = glyph->bitmap.buffer;
+
+                const uint32_t glyphWidth = glyph->bitmap.width;
+                const uint32_t glyphHeight = glyph->bitmap.rows;
+
+                // Convert & store glyph texture data
+                glyphTextures[i].Character = i;
+                glyphTextures[i].Width = glyphWidth;
+                glyphTextures[i].Height = glyphHeight;
+                glyphTextures[i].Data.assign(data, data + (glyphWidth * glyphHeight));
+
+                // Store glyph data for later
+
+                auto& glyphData = m_glyphs[i];
+                glyphData.Size = { glyphWidth, glyphHeight };
+                glyphData.Bearing = { glyph->bitmap_left, glyph->bitmap_top };
+                glyphData.UVOrigin = {};
+                glyphData.Advance = glyph->advance.x;
+                // }
             }
-
-            error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF);
-            if (error)
-            {
-                GFX_ERROR("Failed to render glyph! ('{}')", char(i));
-                continue;
-            }
-
-            uint8_t* data = glyph->bitmap.buffer;
-
-            const uint32_t glyphWidth = glyph->bitmap.width;
-            const uint32_t glyphHeight = glyph->bitmap.rows;
-
-            // Convert & store glyph texture data
-            glyphTextures[i].Character = i;
-            glyphTextures[i].Width = glyphWidth;
-            glyphTextures[i].Height = glyphHeight;
-            glyphTextures[i].Data.assign(data, data + (glyphWidth * glyphHeight));
-
-            // Store glyph data for later
-
-            auto& glyphData = m_glyphs[i];
-            glyphData.Size = { glyphWidth, glyphHeight };
-            glyphData.Bearing = { glyph->bitmap_left, glyph->bitmap_top };
-            glyphData.UVOrigin = {};
-            glyphData.Advance = glyph->advance.x;
-            // }
         }
-        // Pack glyph textures. Sorted by total pixels (width x height, largest -> smallest) 
+
+        // Pack glyph textures. Sorted by total pixels (width x height, largest -> smallest)
         {
+            GFX_SCOPED_TIMER("Packing Glyph Textures");
+
             std::ranges::sort(glyphTextures,
                               [](const auto& a, const auto& b)
                               {
@@ -144,19 +148,13 @@ namespace gfx
                 auto& glyph = m_glyphs[glyphTexture.Character];
                 glyph.UVOrigin = origin / 512.0f;
                 glyph.UVSize = { glyphTexture.Width / 512.0f, glyphTexture.Height / 512.0f };
-
-                // GFX_TRACE("Packed texture: size=({}, {}), pos=({}, {})",
-                //           glyphTexture.Width,
-                //           glyphTexture.Height,
-                //           origin.x,
-                //           origin.y);
             }
 
             m_atlas = packer.CreateTexture();
-            packer.WriteToPng("font_atlas.png");
+            // packer.WriteToPng("font_atlas.png");
         }
 
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
     }
-}
+}  // namespace gfx
