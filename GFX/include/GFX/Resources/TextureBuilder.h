@@ -30,4 +30,4 @@ namespace gfx
 
         std::vector<uint8_t> m_data = {};
     };
-}
+}  // namespace gfx

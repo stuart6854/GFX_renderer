@@ -29,4 +29,4 @@
 #include "GFX/Resources/Font.h"
 
 // Utility
-#include "GFX/Utility/TexturePacker.h"
+#include "GFX/Utility/RectPacker.h"

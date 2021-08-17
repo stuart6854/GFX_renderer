@@ -27,7 +27,7 @@ set(GFX_HEADERS
     "include/GFX/Resources/TextureImporter.h"
     "include/GFX/Resources/Texture.h"
     "include/GFX/Resources/Font.h"
-	"include/GFX/Utility/TexturePacker.h"
+	"include/GFX/Utility/RectPacker.h"
 	"include/GFX/Utility/IO.h"
 )
 
@@ -51,7 +51,7 @@ set(GFX_SOURCES
 	"src/Resources/Font.cpp"
 	"src/Resources/MeshBuilder.cpp"
 	"src/Resources/MeshImporter.cpp"
-	"src/Utility/TexturePacker.cpp"
+	"src/Utility/RectPacker.cpp"
 	"src/Utility/IO.cpp"
 	"src/Utility/Timer.h"
 	"src/Utility/Timer.cpp"

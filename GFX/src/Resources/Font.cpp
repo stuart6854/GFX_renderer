@@ -3,12 +3,15 @@
 #include "GFX/Debug.h"
 #include "GFX/Resources/TextureBuilder.h"
 #include "GFX/Resources/Texture.h"
-#include "GFX/Utility/TexturePacker.h"
+#include "GFX/Utility/RectPacker.h"
 #include "Utility/Timer.h"
+#include "GFX/Utility/IO.h"
 
-#include <algorithm>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#include <algorithm>
+#include <random>
 
 namespace gfx
 {
@@ -61,7 +64,7 @@ namespace gfx
             return;
         }
 
-        m_fontSize = 48;
+        m_fontSize = 32;
         if (FT_Set_Pixel_Sizes(face, 0, m_fontSize))
         {
             GFX_ERROR("Failed to set font pixel size!");
@@ -72,6 +75,10 @@ namespace gfx
         m_lineHeight = face->size->metrics.height >> 6;
 
         std::vector<GlyphTexture> glyphTextures(128);
+
+        const float atlasWidth = 512;
+        const float atlasHeight = 512;
+        RectPacker rectPacker(atlasWidth, atlasHeight);
 
         {
             GFX_SCOPED_TIMER("Generate Font Glyphs");
@@ -104,6 +111,8 @@ namespace gfx
                 glyphTextures[i].Height = glyphHeight;
                 glyphTextures[i].Data.assign(data, data + (glyphWidth * glyphHeight));
 
+                if (glyphWidth > 0 && glyphHeight > 0) rectPacker.AddRect(i, glyphWidth, glyphHeight);
+
                 // Store glyph data for later
 
                 auto& glyphData = m_glyphs[i];
@@ -111,50 +120,47 @@ namespace gfx
                 glyphData.Bearing = { glyph->bitmap_left, glyph->bitmap_top };
                 glyphData.UVOrigin = {};
                 glyphData.Advance = glyph->advance.x;
-                // }
             }
         }
-
-        // Pack glyph textures. Sorted by total pixels (width x height, largest -> smallest)
         {
-            GFX_SCOPED_TIMER("Packing Glyph Textures");
+            GFX_SCOPED_TIMER("Font::PackGlyphs");
+            if (!rectPacker.Pack()) GFX_ERROR("Failed to pack rects!");
+        }
+        {
+            GFX_SCOPED_TIMER("Font::CreateAtlas");
+            std::vector<uint8_t> atlasData(atlasWidth * atlasHeight);
 
-            std::ranges::sort(glyphTextures,
-                              [](const auto& a, const auto& b)
-                              {
-                                  if (a.Data.empty()) return false;
-                                  if (/* a.Data.empty() && */ b.Data.empty()) return true;
-
-                                  const int aPixels = a.Width * a.Height;
-                                  const int bPixels = b.Width * b.Height;
-                                  return aPixels > bPixels;
-                              });
-
-            // TexturePacker packer(128, 1);
-            TexturePacker packer(512, 1);
-            for (const auto& glyphTexture : glyphTextures)
+            for (const auto& rect : rectPacker.GetAllPackedRects())
             {
-                // We can break if a texture is null,
-                // because null textures should all be last after sort
-                if (glyphTexture.Data.empty()) continue;
+                auto& glyph = glyphTextures[rect.id];
+                auto& glyphData = m_glyphs[rect.id];
 
-                glm::vec2 origin;
-                if (!packer.AddToPack(glyphTexture.Data, glyphTexture.Width, glyphTexture.Height, origin))
+                glyphData.UVOrigin = { rect.x / atlasWidth, rect.y / atlasHeight };
+                glyphData.UVSize = { rect.width / atlasWidth, rect.height / atlasHeight };
+
+                int i = 0;
+                for (int y = rect.y; y < rect.y + rect.height; y++)
                 {
-                    GFX_ERROR("Failed to pack texture! Increase packer texture size!");
-                    continue;
+                    for (int x = rect.x; x < rect.x + rect.width; x++)
+                    {
+                        atlasData[x + y * atlasWidth] = glyph.Data[i];
+                        i++;
+                    }
                 }
-
-                auto& glyph = m_glyphs[glyphTexture.Character];
-                glyph.UVOrigin = origin / 512.0f;
-                glyph.UVSize = { glyphTexture.Width / 512.0f, glyphTexture.Height / 512.0f };
             }
 
-            m_atlas = packer.CreateTexture();
-            // packer.WriteToPng("font_atlas.png");
+            TextureDesc desc{};
+            desc.Width = atlasWidth;
+            desc.Height = atlasHeight;
+            desc.Usage = TextureUsage::eTexture;
+            desc.Format = TextureFormat::eR;
+            m_atlas = Texture::Create(desc, atlasData);
+
+            // WriteImagePNG("font_atlas.png", atlasWidth, atlasHeight, 1, atlasData);
         }
 
         FT_Done_Face(face);
         FT_Done_FreeType(ft);
     }
+
 }  // namespace gfx

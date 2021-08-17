@@ -7,14 +7,9 @@
 
 namespace gfx
 {
-    inline auto FloatToByte(const float value) -> uint8_t
-    {
-        return uint8_t(std::clamp(256.0f * value, 0.0f, 255.0f));
-    }
+    inline auto FloatToByte(const float value) -> uint8_t { return uint8_t(std::clamp(256.0f * value, 0.0f, 255.0f)); }
 
-    TextureBuilder::TextureBuilder(const uint32_t width, const uint32_t height, bool isHdr)
-        : m_width(width),
-          m_height(height)
+    TextureBuilder::TextureBuilder(const uint32_t width, const uint32_t height, bool isHdr) : m_width(width), m_height(height)
     {
         if (!isHdr) m_format = TextureFormat::eRGBA;
 
@@ -47,4 +42,5 @@ namespace gfx
         m_data[baseIndex + 2] = FloatToByte(color.b);
         m_data[baseIndex + 3] = FloatToByte(color.a);
     }
-}
+
+}  // namespace gfx
