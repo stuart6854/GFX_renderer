@@ -31,7 +31,7 @@ namespace gfx
     public:
         ShaderUniform() = default;
 
-        ShaderUniform(std::string name, ShaderUniformType type, uint32_t size, uint32_t offset)
+        ShaderUniform(std::string name, ShaderUniformType type, size_t size, size_t offset)
             : m_name(std::move(name)),
               m_type(type),
               m_size(size),
@@ -41,22 +41,22 @@ namespace gfx
 
         auto GetName() const -> const std::string& { return m_name; }
         auto GetType() const -> ShaderUniformType { return m_type; }
-        auto GetSize() const -> uint32_t { return m_size; }
-        auto GetOffset() const -> uint32_t { return m_offset; }
+        auto GetSize() const -> size_t { return m_size; }
+        auto GetOffset() const -> size_t { return m_offset; }
 
         static auto UniformTypeToString(ShaderUniformType type) -> std::string;
 
     private:
         std::string m_name;
         ShaderUniformType m_type = ShaderUniformType::eNone;
-        uint32_t m_size = 0;
-        uint32_t m_offset = 0;
+        size_t m_size = 0;
+        size_t m_offset = 0;
     };
 
     struct ShaderBuffer
     {
         std::string Name;
-        uint32_t Size = 0;
+        size_t Size = 0;
         std::unordered_map<std::string, ShaderUniform> Uniforms;
     };
 

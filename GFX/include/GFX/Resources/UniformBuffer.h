@@ -13,7 +13,7 @@ namespace gfx
     class UniformBuffer
     {
     public:
-        UniformBuffer(size_t size, size_t binding);
+        UniformBuffer(size_t size, uint32_t binding);
         
         void SetData(size_t offset, size_t size, const void* data);
 
@@ -23,7 +23,6 @@ namespace gfx
     private:
         OwnedPtr<Buffer> m_buffer;
         uint32_t m_binding;
-        ShaderStage m_shaderStage;
     };
 
     class UniformBufferSet

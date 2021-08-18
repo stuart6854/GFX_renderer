@@ -117,7 +117,7 @@ namespace gfx
     auto MeshBuilder::AddVertex(const Vertex& position) -> uint32_t
     {
         m_vertices.push_back(position);
-        return m_vertices.size() - 1;
+        return (uint32_t)m_vertices.size() - 1;
     }
 
     // void MeshBuilder::AddLine(uint32_t a, uint32_t b)

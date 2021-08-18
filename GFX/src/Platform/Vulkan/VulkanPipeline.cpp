@@ -67,8 +67,8 @@ namespace gfx
             auto& vkPushConstantRange = vkPushConstantRanges[i];
 
             vkPushConstantRange.stageFlags = pushConstantRange.ShaderStage;
-            vkPushConstantRange.offset = pushConstantRange.Offset;
-            vkPushConstantRange.size = pushConstantRange.Size;
+            vkPushConstantRange.offset = (uint32_t)pushConstantRange.Offset;
+            vkPushConstantRange.size = (uint32_t)pushConstantRange.Size;
         }
 
         auto descriptorSetLayouts = vkShader->GetDescriptorSetLayouts();

@@ -93,7 +93,7 @@ namespace gfx
 
         auto GetStride() const -> uint32_t { return m_stride; }
         auto GetElements() const -> const std::vector<VertexElement>& { return m_elements; }
-        auto GetElementCount() const -> uint32_t { return m_elements.size(); }
+        auto GetElementCount() const -> uint32_t { return (uint32_t)m_elements.size(); }
 
         auto begin() -> std::vector<VertexElement>::iterator { return m_elements.begin(); }
         auto end() -> std::vector<VertexElement>::iterator { return m_elements.end(); }

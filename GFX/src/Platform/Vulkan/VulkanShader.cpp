@@ -188,7 +188,7 @@ namespace gfx
             auto& bufferType = compiler.get_type(resource.base_type_id);
             auto bufferSize = compiler.get_declared_struct_size(bufferType);
             auto memberCount = bufferType.member_types.size();
-            uint32_t bufferOffset = 0;
+            size_t bufferOffset = 0;
             if (!m_pushConstantRanges.empty())
             {
                 bufferOffset = m_pushConstantRanges.back().Offset + m_pushConstantRanges.back().Size;
@@ -277,13 +277,13 @@ namespace gfx
             {
                 auto& typeCount = m_typeCounts[set].emplace_back();
                 typeCount.setType(vk::DescriptorType::eUniformBuffer);
-                typeCount.setDescriptorCount(shaderSet.UniformBuffers.size());
+                typeCount.setDescriptorCount((uint32_t)shaderSet.UniformBuffers.size());
             }
             if (!shaderSet.ImageSamplers.empty())
             {
                 auto& typeCount = m_typeCounts[set].emplace_back();
                 typeCount.setType(vk::DescriptorType::eCombinedImageSampler);
-                typeCount.setDescriptorCount(shaderSet.ImageSamplers.size());
+                typeCount.setDescriptorCount((uint32_t)shaderSet.ImageSamplers.size());
             }
 
             /* Descriptor Set Layout */
@@ -307,7 +307,7 @@ namespace gfx
             {
                 auto& layoutBinding = layoutBindings.emplace_back();
                 layoutBinding.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-                layoutBinding.setDescriptorCount(imageSampler.ArraySize);
+                layoutBinding.setDescriptorCount((uint32_t)imageSampler.ArraySize);
                 layoutBinding.setStageFlags(imageSampler.ShaderStage);
                 layoutBinding.setBinding(binding);
 
@@ -317,7 +317,7 @@ namespace gfx
 
                 auto& writeSet = shaderSet.WriteDescriptorSets[imageSampler.Name];
                 writeSet.setDescriptorType(vk::DescriptorType::eCombinedImageSampler);
-                writeSet.setDescriptorCount(imageSampler.ArraySize);
+                writeSet.setDescriptorCount((uint32_t)imageSampler.ArraySize);
                 writeSet.setDstBinding(layoutBinding.binding);
             }
 

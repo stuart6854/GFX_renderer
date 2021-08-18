@@ -30,7 +30,7 @@ namespace gfx
     {
         if (s_callback != nullptr)
         {
-            const auto output = fmt::format(msg, std::forward<T>(args)...);
+            const auto output = fmt::format(fmt::runtime(msg), std::forward<T>(args)...);
             s_callback(level, output);
         }
     }

@@ -19,7 +19,7 @@ namespace gfx
         struct UniformBuffer
         {
             vk::DescriptorBufferInfo Descriptor = {};
-            uint32_t Size = 0;
+            size_t Size = 0;
             uint32_t BindingPoint = 0;
             std::string Name;
             vk::ShaderStageFlagBits ShaderStage = {};
@@ -28,15 +28,15 @@ namespace gfx
         struct PushConstantRange
         {
             vk::ShaderStageFlagBits ShaderStage = {};
-            uint32_t Offset = 0;
-            uint32_t Size = 0;
+            size_t Offset = 0;
+            size_t Size = 0;
         };
 
         struct ImageSampler
         {
             uint32_t BindingPoint = 0;
             uint32_t DescriptorSet = 0;
-            uint32_t ArraySize = 0;
+            size_t ArraySize = 0;
             std::string Name;
             vk::ShaderStageFlagBits ShaderStage = {};
         };

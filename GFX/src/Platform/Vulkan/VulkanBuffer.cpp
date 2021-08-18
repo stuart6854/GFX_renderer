@@ -36,7 +36,7 @@ namespace gfx
         }
     }
 
-    VulkanBuffer::VulkanBuffer(BufferUsage usage, uint64_t size, const void* data, bool forceLocalMemory)
+    VulkanBuffer::VulkanBuffer(BufferUsage usage, size_t size, const void* data, bool forceLocalMemory)
         : m_forceLocalMemory(forceLocalMemory),
           m_usage(usage),
           m_size(size)
@@ -71,7 +71,7 @@ namespace gfx
         allocator.Free(m_buffer, m_allocation);
     }
 
-    void VulkanBuffer::SetData(uint32_t offset, const uint32_t size, const void* data)
+    void VulkanBuffer::SetData(const size_t offset, const size_t size, const void* data)
     {
         auto* backend = VulkanBackend::Get();
         auto& allocator = backend->GetAllocator();

@@ -15,7 +15,7 @@ namespace gfx
         VulkanFramebuffer(const FramebufferDesc& desc);
         ~VulkanFramebuffer();
 
-        auto GetColorAttachmentCount() const -> uint32_t override { return m_attachmentTextures.size(); }
+        auto GetColorAttachmentCount() const -> uint32_t override { return (uint32_t)m_attachmentTextures.size(); }
 
         auto GetColorTexture(uint32_t index) const -> Texture* override { return m_attachmentTextures[index].get(); }
         auto GetDepthTexture() const -> Texture* override { return m_depthAttachentTexture.get(); }

@@ -12,21 +12,21 @@ namespace gfx
     class VulkanBuffer : public Buffer
     {
     public:
-        VulkanBuffer(BufferUsage usage, uint64_t size, const void* data = nullptr, bool forceLocalMemory = false);
+        VulkanBuffer(BufferUsage usage, size_t size, const void* data = nullptr, bool forceLocalMemory = false);
         ~VulkanBuffer() override;
 
-        auto GetSize() const -> uint64_t { return m_size; }
+        auto GetSize() const -> size_t { return m_size; }
 
         auto GetHandle() const -> vk::Buffer { return m_buffer; }
 
-        void SetData(uint32_t offset, uint32_t size, const void* data) override;
+        void SetData(size_t offset, size_t size, const void* data) override;
 
         auto GetBufferInfo() const -> vk::DescriptorBufferInfo;
 
     private:
         bool m_forceLocalMemory = false;
         BufferUsage m_usage;
-        uint64_t m_size;
+        size_t m_size;
 
         vk::Buffer m_buffer;
         VmaAllocation m_allocation;

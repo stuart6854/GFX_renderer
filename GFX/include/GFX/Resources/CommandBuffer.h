@@ -37,7 +37,7 @@ namespace gfx
         virtual void BindVertexBuffer(Buffer* buffer) = 0;
         virtual void BindIndexBuffer(Buffer* buffer) = 0;
 
-        virtual void SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data) = 0;
+        virtual void SetConstants(ShaderStage shaderStage, size_t offset, size_t size, const void* data) = 0;
         virtual void BindResourceSets(uint32_t firstSet, const std::vector<ResourceSet*> sets) = 0;
 
         virtual void Draw(uint32_t vertexCount) = 0;

@@ -37,7 +37,7 @@ namespace gfx
         void BindVertexBuffer(Buffer* buffer) override;
         void BindIndexBuffer(Buffer* buffer) override;
 
-        void SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data) override;
+        void SetConstants(ShaderStage shaderStage, size_t offset, size_t size, const void* data) override;
         void BindResourceSets(uint32_t firstSet, const std::vector<ResourceSet*> sets) override;
 
         void Draw(uint32_t vertexCount) override;

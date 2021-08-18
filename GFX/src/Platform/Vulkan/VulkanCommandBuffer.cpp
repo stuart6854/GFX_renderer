@@ -143,12 +143,12 @@ namespace gfx
         m_currentCmdBuffer.bindIndexBuffer(vkBuffer->GetHandle(), { 0 }, vk::IndexType::eUint32);
     }
 
-    void VulkanCommandBuffer::SetConstants(ShaderStage shaderStage, uint32_t offset, uint32_t size, const void* data)
+    void VulkanCommandBuffer::SetConstants(ShaderStage shaderStage, size_t offset, size_t size, const void* data)
     {
         auto layout = m_boundPipeline->GetLayoutHandle();
         auto stage = VkUtils::ToVkShaderStage(shaderStage);
 
-        m_currentCmdBuffer.pushConstants(layout, stage, offset, size, data);
+        m_currentCmdBuffer.pushConstants(layout, stage, (uint32_t)offset, (uint32_t)size, data);
     }
 
     void VulkanCommandBuffer::BindResourceSets(uint32_t firstSet, const std::vector<ResourceSet*> sets)
