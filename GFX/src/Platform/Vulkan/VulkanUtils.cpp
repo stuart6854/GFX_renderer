@@ -54,7 +54,7 @@ namespace gfx
         return {};
     }
 
-    auto VkUtils::ToTextureUsage(vk::ImageUsageFlags usage) -> TextureUsage
+    auto VkUtils::ToTextureUsage(vk::ImageUsageFlags) -> TextureUsage
     {
         GFX_WARN("VkUtils::ToTextureUsage() is not implemented!");
         return {};

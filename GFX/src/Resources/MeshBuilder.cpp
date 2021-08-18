@@ -109,7 +109,7 @@ namespace gfx
         return builder;
     }
 
-    auto MeshBuilder::CreateSphere(float radius) -> MeshBuilder
+    auto MeshBuilder::CreateSphere(float) -> MeshBuilder
     {
         return {};
     }
@@ -119,12 +119,6 @@ namespace gfx
         m_vertices.push_back(position);
         return (uint32_t)m_vertices.size() - 1;
     }
-
-    // void MeshBuilder::AddLine(uint32_t a, uint32_t b)
-    // {
-    //     m_indices.push_back(a);
-    //     m_indices.push_back(b);
-    // }
 
     void MeshBuilder::AddTriangle(const uint32_t a, const uint32_t b, const uint32_t c)
     {

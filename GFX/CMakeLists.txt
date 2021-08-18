@@ -102,3 +102,5 @@ target_compile_definitions(gfx
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${GFX_HEADERS})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX "Source Files" FILES ${GFX_SOURCES})
+
+target_compile_options(gfx PRIVATE "${CMAKE_CXX_FLAGS} /W4 /WX /EHsc")

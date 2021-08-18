@@ -71,7 +71,7 @@ namespace gfx
         allocator.Free(m_buffer, m_allocation);
     }
 
-    void VulkanBuffer::SetData(const size_t offset, const size_t size, const void* data)
+    void VulkanBuffer::SetData(const size_t, const size_t size, const void* data)
     {
         auto* backend = VulkanBackend::Get();
         auto& allocator = backend->GetAllocator();

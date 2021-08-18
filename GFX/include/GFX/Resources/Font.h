@@ -32,14 +32,14 @@ namespace gfx
 
         auto GetLineHeight() const -> uint32_t { return m_lineHeight; }
 
-        auto GetGlyph(char character) -> const FontGlyph&;
+        auto GetGlyph(uint32_t character) -> const FontGlyph&;
 
         auto GetAtlasTexture() const -> SharedPtr<Texture> { return m_atlas; }
 
     private:
         struct GlyphTexture
         {
-            int Character = 0;
+            uint32_t Character = 0;
             int Width = 0;
             int Height = 0;
             std::vector<uint8_t> Data;

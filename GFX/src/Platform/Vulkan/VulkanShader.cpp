@@ -226,11 +226,11 @@ namespace gfx
         for (const auto& resource : resources.sampled_images)
         {
             const auto& name = resource.name;
-            auto& baseType = compiler.get_type(resource.base_type_id);
+//            auto& baseType = compiler.get_type(resource.base_type_id);
             auto& type = compiler.get_type(resource.type_id);
             uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
             uint32_t descriptorSet = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
-            uint32_t dimension = baseType.image.dim;
+//            uint32_t dimension = baseType.image.dim;
             uint32_t arraySize = type.array[0];
             if (arraySize == 0) arraySize = 1;
             if (descriptorSet >= m_shaderDescriptorSets.size()) m_shaderDescriptorSets.resize(descriptorSet + 1);

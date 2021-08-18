@@ -67,7 +67,6 @@ namespace gfx
         //TODO: Assert glfwVulkanSupported();
 
         auto* backend = VulkanBackend::Get();
-        auto& device = backend->GetDevice();
         auto& gpu = backend->GetPhysicalDevice();
         auto vkGpu = gpu.GetHandle();
 

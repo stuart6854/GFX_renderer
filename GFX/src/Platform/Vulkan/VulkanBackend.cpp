@@ -23,10 +23,10 @@ namespace gfx
             return false;
         }
 
-        static VKAPI_ATTR auto VKAPI_CALL VkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        static VKAPI_ATTR auto VKAPI_CALL VkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT,
                                                           VkDebugUtilsMessageTypeFlagsEXT messageType,
                                                           const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                                          void* pUserData) -> VkBool32
+                                                          void*) -> VkBool32
         {
             if (messageType >= (int)vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation)
             {

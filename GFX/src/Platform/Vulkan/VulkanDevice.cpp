@@ -31,13 +31,15 @@ namespace gfx
         m_graphicsQueue = m_device.getQueue(queueFamilyIndices.Graphics, 0);
         //        m_transferQueue = m_device.getQueue(m_transferQueueFamily, 0);
 
-        vk::CommandPoolCreateInfo poolInfo{};
-        poolInfo.setQueueFamilyIndex(queueFamilyIndices.Graphics);
-        poolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+        {
+            vk::CommandPoolCreateInfo poolInfo{};
+            poolInfo.setQueueFamilyIndex(queueFamilyIndices.Graphics);
+            poolInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
+
+            m_commandPool = m_device.createCommandPool(poolInfo);
+        }
 
         {
-            m_commandPool = m_device.createCommandPool(poolInfo);
-
             std::vector<vk::DescriptorPoolSize> poolSizes = {
                 { vk::DescriptorType::eSampler, 1000 },
                 { vk::DescriptorType::eCombinedImageSampler, 1000 },

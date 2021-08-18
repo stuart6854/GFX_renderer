@@ -17,9 +17,9 @@ namespace gfx
 {
     Font::Font(const std::string& filename) : m_filename(filename) { LoadCharData(); }
 
-    auto Font::GetGlyph(const char character) -> const FontGlyph&
+    auto Font::GetGlyph(const uint32_t character) -> const FontGlyph&
     {
-        GFX_ASSERT(character > char(128), "Only compatible with ASCII characters!");
+        GFX_ASSERT(character > 128, "Only compatible with ASCII characters!");
 
         return m_glyphs.at(character);
     }

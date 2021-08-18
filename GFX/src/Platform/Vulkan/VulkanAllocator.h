@@ -1,6 +1,11 @@
 ﻿#pragma once
 
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#pragma warning(disable : 4127)
+#pragma warning(disable : 4324)
 #include "vk_mem_alloc.h"
+#pragma warning(pop)
 
 #include <vulkan/vulkan.hpp>
 
