@@ -286,7 +286,7 @@ namespace gfx
         imageInfo.format = depthFormat;
         imageInfo.extent.width = m_width;
         imageInfo.extent.height = m_height;
-        imageInfo.extent.depth = 1.0f;
+        imageInfo.extent.depth = 1;
         imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = 1;
         imageInfo.samples = vk::SampleCountFlagBits::e1;

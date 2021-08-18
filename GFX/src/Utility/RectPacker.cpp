@@ -8,9 +8,9 @@
 
 namespace gfx
 {
-    RectPacker::RectPacker(uint32_t width, uint32_t height) : m_width(width), m_height(height) { Clear(); }
+    RectPacker::RectPacker(int width, int height) : m_width(width), m_height(height) { Clear(); }
 
-    void RectPacker::AddRect(int id, uint32_t width, uint32_t height) { m_rects.push_back({ id, width, height }); }
+    void RectPacker::AddRect(int id, int width, int height) { m_rects.push_back({ id, width, height }); }
 
     bool RectPacker::Pack()
     {

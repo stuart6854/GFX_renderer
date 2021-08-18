@@ -20,7 +20,7 @@ namespace gfx
         glm::vec2 Bearing;   // Offset from baseline to left/top of glyph
         glm::vec2 UVOrigin;  // Origin of the texture glyph
         glm::vec2 UVSize;    // Size of the texture glyph
-        uint32_t Advance;    // Horizontal offset to advance to next glyph
+        int Advance;    // Horizontal offset to advance to next glyph
     };
 
     class Font
@@ -39,21 +39,20 @@ namespace gfx
     private:
         struct GlyphTexture
         {
-            uint32_t Character = 0;
-            uint32_t Width = 0;
-            uint32_t Height = 0;
+            int Character = 0;
+            int Width = 0;
+            int Height = 0;
             std::vector<uint8_t> Data;
         };
 
         void LoadCharData();
-        void GenerateAtlas();
 
     private:
         std::string m_filename;
 
-        uint32_t m_fontSize = 0;
-        uint32_t m_lineHeight = 0;
-        uint32_t m_maxHeight = 0;
+        int m_fontSize = 0;
+        int m_lineHeight = 0;
+        int m_maxHeight = 0;
         std::array<FontGlyph, 128> m_glyphs;
 
         SharedPtr<gfx::Texture> m_atlas;

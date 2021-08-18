@@ -15,30 +15,6 @@
 
 namespace gfx
 {
-    namespace Utils
-    {
-        /*auto ConvertTextureData(const msdfgen::Bitmap<float, 3>& original) -> std::vector<glm::vec4>
-        {
-            std::vector<glm::vec4> data(original.width() * original.height());
-
-            for (int x = 0; x < original.width(); x++)
-            {
-                for (int y = 0; y < original.height(); y++)
-                {
-                    auto* pix = original(x, y);
-
-                    const auto index = x + y * original.width();
-                    data[index].r = pix[0];
-                    data[index].g = pix[1];
-                    data[index].b = pix[2];
-                    data[index].a = 1.0f;
-                }
-            }
-
-            return data;
-        }*/
-    }
-
     Font::Font(const std::string& filename) : m_filename(filename) { LoadCharData(); }
 
     auto Font::GetGlyph(const char character) -> const FontGlyph&
@@ -76,8 +52,8 @@ namespace gfx
 
         std::vector<GlyphTexture> glyphTextures(128);
 
-        const float atlasWidth = 512;
-        const float atlasHeight = 512;
+        const int atlasWidth = 512;
+        const int atlasHeight = 512;
         RectPacker rectPacker(atlasWidth, atlasHeight);
 
         {
@@ -102,8 +78,8 @@ namespace gfx
 
                 uint8_t* data = glyph->bitmap.buffer;
 
-                const uint32_t glyphWidth = glyph->bitmap.width;
-                const uint32_t glyphHeight = glyph->bitmap.rows;
+                const int glyphWidth = glyph->bitmap.width;
+                const int glyphHeight = glyph->bitmap.rows;
 
                 // Convert & store glyph texture data
                 glyphTextures[i].Character = i;
@@ -132,18 +108,18 @@ namespace gfx
 
             for (const auto& rect : rectPacker.GetAllPackedRects())
             {
-                auto& glyph = glyphTextures[rect.id];
+                auto& glyphTexture = glyphTextures[rect.id];
                 auto& glyphData = m_glyphs[rect.id];
 
-                glyphData.UVOrigin = { rect.x / atlasWidth, rect.y / atlasHeight };
-                glyphData.UVSize = { rect.width / atlasWidth, rect.height / atlasHeight };
+                glyphData.UVOrigin = { (float)rect.x / (float)atlasWidth, (float)rect.y / (float)atlasHeight };
+                glyphData.UVSize = { (float)rect.width / (float)atlasWidth, (float)rect.height / (float)atlasHeight };
 
                 int i = 0;
                 for (int y = rect.y; y < rect.y + rect.height; y++)
                 {
                     for (int x = rect.x; x < rect.x + rect.width; x++)
                     {
-                        atlasData[x + y * atlasWidth] = glyph.Data[i];
+                        atlasData[x + y * atlasWidth] = glyphTexture.Data[i];
                         i++;
                     }
                 }

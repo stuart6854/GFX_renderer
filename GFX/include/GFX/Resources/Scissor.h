@@ -5,9 +5,9 @@ namespace gfx
 {
     struct Scissor
     {
-        float X = 0;
-        float Y = 0;
-        float Width;
-        float Height;
+        int X = 0;
+        int Y = 0;
+        int Width = 0;
+        int Height = 0;
     };
 }

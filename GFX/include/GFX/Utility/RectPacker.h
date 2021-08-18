@@ -11,12 +11,12 @@ namespace gfx
         int id = 0;
 
         // Input
-        uint32_t width = 0;
-        uint32_t height = 0;
+        int width = 0;
+        int height = 0;
 
         // Output
-        uint32_t x = 0;
-        uint32_t y = 0;
+        int x = 0;
+        int y = 0;
 
         bool isPacked = false;
     };
@@ -24,12 +24,12 @@ namespace gfx
     class RectPacker
     {
     public:
-        RectPacker(uint32_t width, uint32_t height);
+        RectPacker(int width, int height);
 
         auto GetWidth() const -> int { return m_width; }
         auto GetHeight() const -> int { return m_height; }
 
-        void AddRect(int id, uint32_t width, uint32_t height);
+        void AddRect(int id, int width, int height);
         bool Pack();
 
         auto GetPackedRect(int id) -> const Rect&;
@@ -43,8 +43,8 @@ namespace gfx
         void SetPacked(int x, int y, int width, int height);
 
     private:
-        uint32_t m_width;
-        uint32_t m_height;
+        int m_width;
+        int m_height;
 
         std::vector<Rect> m_rects;
 
