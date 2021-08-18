@@ -67,9 +67,9 @@ namespace gfx
         instanceInfo.setPApplicationInfo(&appInfo);
         instanceInfo.setPEnabledExtensionNames(extensions);
 
+        const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
         if (enableDebugLayer)
         {
-            const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
             if (Utils::IsLayerSupported(validationLayerName))
             {
                 layers.push_back(validationLayerName.c_str());

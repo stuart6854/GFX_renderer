@@ -19,7 +19,7 @@ namespace gfx
 
     auto Font::GetGlyph(const uint32_t character) -> const FontGlyph&
     {
-        GFX_ASSERT(character > 128, "Only compatible with ASCII characters!");
+        GFX_ASSERT(character < 128, "Only compatible with ASCII characters!");
 
         return m_glyphs.at(character);
     }
