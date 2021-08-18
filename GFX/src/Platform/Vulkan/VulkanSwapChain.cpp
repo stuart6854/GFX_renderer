@@ -185,7 +185,7 @@ namespace gfx
         presentInfo.setImageIndices(m_imageIndex);
         presentInfo.setWaitSemaphores(GetCurrentFrame().RenderComplete);
 
-        device.GetGraphicsQueue().presentKHR(presentInfo);
+        void(device.GetGraphicsQueue().presentKHR(presentInfo));
 
         m_frameIndex = (m_frameIndex + 1) % Config::FramesInFlight;
     }

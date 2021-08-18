@@ -36,9 +36,9 @@ namespace gfx
         }
     }  // namespace Utils
 
-    VulkanBackend::VulkanBackend(bool enableDebugLayer) : Backend(enableDebugLayer)
+    VulkanBackend::VulkanBackend(bool enableDebugLayer)
     {
-        CreateInstance();
+        CreateInstance(enableDebugLayer);
         PickPhysicalDevice();
         CreateDevice();
         CreateAllocator();
@@ -48,7 +48,7 @@ namespace gfx
 
     void VulkanBackend::WaitIdle() { m_device->WaitIdle(); }
 
-    void VulkanBackend::CreateInstance()
+    void VulkanBackend::CreateInstance(bool enableDebugLayer)
     {
         vk::ApplicationInfo appInfo{};
         appInfo.setApiVersion(VK_API_VERSION_1_2);
@@ -67,15 +67,18 @@ namespace gfx
         instanceInfo.setPApplicationInfo(&appInfo);
         instanceInfo.setPEnabledExtensionNames(extensions);
 
-        const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
-        if (Utils::IsLayerSupported(validationLayerName))
+        if (enableDebugLayer)
         {
-            layers.push_back(validationLayerName.c_str());
-            GFX_INFO("Vulkan validation layer enabled.");
-        }
-        else
-        {
-            GFX_WARN("Vulkan validation layer not supported!");
+            const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
+            if (Utils::IsLayerSupported(validationLayerName))
+            {
+                layers.push_back(validationLayerName.c_str());
+                GFX_INFO("Vulkan validation layer enabled.");
+            }
+            else
+            {
+                GFX_WARN("Vulkan validation layer not supported!");
+            }
         }
 
         instanceInfo.setPEnabledLayerNames(layers);
@@ -83,16 +86,19 @@ namespace gfx
         m_instance = vk::createInstance(instanceInfo);
         GFX_ASSERT(m_instance, "vk::createInstance() failed!");
 
-        // Setup debug message callback
-        vk::DebugUtilsMessengerCreateInfoEXT debugInfo{};
-        debugInfo.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-                                     vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
-        debugInfo.setPfnUserCallback(Utils::VkDebugCallback);
-        debugInfo.setMessageType(vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                 vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
+        if (enableDebugLayer)
+        {
+            // Setup debug message callback
+            vk::DebugUtilsMessengerCreateInfoEXT debugInfo{};
+            debugInfo.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+                                         vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
+            debugInfo.setPfnUserCallback(Utils::VkDebugCallback);
+            debugInfo.setMessageType(vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+                                     vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
 
-        vk::DispatchLoaderDynamic dldi(m_instance, vkGetInstanceProcAddr);
-        m_debugCallback = m_instance.createDebugUtilsMessengerEXT(debugInfo, nullptr, dldi);
+            vk::DispatchLoaderDynamic dldi(m_instance, vkGetInstanceProcAddr);
+            m_debugCallback = m_instance.createDebugUtilsMessengerEXT(debugInfo, nullptr, dldi);
+        }
     }
 
     void VulkanBackend::PickPhysicalDevice() { m_physicalDevice = VulkanPhysicalDevice::Select(m_instance); }

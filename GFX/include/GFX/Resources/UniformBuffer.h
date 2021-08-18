@@ -13,9 +13,9 @@ namespace gfx
     class UniformBuffer
     {
     public:
-        UniformBuffer(uint32_t size, uint32_t binding);
+        UniformBuffer(size_t size, size_t binding);
         
-        void SetData(uint32_t offset, uint32_t size, const void* data);
+        void SetData(size_t offset, size_t size, const void* data);
 
         auto GetBuffer() -> Buffer* { return m_buffer.get(); }
         auto GetBinding() const -> uint32_t { return m_binding; }
@@ -33,7 +33,7 @@ namespace gfx
 
         UniformBufferSet(uint32_t frames);
 
-        void Create(uint32_t size, uint32_t binding);
+        void Create(size_t size, uint32_t binding);
 
         auto Get(uint32_t binding, uint32_t set = 0, uint32_t frame = 0) -> UniformBuffer*;
         void Set(OwnedPtr<UniformBuffer>& uniformBuffer, uint32_t set = 0, uint32_t frame = 0);

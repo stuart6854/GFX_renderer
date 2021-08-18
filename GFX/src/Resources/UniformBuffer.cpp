@@ -6,30 +6,17 @@ namespace gfx
 {
     /* Uniform Buffer */
 
-    UniformBuffer::UniformBuffer(const uint32_t size, const uint32_t binding)
-        : m_binding(binding)
-    {
-        m_buffer = Buffer::CreateUniform(size);
-    }
+    UniformBuffer::UniformBuffer(const size_t size, const size_t binding) : m_binding(binding) { m_buffer = Buffer::CreateUniform(size); }
 
-    void UniformBuffer::SetData(const uint32_t offset, const uint32_t size, const void* data)
-    {
-        m_buffer->SetData(offset, size, data);
-    }
+    void UniformBuffer::SetData(const size_t offset, const size_t size, const void* data) { m_buffer->SetData(offset, size, data); }
 
     /* Uniform Buffer Set */
 
-    auto UniformBufferSet::Create(uint32_t frames) -> OwnedPtr<UniformBufferSet>
-    {
-        return CreateOwned<UniformBufferSet>(frames);
-    }
+    auto UniformBufferSet::Create(uint32_t frames) -> OwnedPtr<UniformBufferSet> { return CreateOwned<UniformBufferSet>(frames); }
 
-    UniformBufferSet::UniformBufferSet(uint32_t frames)
-        : m_frames(frames)
-    {
-    }
+    UniformBufferSet::UniformBufferSet(uint32_t frames) : m_frames(frames) {}
 
-    void UniformBufferSet::Create(uint32_t size, uint32_t binding)
+    void UniformBufferSet::Create(size_t size, uint32_t binding)
     {
         for (uint32_t frame = 0; frame < m_frames; frame++)
         {
@@ -47,4 +34,4 @@ namespace gfx
     {
         m_uniformBuffers[frame][set][uniformBuffer->GetBinding()] = std::move(uniformBuffer);
     }
-}
+}  // namespace gfx

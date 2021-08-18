@@ -28,7 +28,7 @@ namespace gfx
         void WaitIdle() override;
 
     private:
-        void CreateInstance();
+        void CreateInstance(bool enableDebugLayer);
         void PickPhysicalDevice();
         void CreateDevice();
         void CreateAllocator();

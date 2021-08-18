@@ -77,7 +77,7 @@ namespace gfx
 
     void VulkanDevice::WaitForFence(vk::Fence fence)
     {
-        m_device.waitForFences(fence, true, UINT64_MAX);
+        void(m_device.waitForFences(fence, true, UINT64_MAX));
     }
 
     void VulkanDevice::WaitIdle()
@@ -130,7 +130,7 @@ namespace gfx
 
         queue.submit(submitInfo, fence);
 
-        m_device.waitForFences(fence, true, UINT64_MAX);
+        void(m_device.waitForFences(fence, true, UINT64_MAX));
 
         m_device.destroy(fence);
         m_device.free(m_commandPool, cmdBuffer);

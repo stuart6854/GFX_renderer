@@ -88,7 +88,7 @@ set(GFX_SOURCES
 
 add_library(gfx ${GFX_HEADERS} ${GFX_SOURCES})
 
-target_include_directories(gfx PUBLIC "include" "src")
+target_include_directories(gfx PUBLIC "include" PRIVATE "src")
 
 target_link_libraries(gfx PUBLIC Vulkan::Vulkan glfw glm stb assimp shaderc spirv-cross-core spirv-cross-glsl freetype fmt::fmt)
 
