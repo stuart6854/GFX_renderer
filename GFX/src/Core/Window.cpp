@@ -10,7 +10,8 @@ namespace gfx
           m_height(height),
           m_title(title)
     {
-        GFX_ASSERT(glfwInit(), "glfwInit() failed!");
+        int success = glfwInit();
+        GFX_ASSERT(success, "glfwInit() failed!");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
