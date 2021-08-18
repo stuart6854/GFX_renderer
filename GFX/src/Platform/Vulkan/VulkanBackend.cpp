@@ -12,11 +12,12 @@ namespace gfx
     {
         bool IsLayerSupported(const std::string& layerName)
         {
-            auto layers = vk::enumerateInstanceLayerProperties();
-            for (const auto& layer : layers)
+            const auto layerProperties = vk::enumerateInstanceLayerProperties();
+
+            for (const vk::LayerProperties& layerProps : layerProperties)
             {
-                if (layer.layerName == layerName)
-                    return true;
+                const std::string vkLayerName = layerProps.layerName.data();
+                if (vkLayerName == layerName) return true;
             }
 
             return false;
@@ -33,10 +34,9 @@ namespace gfx
             }
             return VK_FALSE;
         }
-    }
+    }  // namespace Utils
 
-    VulkanBackend::VulkanBackend(bool enableDebugLayer)
-        : Backend(enableDebugLayer)
+    VulkanBackend::VulkanBackend(bool enableDebugLayer) : Backend(enableDebugLayer)
     {
         CreateInstance();
         PickPhysicalDevice();
@@ -44,14 +44,9 @@ namespace gfx
         CreateAllocator();
     }
 
-    VulkanBackend::~VulkanBackend()
-    {
-    }
+    VulkanBackend::~VulkanBackend() {}
 
-    void VulkanBackend::WaitIdle()
-    {
-        m_device->WaitIdle();
-    }
+    void VulkanBackend::WaitIdle() { m_device->WaitIdle(); }
 
     void VulkanBackend::CreateInstance()
     {
@@ -66,6 +61,8 @@ namespace gfx
             VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
         };
 
+        std::vector<const char*> layers = {};
+
         vk::InstanceCreateInfo instanceInfo{};
         instanceInfo.setPApplicationInfo(&appInfo);
         instanceInfo.setPEnabledExtensionNames(extensions);
@@ -73,11 +70,15 @@ namespace gfx
         const std::string validationLayerName = "VK_LAYER_KHRONOS_validation";
         if (Utils::IsLayerSupported(validationLayerName))
         {
-            const char* layerName = validationLayerName.c_str();
-            instanceInfo.setEnabledLayerCount(1);
-            instanceInfo.setPEnabledLayerNames(layerName);
+            layers.push_back(validationLayerName.c_str());
             GFX_INFO("Vulkan validation layer enabled.");
         }
+        else
+        {
+            GFX_WARN("Vulkan validation layer not supported!");
+        }
+
+        instanceInfo.setPEnabledLayerNames(layers);
 
         m_instance = vk::createInstance(instanceInfo);
         GFX_ASSERT(m_instance, "vk::createInstance() failed!");
@@ -85,27 +86,19 @@ namespace gfx
         // Setup debug message callback
         vk::DebugUtilsMessengerCreateInfoEXT debugInfo{};
         debugInfo.setMessageSeverity(vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
+                                     vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning);
         debugInfo.setPfnUserCallback(Utils::VkDebugCallback);
         debugInfo.setMessageType(vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
+                                 vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral);
 
         vk::DispatchLoaderDynamic dldi(m_instance, vkGetInstanceProcAddr);
         m_debugCallback = m_instance.createDebugUtilsMessengerEXT(debugInfo, nullptr, dldi);
     }
 
-    void VulkanBackend::PickPhysicalDevice()
-    {
-        m_physicalDevice = VulkanPhysicalDevice::Select(m_instance);
-    }
+    void VulkanBackend::PickPhysicalDevice() { m_physicalDevice = VulkanPhysicalDevice::Select(m_instance); }
 
-    void VulkanBackend::CreateDevice()
-    {
-        m_device = CreateOwned<VulkanDevice>(*m_physicalDevice);
-    }
+    void VulkanBackend::CreateDevice() { m_device = CreateOwned<VulkanDevice>(*m_physicalDevice); }
 
-    void VulkanBackend::CreateAllocator()
-    {
-        m_allocator = CreateOwned<VulkanAllocator>(m_instance, m_physicalDevice->GetHandle(), m_device->GetHandle());
-    }
-}
+    void VulkanBackend::CreateAllocator() { m_allocator = CreateOwned<VulkanAllocator>(m_instance, m_physicalDevice->GetHandle(), m_device->GetHandle()); }
+
+}  // namespace gfx
